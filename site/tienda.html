@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Queen Shop · Baños espirituales y más</title>
+<meta name="description" content="Queen Shop: baños espirituales, guías para descargar y productos espirituales sencillos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/estilo.css">
+<style>
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px}
+.brand{font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--ink);text-decoration:none}
+.cart-btn{position:relative;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--blue);background:var(--surface);color:var(--blue);font:inherit;font-weight:600;cursor:pointer}
+.cart-btn svg{width:20px;height:20px}
+.count{min-width:22px;height:22px;border-radius:999px;background:var(--blue);color:var(--bg);font-size:.8rem;display:inline-grid;place-items:center;padding:0 6px}
+.head{padding:28px 0 32px}
+.head h1{font-size:clamp(2.8rem,8vw,4.4rem);letter-spacing:-.01em}
+.head p{color:var(--muted);max-width:52ch;margin:12px 0 0;font-size:1.08rem}
+.chips{margin:0 0 30px}
+main{padding-bottom:96px}
+.empty-shop{background:var(--blue-soft);border-radius:14px;padding:32px;max-width:620px}
+.soldout{font-size:.85rem;font-weight:600;color:var(--warn)}
+/* carrito */
+dialog{border:0;padding:0;margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(440px,100vw);background:var(--surface);color:var(--ink);box-shadow:-10px 0 40px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(14,19,38,.55)}
+.cart{display:flex;flex-direction:column;height:100%}
+.cart header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.cart header h2{font-size:1.9rem}
+.x{background:none;border:0;font-size:1.8rem;line-height:1;color:var(--muted);cursor:pointer;padding:4px 8px}
+.lines{flex:1;overflow:auto;padding:8px 20px}
+.line{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.line .thumb{width:56px;height:70px;border-radius:8px;background:var(--blue-soft);overflow:hidden}
+.line .thumb img{width:100%;height:100%;object-fit:cover}
+.line b{display:block;font-weight:600;line-height:1.3}
+.line small{color:var(--muted)}
+.qty{display:inline-flex;align-items:center;gap:6px;margin-top:6px}
+.qty button,.rm{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;width:30px;height:30px;font:inherit;cursor:pointer}
+.rm{width:auto;padding:0 10px;font-size:.85rem;color:var(--muted)}
+.foot{padding:18px 20px 22px;border-top:1px solid var(--line);display:grid;gap:12px}
+.total{display:flex;justify-content:space-between;font-weight:600;font-size:1.1rem}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0}
+legend{font-weight:600;font-size:.95rem;padding:0 4px}
+fieldset label{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:.95rem}
+fieldset input{margin-top:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/" id="brandName">Queen Spiritual</a>
+    <button class="cart-btn" type="button" id="openCart" aria-label="Abrir carrito">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 7h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9L5 7Z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/></svg>
+      Carrito <span class="count" id="count">0</span>
+    </button>
+  </header>
+  <div class="head">
+    <h1>Queen Shop</h1>
+    <p id="intro"></p>
+  </div>
+  <main>
+    <div class="chips" id="chips" role="group" aria-label="Categorías" hidden></div>
+    <div id="grid"></div>
+    <p style="margin-top:48px"><a href="/">← Volver a la página principal</a></p>
+  </main>
+</div>
+
+<dialog id="cartDlg" aria-labelledby="cartTitle">
+  <div class="cart">
+    <header><h2 id="cartTitle">Tu carrito</h2><button class="x" type="button" id="closeCart" aria-label="Cerrar">×</button></header>
+    <div class="lines" id="lines"></div>
+    <div class="foot" id="foot"></div>
+  </div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const s = v => (typeof v === "string" ? v.trim() : (v == null ? "" : String(v)));
+const slug = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const dinero = n => "$" + (Number(n) % 1 ? Number(n).toFixed(2) : Number(n).toFixed(0));
+const leer = n => fetch(`/content/${n}.json`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+function toast(m) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = el("div", "toast", m); t.setAttribute("role", "status"); document.body.append(t); setTimeout(() => t.remove(), 5000); }
+
+let PRODUCTOS = new Map(), AJ = {};
+// Carrito guardado en este navegador (si no se puede guardar, funciona igual mientras la página esté abierta)
+let carrito = [];
+try { carrito = JSON.parse(localStorage.getItem("queenCart") || "[]"); if (!Array.isArray(carrito)) carrito = []; } catch (e) { carrito = []; }
+const guardar = () => { try { localStorage.setItem("queenCart", JSON.stringify(carrito)); } catch (e) {} $("#count").textContent = carrito.reduce((t, i) => t + i.cantidad, 0); };
+
+function agregar(p) {
+  const id = slug(p.titulo), it = carrito.find(i => i.id === id), digital = p.entrega !== "fisico";
+  if (it) { if (digital) { toast(`"${p.titulo}" ya está en tu carrito.`); return; } it.cantidad = Math.min(20, it.cantidad + 1); }
+  else carrito.push({ id, cantidad: 1 });
+  guardar(); toast(`Agregaste "${p.titulo}" al carrito.`);
+}
+
+function tarjeta(p) {
+  const c = el("article", "product"), cv = el("div", "cover");
+  if (s(p.foto)) { const im = el("img"); im.src = p.foto; im.alt = p.titulo; im.loading = "lazy"; cv.append(im); } else cv.append(el("span", null, p.titulo));
+  const bd = el("div", "body"), digital = p.entrega !== "fisico";
+  bd.append(el("span", "tag", [s(p.categoria), digital ? "Descarga inmediata" : ""].filter(Boolean).join(" · ")), el("h3", null, p.titulo));
+  if (s(p.descripcion)) bd.append(el("p", null, p.descripcion));
+  const row = el("div", "row"); row.append(el("span", "cost", dinero(p.precio)));
+  if (p.agotado) row.append(el("span", "soldout", "Agotado"));
+  else { const b = el("button", "btn btn-solid btn-sm", "Agregar"); b.type = "button"; b.onclick = () => agregar(p); b.setAttribute("aria-label", `Agregar ${p.titulo} al carrito`); row.append(b); }
+  bd.append(row); c.append(cv, bd); c.dataset.cat = s(p.categoria); return c;
+}
+
+function pintarTienda(T, A) {
+  AJ = A || {};
+  $("#intro").textContent = s(T.intro);
+  const lista = (T.productos || []).filter(p => p && p.visible !== false && s(p.titulo) && Number(p.precio) > 0);
+  PRODUCTOS = new Map(lista.map(p => [slug(p.titulo), p]));
+  carrito = carrito.filter(i => i && PRODUCTOS.has(i.id)).map(i => ({ id: i.id, cantidad: PRODUCTOS.get(i.id).entrega === "fisico" ? Math.min(20, Math.max(1, i.cantidad | 0)) : 1 }));
+  guardar();
+  const grid = $("#grid");
+  if (!lista.length) { const e = el("div", "empty-shop"); e.append(el("p", null, "Muy pronto encontrarás aquí mis productos. ¡Vuelve pronto!")); grid.append(e); return; }
+  const g = el("div", "shop"); lista.forEach(p => g.append(tarjeta(p))); grid.append(g);
+  // Categorías en el orden del panel, solo las que tienen productos
+  const usadas = new Set(lista.map(p => s(p.categoria)).filter(Boolean));
+  const orden = (AJ.categorias || []).map(c => s(c && c.nombre)).filter(n => usadas.has(n));
+  usadas.forEach(n => { if (!orden.includes(n)) orden.push(n); });
+  if (orden.length < 2) return;
+  const chips = $("#chips"); chips.hidden = false;
+  const pedida = new URLSearchParams(location.search).get("categoria");
+  ["Todo", ...orden].forEach((n, i) => {
+    const b = el("button", null, n); b.type = "button"; b.setAttribute("aria-pressed", "false");
+    b.onclick = () => {
+      chips.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+      g.querySelectorAll(".product").forEach(c => { c.hidden = i !== 0 && c.dataset.cat !== n; });
+    };
+    chips.append(b);
+  });
+  const ini = [...chips.children].find(b => b.textContent === pedida) || chips.children[0]; ini.click();
+}
+
+/* ───── Carrito ───── */
+const dlg = $("#cartDlg");
+$("#openCart").onclick = () => { pintarCarrito(); dlg.showModal(); };
+$("#closeCart").onclick = () => dlg.close();
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+let entrega = null;
+
+function pintarCarrito() {
+  const lines = $("#lines"), foot = $("#foot");
+  lines.replaceChildren(); foot.replaceChildren();
+  if (!carrito.length) { lines.append(el("p", "muted", "Tu carrito está vacío.")); return; }
+  let subtotal = 0, fisicos = false;
+  carrito.forEach(it => {
+    const p = PRODUCTOS.get(it.id); if (!p) return;
+    const digital = p.entrega !== "fisico"; fisicos = fisicos || !digital; subtotal += Number(p.precio) * it.cantidad;
+    const l = el("div", "line"), th = el("div", "thumb");
+    if (s(p.foto)) { const im = el("img"); im.src = p.foto; im.alt = ""; th.append(im); }
+    const info = el("div"); info.append(el("b", null, p.titulo), el("small", null, `${dinero(p.precio)}${digital ? " · Descarga" : ""}`));
+    if (!digital) {
+      const q = el("div", "qty"), menos = el("button", null, "−"), mas = el("button", null, "+"), n = el("span", null, it.cantidad);
+      menos.type = mas.type = "button"; menos.setAttribute("aria-label", "Quitar uno"); mas.setAttribute("aria-label", "Agregar uno");
+      menos.onclick = () => { it.cantidad > 1 ? it.cantidad-- : carrito.splice(carrito.indexOf(it), 1); guardar(); pintarCarrito(); };
+      mas.onclick = () => { it.cantidad = Math.min(20, it.cantidad + 1); guardar(); pintarCarrito(); };
+      q.append(menos, n, mas); info.append(q);
+    }
+    const rm = el("button", "rm", "Quitar"); rm.type = "button"; rm.onclick = () => { carrito.splice(carrito.indexOf(it), 1); guardar(); pintarCarrito(); };
+    l.append(th, info, rm); lines.append(l);
+  });
+  const env = AJ.envio || {}, rec = AJ.recoger || {};
+  if (fisicos) {
+    const fs = el("fieldset"); fs.append(el("legend", null, "¿Cómo quieres recibirlo?"));
+    const opciones = [];
+    if (env.activo) {
+      const gratis = Number(env.gratisDesde) > 0 && subtotal >= Number(env.gratisDesde);
+      opciones.push(["envio", `Envío a domicilio${Number(env.costo) > 0 && !gratis ? " · " + dinero(env.costo) : " · gratis"}`]);
+    }
+    if (rec.activo) opciones.push(["recoger", "Lo recojo yo" + (s(rec.texto) ? ` · ${s(rec.texto)}` : "")]);
+    if (!opciones.some(o => o[0] === entrega)) entrega = opciones.length === 1 ? opciones[0][0] : null;
+    opciones.forEach(([v, t]) => {
+      const L = el("label"), r = el("input"); r.type = "radio"; r.name = "entrega"; r.value = v; r.checked = entrega === v;
+      r.onchange = () => { entrega = v; pintarCarrito(); };
+      L.append(r, el("span", null, t)); fs.append(L);
+    });
+    if (!opciones.length) fs.append(el("p", "note err", "Por ahora no hay forma de entrega disponible. Escríbeme por WhatsApp."));
+    foot.append(fs);
+  }
+  const envioCosto = fisicos && entrega === "envio" && !(Number(env.gratisDesde) > 0 && subtotal >= Number(env.gratisDesde)) ? Number(env.costo) || 0 : 0;
+  const tot = el("div", "total"); tot.append(el("span", null, "Total"), el("span", null, dinero(subtotal + envioCosto)));
+  const err = el("p", "note err"); err.hidden = true;
+  const pagar = el("button", "btn btn-solid", "Pagar con tarjeta"); pagar.type = "button";
+  pagar.disabled = fisicos && !entrega;
+  pagar.onclick = async () => {
+    err.hidden = true; pagar.disabled = true; pagar.textContent = "Abriendo el pago…";
+    try {
+      const r = await fetch("/api/comprar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ items: carrito, entrega }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "No se pudo abrir el pago. Intenta de nuevo.");
+      location.href = d.url;
+    } catch (e) { err.textContent = e.message; err.hidden = false; pagar.disabled = false; pagar.textContent = "Pagar con tarjeta"; }
+  };
+  foot.append(tot, err, pagar);
+  if (fisicos && entrega === "envio") foot.append(el("small", "muted", "Tu dirección te la pide la página de pago."));
+}
+
+Promise.all(["negocio", "tienda", "tienda-ajustes"].map(leer)).then(([N, T, A]) => {
+  if (s(N.nombre)) { $("#brandName").textContent = N.nombre; document.title = `Queen Shop · ${N.nombre}`; }
+  pintarTienda(T, A);
+  if (new URLSearchParams(location.search).has("cancelado")) { toast("No se completó el pago. Tu carrito sigue aquí."); history.replaceState(null, "", location.pathname); }
+});
+</script>
+</body>
+</html>

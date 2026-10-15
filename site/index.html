@@ -42,9 +42,7 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .photo img{width:100%;height:100%;object-fit:cover}
 .item h3{font-size:2.3rem}
 .tipo{display:inline-block;font-size:.8rem;font-weight:600;color:var(--gold);margin-bottom:6px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:-20px 0 40px}
-.chips button{font:inherit;font-size:.92rem;font-weight:500;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-.chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+#chips{margin:-20px 0 40px}
 .occasion{color:var(--leaf);font-weight:600;font-size:.95rem;margin:6px 0 16px}
 .item p.desc{max-width:52ch;margin:0 0 18px}
 .flowers{color:var(--muted);font-size:.95rem;margin:0 0 22px;max-width:52ch}
@@ -56,6 +54,7 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .readings{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
 .reading{background:var(--night-2);border:1px solid var(--night-line);border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:10px}
 .reading h3{font-size:1.8rem}
+.readings.single{grid-template-columns:minmax(0,520px)}
 .reading .meta{color:var(--gold);font-size:.9rem;font-weight:600}
 .reading p{margin:0;color:var(--night-muted)}
 .reading .price{margin:auto 0 4px;padding-top:8px}
@@ -63,17 +62,7 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .on-night{background:var(--night-ink);color:var(--night);border-color:var(--night-ink)}
 .how{display:flex;gap:28px;flex-wrap:wrap;margin-top:36px;color:var(--night-muted);font-size:.95rem}
 .how b{color:var(--night-ink)}
-/* tienda */
-.shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
-.product{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-.product .cover{aspect-ratio:4/5;background:linear-gradient(160deg,var(--blue-soft),var(--surface));display:grid;place-items:center}
-.product .cover img{width:100%;height:100%;object-fit:cover}
-.product .cover span{font-family:"Cormorant",Georgia,serif;font-size:1.5rem;color:var(--blue);padding:20px;text-align:center}
-.product .body{padding:20px;display:flex;flex-direction:column;gap:8px;flex:1}
-.product h3{font-size:1.5rem}
-.product p{margin:0;color:var(--muted);font-size:.95rem}
-.product .btn{margin-top:auto}
-.tag{font-size:.8rem;font-weight:600;color:var(--leaf)}
+.shop-cta{margin-top:32px}
 /* reseñas */
 .reviews{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
 .review{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin:0}
@@ -110,7 +99,6 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 .form label{display:grid;gap:4px;font-size:.9rem;font-weight:500}
 .form input,.form textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .summary{background:var(--blue-soft);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:.95rem}
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;max-width:calc(100vw - 32px);z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 @media (max-width:820px){
   .hero{grid-template-columns:1fr;gap:32px;padding-top:16px}
   .arch{max-width:420px}
@@ -129,7 +117,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
     <nav aria-label="Secciones">
       <a href="#arreglos">Arreglos y mesas</a>
       <a href="#lecturas">Lecturas</a>
-      <a href="#tienda">Tienda</a>
+      <a href="/tienda.html">Queen Shop</a>
       <a href="#resenas">Reseñas</a>
       <a href="#contacto">Contacto</a>
     </nav>
@@ -141,7 +129,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <div class="pillars">
         <a href="#arreglos"><b>Arreglos y mesas</b><span>Celebraciones yorubas</span></a>
         <a href="#lecturas"><b>Lecturas</b><span>Cartas españolas</span></a>
-        <a href="#tienda"><b>Tienda</b><span>Baños espirituales</span></a>
+        <a href="/tienda.html"><b>Queen Shop</b><span>Baños espirituales y más</span></a>
       </div>
     </div>
     <div class="arch" id="heroArch"><img id="heroImg" alt=""></div>
@@ -158,10 +146,10 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 
 <section id="lecturas">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Lecturas</span><h2>Cartas españolas</h2><p id="lecIntro"></p></div>
+    <div class="sec-head"><span class="kicker">Lecturas</span><h2>Mensajes de tus ancestros</h2><p id="lecIntro"></p></div>
     <div class="readings" id="readings"></div>
     <div class="how">
-      <span><b>1.</b> Eliges lectura, día y hora</span>
+      <span><b>1.</b> Eliges el día y la hora</span>
       <span><b>2.</b> Pagas con tarjeta</span>
       <span><b>3.</b> Te escribo por WhatsApp con el enlace de la videollamada</span>
     </div>
@@ -170,8 +158,9 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 
 <section id="tienda">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Tienda</span><h2>Guías de baños espirituales</h2><p id="pdfIntro"></p></div>
+    <div class="sec-head"><span class="kicker">Queen Shop</span><h2>Baños espirituales y más</h2><p id="shopIntro"></p></div>
     <div id="shop"></div>
+    <div class="shop-cta"><a class="btn btn-solid" href="/tienda.html">Entrar a Queen Shop</a></div>
   </div>
 </section>
 
@@ -307,6 +296,7 @@ function renderLecturas(L) {
   $("#lecIntro").textContent = s(L.intro);
   LECTURAS = (L.lecturas || []).filter(l => l && l.visible !== false && s(l.nombre) && Number(l.precio) > 0);
   const box = $("#readings");
+  box.classList.toggle("single", LECTURAS.length === 1);
   LECTURAS.forEach(l => {
     const c = el("article", "reading");
     c.append(el("h3", null, l.nombre));
@@ -389,26 +379,25 @@ function pintarCalendario(l, d) {
   slots.append(el("span", "muted", "Primero elige un día."));
 }
 
-/* ───── Tienda ───── */
-function renderTienda(P) {
-  $("#pdfIntro").textContent = s(P.intro);
-  const list = (P.pdfs || []).filter(p => p && p.visible !== false && s(p.titulo) && Number(p.precio) > 0);
+/* ───── Queen Shop (vista previa; la tienda completa está en /tienda.html) ───── */
+function renderTienda(T) {
+  $("#shopIntro").textContent = s(T.intro);
+  const todos = (T.productos || []).filter(p => p && p.visible !== false && s(p.titulo) && Number(p.precio) > 0);
+  const destacados = todos.filter(p => p.destacado);
+  const list = (destacados.length ? destacados : todos).slice(0, 4);
   const box = $("#shop");
-  if (!list.length) { box.append(el("p", "muted", "Muy pronto encontrarás aquí mis guías en PDF.")); return; }
+  if (!list.length) { box.append(el("p", "muted", "Muy pronto encontrarás aquí mis productos.")); return; }
   const g = el("div", "shop");
   list.forEach(p => {
     const c = el("article", "product"), cv = el("div", "cover");
-    if (s(p.portada)) { const im = el("img"); im.src = p.portada; im.alt = p.titulo; im.loading = "lazy"; cv.append(im); } else cv.append(el("span", null, p.titulo));
+    if (s(p.foto)) { const im = el("img"); im.src = p.foto; im.alt = p.titulo; im.loading = "lazy"; cv.append(im); } else cv.append(el("span", null, p.titulo));
     const bd = el("div", "body");
-    bd.append(el("span", "tag", "PDF · Descarga inmediata"), el("h3", null, p.titulo));
+    bd.append(el("span", "tag", [s(p.categoria), p.entrega !== "fisico" ? "Descarga inmediata" : ""].filter(Boolean).join(" · ")), el("h3", null, p.titulo));
     if (s(p.descripcion)) bd.append(el("p", null, p.descripcion));
-    const b = el("button", "btn btn-solid", `Comprar · ${dinero(p.precio)}`); b.type = "button";
-    b.onclick = async () => {
-      b.disabled = true; const t = b.textContent; b.textContent = "Abriendo el pago…";
-      try { location.href = (await api("/api/comprar-pdf", { pdf: slug(p.titulo) })).url; }
-      catch (e) { toast(e.message); b.disabled = false; b.textContent = t; }
-    };
-    bd.append(b); c.append(cv, bd); g.append(c);
+    const row = el("div", "row"), a = el("a", "btn btn-line btn-sm", "Ver en la tienda");
+    a.href = "/tienda.html" + (s(p.categoria) ? "?categoria=" + encodeURIComponent(p.categoria) : "");
+    row.append(el("span", "cost", dinero(p.precio)), a);
+    bd.append(row); c.append(cv, bd); g.append(c);
   });
   box.append(g);
 }
@@ -434,7 +423,7 @@ function renderResenas(R, C) {
   }
 }
 
-Promise.all(["negocio", "arreglos", "lecturas", "pdfs", "resenas"].map(leer)).then(([N, A, L, P, R]) => {
+Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas"].map(leer)).then(([N, A, L, P, R]) => {
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
 });
 

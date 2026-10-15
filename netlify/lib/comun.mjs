@@ -147,3 +147,25 @@ export async function confirmarReserva(store, sesion) {
   await store.setJSON(`conflicto/${sesion.id}`, { ...datos, creada: datos.pagada });
   return { ...datos, clave: k, conflicto: true };
 }
+
+// ───────── Queen Shop ─────────
+export async function cargarTienda(o) {
+  const [t, a] = await Promise.all([deps.contenido(o, "tienda"), deps.contenido(o, "tienda-ajustes")]);
+  const productos = (t.productos || []).filter((p) => p && p.visible !== false && texto(p.titulo) && Number(p.precio) > 0);
+  return { productos, ajustes: a || {} };
+}
+
+// Marca la orden como pagada (desde la página de gracias o el webhook) y guarda a quién y dónde entregar.
+export async function confirmarOrden(store, sesion) {
+  const m = sesion.metadata || {};
+  if (m.tipo !== "tienda" || sesion.payment_status !== "paid") return null;
+  const k = `orden/${sesion.id}`;
+  const o = await store.get(k, { type: "json" });
+  if (!o) return null;
+  if (o.estado !== "creada") return o;
+  const cd = sesion.customer_details || {};
+  const envio = (sesion.collected_information && sesion.collected_information.shipping_details) || sesion.shipping_details || null;
+  const listo = { ...o, estado: "pagada", pagada: deps.ahora().toISOString(), email: cd.email || "", nombre: cd.name || "", telefono: cd.phone || "", envio, total: (sesion.amount_total || 0) / 100 };
+  await store.setJSON(k, listo);
+  return listo;
+}

@@ -93,26 +93,58 @@ collections:
               - { label: "Hasta", name: "hasta", widget: "select", options: [{label: "6:00 am", value: "06:00"}, {label: "6:30 am", value: "06:30"}, {label: "7:00 am", value: "07:00"}, {label: "7:30 am", value: "07:30"}, {label: "8:00 am", value: "08:00"}, {label: "8:30 am", value: "08:30"}, {label: "9:00 am", value: "09:00"}, {label: "9:30 am", value: "09:30"}, {label: "10:00 am", value: "10:00"}, {label: "10:30 am", value: "10:30"}, {label: "11:00 am", value: "11:00"}, {label: "11:30 am", value: "11:30"}, {label: "12:00 pm", value: "12:00"}, {label: "12:30 pm", value: "12:30"}, {label: "1:00 pm", value: "13:00"}, {label: "1:30 pm", value: "13:30"}, {label: "2:00 pm", value: "14:00"}, {label: "2:30 pm", value: "14:30"}, {label: "3:00 pm", value: "15:00"}, {label: "3:30 pm", value: "15:30"}, {label: "4:00 pm", value: "16:00"}, {label: "4:30 pm", value: "16:30"}, {label: "5:00 pm", value: "17:00"}, {label: "5:30 pm", value: "17:30"}, {label: "6:00 pm", value: "18:00"}, {label: "6:30 pm", value: "18:30"}, {label: "7:00 pm", value: "19:00"}, {label: "7:30 pm", value: "19:30"}, {label: "8:00 pm", value: "20:00"}, {label: "8:30 pm", value: "20:30"}, {label: "9:00 pm", value: "21:00"}, {label: "9:30 pm", value: "21:30"}, {label: "10:00 pm", value: "22:00"}] }
 
   - name: "tienda"
-    label: "Tienda de PDFs"
+    label: "Queen Shop"
     editor: { preview: false }
     files:
-      - label: "PDFs a la venta"
-        name: "pdfs"
-        file: "site/content/pdfs.json"
+      - label: "Productos"
+        name: "productos"
+        file: "site/content/tienda.json"
         fields:
-          - { label: "Texto de la sección", name: "intro", widget: "text", required: false }
-          - label: "PDFs"
-            name: "pdfs"
+          - { label: "Texto de la tienda", name: "intro", widget: "text", required: false }
+          - label: "Productos"
+            name: "productos"
             widget: "list"
-            label_singular: "PDF"
-            summary: "{{fields.titulo}} · ${{fields.precio}}"
+            label_singular: "producto"
+            summary: "{{fields.titulo}} · ${{fields.precio}} · {{fields.categoria}}"
+            hint: "Arrastra para cambiar el orden."
             fields:
-              - { label: "Portada (imagen)", name: "portada", widget: "image", required: false }
-              - { label: "Título", name: "titulo", widget: "string" }
+              - { label: "Foto", name: "foto", widget: "image", required: false }
+              - { label: "Nombre del producto", name: "titulo", widget: "string" }
+              - { label: "Categoría", name: "categoria", widget: "relation", collection: "tienda", file: "ajustes", search_fields: ["categorias.*.nombre"], display_fields: ["categorias.*.nombre"], value_field: "categorias.*.nombre", hint: "Las categorías se crean en Queen Shop > Categorías y entregas." }
               - { label: "Descripción", name: "descripcion", widget: "text", required: false }
               - { label: "Precio (USD)", name: "precio", widget: "number", value_type: "float", min: 1 }
-              - { label: "Archivo PDF", name: "archivo", widget: "file", media_folder: "/private/pdfs", public_folder: "private/pdfs", hint: "Se guarda en privado. Solo lo descarga quien paga." }
-              - { label: "Mostrar en la página", name: "visible", widget: "boolean", default: true }
+              - { label: "Tipo de producto", name: "entrega", widget: "select", default: "digital", options: [{ label: "Digital (se descarga, PDF)", value: "digital" }, { label: "Físico (envío o recoger)", value: "fisico" }] }
+              - { label: "Archivo PDF (solo productos digitales)", name: "archivo", widget: "file", required: false, media_folder: "/private/pdfs", public_folder: "private/pdfs", hint: "Se guarda en privado. Solo lo descarga quien paga." }
+              - { label: "Mostrar en la página principal", name: "destacado", widget: "boolean", default: false, hint: "Los destacados aparecen en la página principal. Si no marcas ninguno, salen los primeros 3." }
+              - { label: "Agotado", name: "agotado", widget: "boolean", default: false, hint: "Se sigue viendo, pero no se puede comprar." }
+              - { label: "Mostrar en la tienda", name: "visible", widget: "boolean", default: true }
+      - label: "Categorías y entregas"
+        name: "ajustes"
+        file: "site/content/tienda-ajustes.json"
+        fields:
+          - label: "Categorías"
+            name: "categorias"
+            widget: "list"
+            label_singular: "categoría"
+            summary: "{{fields.nombre}}"
+            hint: "Arrastra para cambiar el orden en que se ven los botones de la tienda."
+            fields:
+              - { label: "Nombre", name: "nombre", widget: "string" }
+          - label: "Envío (productos físicos)"
+            name: "envio"
+            widget: "object"
+            collapsed: false
+            fields:
+              - { label: "Hago envíos", name: "activo", widget: "boolean", default: false }
+              - { label: "Costo del envío (USD)", name: "costo", widget: "number", value_type: "float", min: 0, default: 0, hint: "Un solo costo por pedido, sin importar cuántos productos lleve. 0 = gratis." }
+              - { label: "Envío gratis a partir de (USD)", name: "gratisDesde", widget: "number", value_type: "float", min: 0, default: 0, required: false, hint: "Opcional. 0 = no aplica." }
+          - label: "Recoger (productos físicos)"
+            name: "recoger"
+            widget: "object"
+            collapsed: false
+            fields:
+              - { label: "Se puede recoger", name: "activo", widget: "boolean", default: true }
+              - { label: "Mensaje para quien recoge", name: "texto", widget: "text", required: false }
 
   - name: "resenas"
     label: "Reseñas"

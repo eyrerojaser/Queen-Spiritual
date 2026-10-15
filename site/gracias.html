@@ -41,10 +41,28 @@ async function revisar(intento = 0) {
     out.push(c, el("p", null, "Antes de tu cita te escribiré por WhatsApp con el enlace de la videollamada. También te llegó el recibo a tu correo."), volver());
     m.replaceChildren(...out); return;
   }
-  if (d.tipo === "pdf") {
-    const a = el("a", "btn btn-solid", "Descargar mi PDF"); a.href = d.descarga;
-    const c = el("div", "card"); c.append(el("p", "big", d.titulo), el("p", "muted", "Tu enlace funciona durante 30 días. Guarda el archivo en tu teléfono o computadora."));
-    m.replaceChildren(el("h1", null, "¡Gracias por tu compra!"), c, a, el("p", "muted", " "), volver()); return;
+  if (d.tipo === "tienda") {
+    try { localStorage.removeItem("queenCart"); } catch (e) {}
+    const out = [el("h1", null, "¡Gracias por tu compra!")];
+    const dig = d.items.filter(i => i.digital), fis = d.items.filter(i => !i.digital);
+    if (dig.length) {
+      const c = el("div", "card");
+      c.append(el("p", "big", dig.length > 1 ? "Tus descargas" : "Tu descarga"));
+      dig.forEach(i => { const a = el("a", "btn btn-solid", "Descargar: " + i.titulo); a.href = i.descarga; a.style.margin = "10px 10px 0 0"; c.append(a); });
+      c.append(el("p", "muted", "Los enlaces funcionan durante 30 días. Guarda los archivos en tu teléfono o computadora."));
+      c.lastChild.style.marginTop = "14px";
+      out.push(c);
+    }
+    if (fis.length) {
+      const c = el("div", "card");
+      c.append(el("p", "big", "Tu pedido"));
+      fis.forEach(i => c.append(el("p", null, `${i.cantidad} × ${i.titulo}`)));
+      if (d.entrega === "envio") c.append(el("p", "muted", "Lo enviaré a: " + (d.direccion || "la dirección que pusiste al pagar") + ". Te aviso por WhatsApp cuando salga."));
+      else c.append(el("p", "muted", d.recogerTexto || "Te escribo por WhatsApp para coordinar la entrega."));
+      out.push(c);
+    }
+    out.push(el("p", "muted", "También te llegó el recibo a tu correo."), volver());
+    m.replaceChildren(...out); return;
   }
   m.replaceChildren(el("h1", null, "¡Gracias!"), volver());
 }

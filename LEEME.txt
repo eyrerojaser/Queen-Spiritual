@@ -1,9 +1,9 @@
-WEBSITE: ARREGLOS + LECTURAS DE CARTAS + TIENDA DE PDFs
+WEBSITE QUEEN SPIRITUAL: ARREGLOS Y MESAS + LECTURAS + QUEEN SHOP
 
 QUÉ HAY EN ESTA CARPETA
 - site/ ............. la página (index.html), la página de gracias y el panel (site/admin)
 - site/content/ ..... la información que cambias desde el panel
-- private/pdfs/ ..... tus PDFs a la venta (privados: solo los descarga quien paga)
+- private/pdfs/ ..... los PDFs de Queen Shop (privados: solo los descarga quien paga)
 - netlify/ .......... las funciones de reservas, pagos y descargas
 
 PASO 1 — GITHUB
@@ -15,7 +15,7 @@ PASO 2 — NETLIFY
 - Identity: Site configuration > Identity > Enable Identity > Registration: Invite only
   > Services > Git Gateway > Enable > Invite users > tu correo. Acepta la invitación del correo.
 
-PASO 3 — STRIPE (para cobrar lecturas y PDFs)
+PASO 3 — STRIPE (para cobrar lecturas y Queen Shop)
 - Crea tu cuenta en stripe.com y completa los datos de tu negocio y tu banco.
 - En Stripe: Developers > API keys > copia la "Secret key" (empieza con sk_live_).
 - En Netlify: Site configuration > Environment variables > Add:
@@ -36,12 +36,17 @@ EL PANEL: TU-SITIO.netlify.app/admin
     · "Aceptar reservas": apágalo para cerrar todo (on/off).
     · Mi horario de cada semana: días y horas que trabajas.
     · Días que NO trabajo (off) y Días extra que SÍ trabajo (on).
-- Tienda de PDFs: portada, título, precio y el archivo PDF.
+- Queen Shop > Productos: foto, nombre, categoría, precio y tipo:
+    · Digital: subes el PDF y el cliente lo descarga al pagar.
+    · Físico (sahumerios, velas, abanicos...): el cliente elige envío o recoger.
+  "Mostrar en la página principal" pone el producto en la portada. "Agotado" lo deja ver sin venderlo.
+- Queen Shop > Categorías y entregas: tus categorías (botones de la tienda), costo de envío y si se puede recoger.
 - Reseñas y Negocio y contacto (WhatsApp, Instagram, TikTok, mapa).
 Toca "Publicar" y en 1-2 minutos se ve en la página.
 
-TUS RESERVAS: TU-SITIO.netlify.app/admin/reservas.html
-(también con el botón "Ver mis reservas" dentro del panel)
+TUS RESERVAS Y PEDIDOS: TU-SITIO.netlify.app/admin/reservas.html
+(también con el botón "Reservas y pedidos" dentro del panel)
+- Pedidos por entregar: productos físicos pagados, con dirección o "lo recoge". Toca "Ya lo envié" cuando salga.
 - Ves cada cita con nombre, hora, lo que pagó y su nota.
 - Botón WhatsApp: le escribe al cliente con el mensaje listo para pegar el enlace de la videollamada.
 - Cancelar cita: libera la hora. Si devuelves el dinero, hazlo desde Stripe.
@@ -50,5 +55,5 @@ TUS RESERVAS: TU-SITIO.netlify.app/admin/reservas.html
 CÓMO FUNCIONA
 - El cliente elige lectura, día y hora; la hora se le aparta 35 minutos mientras paga.
 - Si paga, queda reservada; si no, la hora se libera sola.
-- Los PDFs: paga y descarga al momento. El enlace de descarga dura 30 días.
+- Queen Shop: página propia (tu-sitio/tienda.html) con carrito. Los digitales se descargan al pagar (enlace válido 30 días).
 - Todas las horas son de Texas (centro).

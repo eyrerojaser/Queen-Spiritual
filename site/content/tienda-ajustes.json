@@ -1,0 +1,22 @@
+{
+  "categorias": [
+    {
+      "nombre": "Baños espirituales"
+    },
+    {
+      "nombre": "Guías en PDF"
+    },
+    {
+      "nombre": "Sahumerios"
+    }
+  ],
+  "envio": {
+    "activo": false,
+    "costo": 0,
+    "gratisDesde": 0
+  },
+  "recoger": {
+    "activo": true,
+    "texto": "Te escribo por WhatsApp para coordinar dónde y cuándo recoger tu pedido."
+  }
+}

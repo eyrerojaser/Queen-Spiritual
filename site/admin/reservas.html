@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Mis reservas</title>
+<title>Reservas y pedidos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
@@ -24,12 +24,14 @@ h1{font-size:2.4rem}
 .danger{border-color:var(--warn);color:var(--warn);background:transparent}
 .conf{border-color:var(--warn)}
 .small{font-size:.9rem}
+.sec{font-family:"Cormorant",Georgia,serif;font-size:1.9rem;margin:34px 0 4px}
+.items{margin:0;padding-left:18px}
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>Mis reservas</h1>
+    <h1>Reservas y pedidos</h1>
     <div class="btns"><a class="btn btn-line" href="/admin/">Volver al panel</a><button class="btn btn-line" id="salir" type="button" hidden>Salir</button></div>
   </header>
   <div id="out"><p class="muted">Cargando…</p></div>
@@ -70,17 +72,42 @@ function tarjeta(r, conflicto) {
   };
   b.append(x); c.append(b); return c;
 }
+function tarjetaPedido(o) {
+  const c = el("div", "bk");
+  const row = el("div", "row"); row.append(el("b", null, o.nombre || o.email || "Cliente"), el("span", "when", `$${o.total}`));
+  const ul = el("ul", "items"); o.items.filter(i => !i.digital).forEach(i => ul.append(el("li", null, `${i.cantidad} × ${i.titulo}`)));
+  const a = o.envio && o.envio.address;
+  const donde = o.entrega === "envio" && a
+    ? `Enviar a: ${[o.envio.name, a.line1, a.line2, [a.city, a.state].filter(Boolean).join(", ") + " " + (a.postal_code || "")].filter(Boolean).join(" · ")}`
+    : "Lo recoge en persona";
+  c.append(row, ul, el("span", "muted small", donde), el("span", "muted small", [o.telefono, o.email].filter(Boolean).join(" · ")));
+  const b = el("div", "btns"), tel = String(o.telefono || "").replace(/\D/g, "");
+  if (tel) {
+    const w = el("a", "btn btn-solid", "WhatsApp"); w.target = "_blank"; w.rel = "noopener";
+    w.href = `https://wa.me/${tel.length === 10 ? "1" + tel : tel}?text=${encodeURIComponent(`Hola ${o.nombre || ""}, gracias por tu compra en Queen Shop. `)}`;
+    b.append(w);
+  }
+  const x = el("button", "btn btn-line", o.entrega === "envio" ? "Ya lo envié" : "Ya lo entregué"); x.type = "button";
+  x.onclick = async () => { x.disabled = true; try { await api({ accion: "entregado", clave: o.clave }); cargar(); } catch (e) { alert(e.message); x.disabled = false; } };
+  b.append(x); c.append(b); return c;
+}
 async function cargar() {
   let d; try { d = await api(); } catch (e) { if (e.login) return pedirLogin(); out.replaceChildren(el("p", "note err", e.message)); return; }
   document.getElementById("salir").hidden = false;
   const nodes = [];
+  if (d.pedidos && d.pedidos.length) {
+    nodes.push(el("h2", "sec", "Pedidos por entregar"));
+    d.pedidos.forEach(o => nodes.push(tarjetaPedido(o)));
+  }
+  nodes.push(el("h2", "sec", "Lecturas"));
   if (d.conflictos.length) {
     nodes.push(el("p", "note err", "Estas personas pagaron una hora que alguien más tomó al mismo tiempo. Escríbeles para darles otro horario o devuélveles el dinero desde Stripe."));
     d.conflictos.forEach(r => nodes.push(tarjeta(r, true)));
   }
   if (!d.reservas.length) nodes.push(el("p", "muted", "No tienes citas próximas."));
   let dia = "";
-  d.reservas.forEach(r => { if (r.fecha !== dia) { dia = r.fecha; nodes.push(el("h2", "day", r.fechaBonita[0].toUpperCase() + r.fechaBonita.slice(1))); } nodes.push(tarjeta(r)); });
+  d.reservas.forEach(r => { if (r.fecha !== dia) { dia = r.fecha; nodes.push(el("h3", "day", r.fechaBonita[0].toUpperCase() + r.fechaBonita.slice(1))); } nodes.push(tarjeta(r)); });
+  nodes.push(el("p", "muted small", "Las compras digitales se descargan solas; las ves todas en Stripe."));
   out.replaceChildren(...nodes);
 }
 document.getElementById("salir").onclick = () => id.logout();
