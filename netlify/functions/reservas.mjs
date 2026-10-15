@@ -1,13 +1,8 @@
-// Solo para ti: reservas de lecturas y pedidos de Queen Shop. Pide haber iniciado sesión en el panel.
-import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, reservasDesde, fechaBonita, horaBonita } from "../lib/comun.mjs";
+// Solo para ti (pide la contraseña del panel): reservas de lecturas y pedidos de Queen Shop.
+import { deps, json, manejar, texto, Fallo, ahoraLocal, reservasDesde, fechaBonita, horaBonita } from "../lib/comun.mjs";
 
-export const autorizar = async (req) => {
-  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
-  if (!token) throw new Fallo(401, "Inicia sesión.");
-  const r = await fetch(`${origen(req)}/.netlify/identity/user`, { headers: { authorization: `Bearer ${token}` } });
-  if (!r.ok) throw new Fallo(401, "Tu sesión venció. Inicia sesión de nuevo.");
-};
-deps.autorizar = deps.autorizar || autorizar;
+import { requireAdmin } from "../lib/panel.mjs";
+deps.autorizar = deps.autorizar || requireAdmin;
 
 export default manejar(async (req) => {
   await deps.autorizar(req);

@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/iconos/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
+<meta name="theme-color" content="#1A2340">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Queen">
 <link rel="stylesheet" href="/estilo.css">
 <style>
 main{max-width:560px;margin:0 auto;padding:72px 22px}
@@ -68,5 +75,6 @@ async function revisar(intento = 0) {
 }
 revisar();
 </script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 </body>
 </html>

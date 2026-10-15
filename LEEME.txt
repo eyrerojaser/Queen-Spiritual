@@ -1,59 +1,67 @@
-WEBSITE QUEEN SPIRITUAL: ARREGLOS Y MESAS + LECTURAS + QUEEN SHOP
+WEBSITE QUEEN SPIRITUAL
+Arreglos y mesas · Lecturas con reservas · Queen Shop · Panel propio
 
 QUÉ HAY EN ESTA CARPETA
-- site/ ............. la página (index.html), la página de gracias y el panel (site/admin)
-- site/content/ ..... la información que cambias desde el panel
-- private/pdfs/ ..... los PDFs de Queen Shop (privados: solo los descarga quien paga)
-- netlify/ .......... las funciones de reservas, pagos y descargas
+- site/ ............. la página, Queen Shop (tienda.html), la página de gracias y tu panel (site/admin)
+- site/content/ ..... la información inicial (después todo se cambia desde el panel)
+- netlify/ .......... las funciones: panel, reservas, pagos y descargas
 
 PASO 1 — GITHUB
-- Crea un repositorio nuevo y márcalo como PRIVADO (importante: así nadie ve tus PDFs).
-- Sube TODO el contenido de esta carpeta (no la carpeta, su contenido).
+- Crea un repositorio nuevo, márcalo como PRIVADO y sube TODO el contenido de esta carpeta
+  (el contenido, no la carpeta).
 
 PASO 2 — NETLIFY
 - Add new site > Import an existing project > GitHub > elige el repositorio > Deploy.
-- Identity: Site configuration > Identity > Enable Identity > Registration: Invite only
-  > Services > Git Gateway > Enable > Invite users > tu correo. Acepta la invitación del correo.
+- Site configuration > Environment variables > Add a variable:
+    ADMIN_PASSWORD = la contraseña que quieras para entrar al panel (mínimo 8 caracteres)
+- Deploys > Trigger deploy (para que tome la contraseña).
+  Ya NO necesitas Netlify Identity ni confirmar correos.
 
 PASO 3 — STRIPE (para cobrar lecturas y Queen Shop)
 - Crea tu cuenta en stripe.com y completa los datos de tu negocio y tu banco.
-- En Stripe: Developers > API keys > copia la "Secret key" (empieza con sk_live_).
-- En Netlify: Site configuration > Environment variables > Add:
-    STRIPE_SECRET_KEY = (la clave que copiaste)
-- Recomendado (confirma la reserva aunque el cliente cierre la página al pagar):
-  En Stripe: Developers > Webhooks > Add endpoint
+- Stripe > Developers > API keys > copia la "Secret key" (empieza con sk_live_).
+- En Netlify agrega otra variable:  STRIPE_SECRET_KEY = (la clave que copiaste)
+- Recomendado: Stripe > Developers > Webhooks > Add endpoint
     URL: https://TU-SITIO.netlify.app/api/stripe-webhook
     Eventos: checkout.session.completed y checkout.session.expired
-  Copia el "Signing secret" (whsec_...) y agrégalo en Netlify como:
-    STRIPE_WEBHOOK_SECRET = (el secreto)
+  Copia el "Signing secret" (whsec_...) y agrégalo en Netlify como STRIPE_WEBHOOK_SECRET.
 - Después de agregar las claves: Deploys > Trigger deploy.
-- Para probar sin cobrar de verdad, usa primero la clave de prueba (sk_test_) y la tarjeta 4242 4242 4242 4242.
+- Para probar sin cobrar de verdad usa primero la clave de prueba (sk_test_)
+  y la tarjeta 4242 4242 4242 4242.
 
-EL PANEL: TU-SITIO.netlify.app/admin
-- Arreglos y mesas: arreglos, centros de mesa y montajes (foto, tipo, orisha o celebración, precio).
-- Lecturas de cartas > Tipos de lectura y precios.
-- Lecturas de cartas > Mi disponibilidad:
-    · "Aceptar reservas": apágalo para cerrar todo (on/off).
-    · Mi horario de cada semana: días y horas que trabajas.
-    · Días que NO trabajo (off) y Días extra que SÍ trabajo (on).
-- Queen Shop > Productos: foto, nombre, categoría, precio y tipo:
-    · Digital: subes el PDF y el cliente lo descarga al pagar.
-    · Físico (sahumerios, velas, abanicos...): el cliente elige envío o recoger.
-  "Mostrar en la página principal" pone el producto en la portada. "Agotado" lo deja ver sin venderlo.
-- Queen Shop > Categorías y entregas: tus categorías (botones de la tienda), costo de envío y si se puede recoger.
-- Reseñas y Negocio y contacto (WhatsApp, Instagram, TikTok, mapa).
-Toca "Publicar" y en 1-2 minutos se ve en la página.
+TU PANEL: TU-SITIO.netlify.app/admin
+- Entras solo con tu contraseña. La sesión dura 30 días en cada teléfono o computadora.
+- Todo se guarda al momento: la página cambia en cuanto tocas Guardar.
+- Cuadros del panel:
+    Reservas ............ tus lecturas pagadas, botón de WhatsApp y cancelar
+    Pedidos ............. productos físicos por entregar (dirección o "lo recoge")
+    Mi calendario ....... aceptar reservas (on/off), tu semana, días que NO trabajas y días extra
+    Lecturas ............ nombre, duración, precio y descripción
+    Arreglos y mesas .... fotos, tipo (arreglo, centro de mesa, montaje), celebración y precio
+    Queen Shop .......... productos digitales (subes el PDF) o físicos (envío o recoger)
+    Categorías y entregas  botones de la tienda, costo de envío y recoger
+    Reseñas ............. lo que dicen tus clientes
+    Negocio y contacto .. nombre, portada, WhatsApp, Instagram, TikTok, mapa
+    Contraseña .......... cámbiala cuando quieras
+- Fotos: súbelas desde el teléfono; el panel las achica solo.
+- PDFs: hasta 20 MB cada uno. Quedan privados: solo los descarga quien paga.
 
-TUS RESERVAS Y PEDIDOS: TU-SITIO.netlify.app/admin/reservas.html
-(también con el botón "Reservas y pedidos" dentro del panel)
-- Pedidos por entregar: productos físicos pagados, con dirección o "lo recoge". Toca "Ya lo envié" cuando salga.
-- Ves cada cita con nombre, hora, lo que pagó y su nota.
-- Botón WhatsApp: le escribe al cliente con el mensaje listo para pegar el enlace de la videollamada.
-- Cancelar cita: libera la hora. Si devuelves el dinero, hazlo desde Stripe.
-- Stripe te avisa por correo de cada pago.
+COMO APLICACIÓN EN TU TELÉFONO
+- Panel: abre TU-SITIO/admin, entra y toca "Instalar el panel" (Android).
+  En iPhone: Safari > botón Compartir > "Agregar a inicio".
+  Queda con ícono de corona azul sobre dorado: "Panel Queen".
+- Tu página: abre TU-SITIO y en el menú del navegador elige "Instalar app" o "Agregar a inicio".
+  Queda con ícono de corona dorada sobre azul: "Queen".
+- Tus clientes también pueden instalar tu página así.
+
+¿OLVIDASTE LA CONTRASEÑA?
+- En Netlify cambia la variable ADMIN_PASSWORD y haz Trigger deploy.
+  Esa nueva vuelve a ser tu contraseña.
+- Después de 8 intentos fallidos, el panel espera 15 minutos antes de dejarte intentar de nuevo.
 
 CÓMO FUNCIONA
-- El cliente elige lectura, día y hora; la hora se le aparta 35 minutos mientras paga.
-- Si paga, queda reservada; si no, la hora se libera sola.
-- Queen Shop: página propia (tu-sitio/tienda.html) con carrito. Los digitales se descargan al pagar (enlace válido 30 días).
-- Todas las horas son de Texas (centro).
+- Lecturas: el cliente elige día y hora; la hora se le aparta 35 minutos mientras paga.
+  Si paga, queda reservada; si no, se libera sola. Todas las horas son de Texas.
+- Queen Shop (tu-sitio/tienda.html): carrito; los digitales se descargan al pagar
+  (enlace válido 30 días); los físicos te llegan a Pedidos.
+- Stripe te avisa por correo de cada pago.

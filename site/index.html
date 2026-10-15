@@ -8,8 +8,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/iconos/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
+<meta name="theme-color" content="#1A2340">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Queen">
 <link rel="stylesheet" href="/estilo.css">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <style>
 /* barra */
 .top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px}
@@ -201,8 +207,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 </dialog>
 
 <script>
-/* Todo el contenido se cambia desde el panel: tu-sitio.netlify.app/admin */
-if (window.netlifyIdentity) netlifyIdentity.on("init", u => { if (!u) netlifyIdentity.on("login", () => { location.href = "/admin/"; }); });
+/* Todo el contenido se cambia desde el panel: tu-sitio/admin */
 
 const $ = s => document.querySelector(s);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -211,7 +216,7 @@ const safeUrl = u => /^(https?:|tel:|\/)/i.test(u) ? u : "";
 const handle = (v, base) => { v = s(v); if (!v) return ""; if (/^https?:\/\//i.test(v)) return v; return base + v.replace(/^@/, ""); };
 const slug = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const dinero = n => "$" + (Math.round(Number(n) * 100) / 100).toFixed(Number(n) % 1 ? 2 : 0);
-const leer = n => fetch(`/content/${n}.json`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+const leer = n => fetch(`/api/contenido?n=${encodeURIComponent(n)}`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
 const api = async (path, body) => {
   const r = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
   const d = await r.json().catch(() => ({}));
@@ -435,5 +440,6 @@ if (new URLSearchParams(location.search).has("cancelado")) {
   history.replaceState(null, "", location.pathname + location.hash);
 }
 </script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 </body>
 </html>

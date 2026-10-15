@@ -4,10 +4,22 @@
 
 [functions]
   node_bundler = "esbuild"
-  # Los PDFs se guardan fuera de la página pública; solo la función de descarga puede leerlos.
-  included_files = ["private/pdfs/**"]
+  # El contenido inicial viaja con las funciones; lo que guardas en el panel queda en Netlify Blobs.
+  included_files = ["site/content/**", "private/pdfs/**"]
 
 [[headers]]
-  for = "/content/*"
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/*.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"

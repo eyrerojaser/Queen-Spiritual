@@ -1,0 +1,17 @@
+{
+  "id": "/admin/",
+  "name": "Panel Queen Spiritual",
+  "short_name": "Panel Queen",
+  "description": "Tus reservas, pedidos, calendario y página.",
+  "lang": "es",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#C9A24A",
+  "icons": [
+    { "src": "/iconos/panel-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/iconos/panel-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/iconos/panel-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

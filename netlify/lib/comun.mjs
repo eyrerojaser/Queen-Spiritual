@@ -9,29 +9,64 @@ export class Fallo extends Error {
   constructor(status, mensaje) { super(mensaje); this.status = status; }
 }
 
+// Busca un archivo que viaja junto con las funciones (contenido inicial y PDFs antiguos).
+const aqui = path.dirname(fileURLToPath(import.meta.url));
+export function leerLocal(rel) {
+  const limpio = String(rel || "").replace(/^\/+/, "");
+  if (limpio.includes("..")) return null;
+  const raices = [process.cwd(), process.env.LAMBDA_TASK_ROOT, aqui, path.resolve(aqui, ".."), path.resolve(aqui, "../.."), path.resolve(aqui, "../../..")].filter(Boolean);
+  for (const r of raices) {
+    const f = path.join(r, limpio);
+    if (fs.existsSync(f)) return fs.readFileSync(f);
+  }
+  return null;
+}
+
+export const NOMBRES_CONTENIDO = ["negocio", "arreglos", "lecturas", "horario", "tienda", "tienda-ajustes", "resenas"];
+const esPdfSubido = (ref) => /^pdf\/[0-9a-f-]{36}$/.test(String(ref || ""));
+const esPdfLocal = (ref) => /^private\/pdfs\/[^/]+\.pdf$/i.test(String(ref || "").replace(/^\/+/, ""));
+
 // Dependencias externas en un solo lugar (las pruebas las reemplazan).
 export const deps = {
-  store: () => getStore({ name: "reservas", consistency: "strong" }),
+  // Almacenes: "reservas" (citas y pedidos), "contenido" (lo que editas en el panel), "archivos" (fotos y PDFs), "panel" (contraseña).
+  store: (nombre = "reservas") => getStore({ name: nombre, consistency: "strong" }),
   stripe: () => {
     const k = process.env.STRIPE_SECRET_KEY;
     if (!k) throw new Fallo(503, "Los pagos todavía no están configurados. Escríbeme por WhatsApp para reservar.");
     return new Stripe(k);
   },
-  contenido: async (origen, nombre) => {
-    const r = await fetch(`${origen}/content/${nombre}.json`, { cache: "no-store" });
-    if (!r.ok) throw new Fallo(500, "No se pudo leer la información del sitio.");
-    return r.json();
+  // Lo guardado desde el panel; si todavía no se ha guardado nada, el contenido inicial del sitio.
+  contenido: async (_origen, nombre) => {
+    if (!NOMBRES_CONTENIDO.includes(nombre)) throw new Fallo(404, "No existe.");
+    const v = await deps.store("contenido").get(`c/${nombre}`, { type: "json" });
+    if (v) return v;
+    const f = leerLocal(`site/content/${nombre}.json`);
+    if (!f) throw new Fallo(500, "No se pudo leer la información del sitio.");
+    return JSON.parse(f.toString("utf8"));
   },
-  leerArchivo: (rel) => {
-    const limpio = String(rel || "").replace(/^\/+/, "");
-    if (!limpio.startsWith("private/pdfs/") || limpio.includes("..")) return null;
-    const aqui = path.dirname(fileURLToPath(import.meta.url));
-    const raices = [process.cwd(), process.env.LAMBDA_TASK_ROOT, aqui, path.resolve(aqui, ".."), path.resolve(aqui, "../.."), path.resolve(aqui, "../../..")].filter(Boolean);
-    for (const r of raices) {
-      const f = path.join(r, limpio);
-      if (fs.existsSync(f)) return fs.readFileSync(f);
+  existeArchivo: async (ref) => {
+    if (esPdfSubido(ref)) return !!(await deps.store("archivos").get(`${ref}/meta`, { type: "json" }));
+    return esPdfLocal(ref) && !!leerLocal(String(ref).replace(/^\/+/, ""));
+  },
+  // Devuelve { tamano, cuerpo } listo para enviarse; los PDFs grandes se envían por partes.
+  abrirArchivo: async (ref) => {
+    if (esPdfSubido(ref)) {
+      const st = deps.store("archivos"), meta = await st.get(`${ref}/meta`, { type: "json" });
+      if (!meta) return null;
+      let i = 0;
+      const cuerpo = new ReadableStream({
+        async pull(c) {
+          if (i >= meta.partes) return c.close();
+          const b = await st.get(`${ref}/${i++}`, { type: "arrayBuffer" });
+          if (!b) return c.error(new Error("parte faltante"));
+          c.enqueue(new Uint8Array(b));
+        },
+      });
+      return { tamano: meta.tamano, cuerpo };
     }
-    return null;
+    if (!esPdfLocal(ref)) return null;
+    const b = leerLocal(String(ref).replace(/^\/+/, ""));
+    return b ? { tamano: b.length, cuerpo: b } : null;
   },
   ahora: () => new Date(),
 };

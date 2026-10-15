@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/iconos/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
+<meta name="theme-color" content="#1A2340">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Queen">
 <link rel="stylesheet" href="/estilo.css">
 <style>
 .top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px}
@@ -80,7 +87,7 @@ const el = (t, c, x) => { const e = document.createElement(t); if (c) e.classNam
 const s = v => (typeof v === "string" ? v.trim() : (v == null ? "" : String(v)));
 const slug = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const dinero = n => "$" + (Number(n) % 1 ? Number(n).toFixed(2) : Number(n).toFixed(0));
-const leer = n => fetch(`/content/${n}.json`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+const leer = n => fetch(`/api/contenido?n=${encodeURIComponent(n)}`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
 function toast(m) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = el("div", "toast", m); t.setAttribute("role", "status"); document.body.append(t); setTimeout(() => t.remove(), 5000); }
 
 let PRODUCTOS = new Map(), AJ = {};
@@ -206,5 +213,6 @@ Promise.all(["negocio", "tienda", "tienda-ajustes"].map(leer)).then(([N, T, A]) 
   if (new URLSearchParams(location.search).has("cancelado")) { toast("No se completó el pago. Tu carrito sigue aquí."); history.replaceState(null, "", location.pathname); }
 });
 </script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 </body>
 </html>

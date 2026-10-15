@@ -11,9 +11,9 @@ export default manejar(async (req) => {
   const o = await deps.store().get(`orden/${id}`, { type: "json" });
   const it = o && o.items && o.items[i];
   if (!it || !it.digital) throw new Fallo(404, "No encontré ese archivo en tu compra.");
-  const archivo = deps.leerArchivo(it.archivo);
+  const archivo = await deps.abrirArchivo(it.archivo);
   if (!archivo) throw new Fallo(404, "No encontré el archivo. Escríbeme y te lo envío.");
   const nombre = (it.titulo || "guia").normalize("NFD").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-") || "guia";
-  return new Response(archivo, { headers: { "content-type": "application/pdf", "content-disposition": `attachment; filename="${nombre}.pdf"`, "cache-control": "private, no-store" } });
+  return new Response(archivo.cuerpo, { headers: { "content-type": "application/pdf", "content-length": String(archivo.tamano), "content-disposition": `attachment; filename="${nombre}.pdf"`, "cache-control": "private, no-store" } });
 });
 export const config = { path: "/api/descargar" };

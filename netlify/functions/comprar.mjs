@@ -13,7 +13,7 @@ export default manejar(async (req) => {
     if (!p) throw new Fallo(409, "Uno de los productos de tu carrito ya no está disponible. Revisa tu carrito.");
     if (p.agotado) throw new Fallo(409, `"${p.titulo}" está agotado. Quítalo del carrito para continuar.`);
     const digital = p.entrega !== "fisico";
-    if (digital && !deps.leerArchivo(p.archivo)) throw new Fallo(503, `"${p.titulo}" todavía no está listo para descargar. Quítalo del carrito o intenta más tarde.`);
+    if (digital && !(await deps.existeArchivo(p.archivo))) throw new Fallo(503, `"${p.titulo}" todavía no está listo para descargar. Quítalo del carrito o intenta más tarde.`);
     const previo = items.get(id);
     const cantidad = digital ? 1 : Math.min(20, Math.max(1, parseInt(it.cantidad, 10) || 1) + (previo ? previo.cantidad : 0));
     items.set(id, { id, titulo: p.titulo, cantidad, digital, archivo: digital ? String(p.archivo).replace(/^\/+/, "") : "", centavos: Math.round(Number(p.precio) * 100), foto: texto(p.foto, 300) });
