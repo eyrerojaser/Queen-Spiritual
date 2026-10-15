@@ -28,6 +28,7 @@ h1{font-size:clamp(2.4rem,7vw,3.4rem);margin-bottom:16px}
 <main id="m"><p class="muted">Confirmando tu pago…</p></main>
 <script>
 const m = document.getElementById("m");
+const $m = n => "$" + Number(n || 0).toFixed(2).replace(/\.00$/, "");
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const id = new URLSearchParams(location.search).get("s");
 try { sessionStorage.removeItem("reservaPendiente"); } catch (e) {}
@@ -45,8 +46,24 @@ async function revisar(intento = 0) {
     c.append(el("p", "big", d.lectura), el("p", null, `${d.fecha}, ${d.hora} (hora de Texas)`), el("p", "muted", "Por videollamada"));
     const out = [el("h1", null, `¡Listo, ${d.nombre}!`), el("p", null, "Tu lectura quedó reservada y pagada.")];
     if (d.conflicto) out.push(el("p", "note err", "Alguien tomó ese mismo horario segundos antes que tú. No te preocupes: te escribiré por WhatsApp para darte otro horario o devolverte tu dinero."));
-    out.push(c, el("p", null, "Antes de tu cita te escribiré por WhatsApp con el enlace de la videollamada. También te llegó el recibo a tu correo."), volver());
+    out.push(c, el("p", null, `Te envié la confirmación${d.email ? " a " + d.email : ""}, con el botón para cancelar o cambiar tu cita. Antes de tu cita te escribo con el enlace de la videollamada.`));
+    if (d.gestion) { const g = el("a", "btn btn-solid", "Administrar mi cita"); g.href = d.gestion; out.push(g, el("span", null, " ")); }
+    out.push(volver());
     m.replaceChildren(...out); return;
+  }
+  if (d.tipo === "arreglo") {
+    try { localStorage.removeItem("queenArreglo"); } catch (e) {}
+    const c = el("div", "card");
+    c.append(el("p", "big", d.arreglo || "Arreglo personalizado"), el("p", null, `Para el ${d.fecha}`)); if (d.flores.length) c.append(el("p", "muted", "Tus flores favoritas: " + d.flores.join(", ")));
+    c.append(el("p", null, d.entrega === "entrega" ? `Entrega en: ${d.lugar}` : "Lo recoges conmigo; te escribo para coordinar la hora."));
+    const pg = el("div", "card"); pg.append(el("p", null, `Total del arreglo: ${$m(d.total)}`), el("p", null, `Pagaste: ${$m(d.pagado)}`), el("p", "big", d.saldo ? `Saldo pendiente: ${$m(d.saldo)}` : "Pagado por completo"));
+    m.replaceChildren(el("h1", null, `¡Tu arreglo está confirmado, ${d.nombre}!`), el("p", null, `Pedido ${d.numero}. Te envié la confirmación a ${d.email}.`), c, pg, el("p", "muted", d.saldo ? "El saldo se paga antes de la entrega. Te escribo para coordinarlo." : "¡Gracias! Te escribo antes de tu evento."), volver());
+    return;
+  }
+  if (d.tipo === "saldo") {
+    m.replaceChildren(el("h1", null, "¡Recibí tu pago!"), el("div", "card"), volver());
+    m.children[1].append(el("p", "big", `Arreglo para el ${d.fecha}`), el("p", null, d.saldo ? `Saldo pendiente: ${$m(d.saldo)}` : "Tu arreglo está pagado por completo."));
+    return;
   }
   if (d.tipo === "tienda") {
     try { localStorage.removeItem("queenCart"); } catch (e) {}
@@ -64,7 +81,10 @@ async function revisar(intento = 0) {
       const c = el("div", "card");
       c.append(el("p", "big", "Tu pedido"));
       fis.forEach(i => c.append(el("p", null, `${i.cantidad} × ${i.titulo}`)));
-      if (d.entrega === "envio") c.append(el("p", "muted", "Lo enviaré a: " + (d.direccion || "la dirección que pusiste al pagar") + ". Te aviso por WhatsApp cuando salga."));
+      if (d.entrega === "envio") {
+        c.append(el("p", "muted", "Lo enviaré a: " + (d.direccion || "la dirección que pusiste") + "."));
+        if (d.paqueteria) c.append(el("p", "muted", "Envío por " + d.paqueteria + ". Te mando el número de rastreo cuando salga."));
+      }
       else c.append(el("p", "muted", d.recogerTexto || "Te escribo por WhatsApp para coordinar la entrega."));
       out.push(c);
     }

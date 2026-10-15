@@ -1,5 +1,6 @@
 // Código compartido por las funciones (reservas, pagos y descargas).
 import { getStore } from "@netlify/blobs";
+import crypto from "node:crypto";
 import Stripe from "stripe";
 import fs from "node:fs";
 import path from "node:path";
@@ -22,7 +23,7 @@ export function leerLocal(rel) {
   return null;
 }
 
-export const NOMBRES_CONTENIDO = ["negocio", "arreglos", "lecturas", "horario", "tienda", "tienda-ajustes", "resenas"];
+export const NOMBRES_CONTENIDO = ["negocio", "arreglos", "lecturas", "horario", "tienda", "tienda-ajustes", "resenas", "solicitudes", "politicas", "flores"];
 const esPdfSubido = (ref) => /^pdf\/[0-9a-f-]{36}$/.test(String(ref || ""));
 const esPdfLocal = (ref) => /^private\/pdfs\/[^/]+\.pdf$/i.test(String(ref || "").replace(/^\/+/, ""));
 
@@ -160,27 +161,53 @@ export async function reservasDesde(store, fechaMin, ahora = deps.ahora()) {
 }
 
 // Marca la reserva como pagada. Se llama desde la página de gracias y desde el webhook (lo que llegue primero).
+// Guarda "ses/<sesión>" apuntando a la cita, para encontrarla aunque luego se cambie de día o se cancele.
 export async function confirmarReserva(store, sesion) {
   const m = sesion.metadata || {};
   if (m.tipo !== "reserva" || sesion.payment_status !== "paid") return null;
+  const ya = await store.get(`ses/${sesion.id}`, { type: "json" });
+  if (ya && ya.clave) {
+    const r = await store.get(ya.clave, { type: "json" });
+    if (r) return { ...r, clave: ya.clave };
+  }
   const k = m.clave;
   const datos = {
-    estado: "pagada", sesion: sesion.id, fecha: m.fecha, hora: m.hora, lectura: m.lectura,
+    estado: "pagada", sesion: sesion.id, pago: typeof sesion.payment_intent === "string" ? sesion.payment_intent : (sesion.payment_intent && sesion.payment_intent.id) || "",
+    fecha: m.fecha, hora: m.hora, lectura: m.lectura,
     nombre: m.nombre, whatsapp: m.whatsapp, email: (sesion.customer_details && sesion.customer_details.email) || m.email || "",
     nota: m.nota || "", precio: (sesion.amount_total || 0) / 100, pagada: deps.ahora().toISOString(),
+    token: crypto.randomBytes(18).toString("base64url"), cambios: 0,
   };
+  let final = null;
   const actual = await store.get(k, { type: "json" });
   if (actual && actual.sesion === sesion.id) {
-    if (actual.estado !== "pagada") await store.setJSON(k, { ...actual, ...datos, creada: actual.creada });
-    return { ...datos, clave: k };
-  }
-  if (!actual) {
+    final = actual.estado === "pagada" && actual.token ? actual : { ...actual, ...datos, creada: actual.creada };
+    if (final !== actual) await store.setJSON(k, final);
+  } else if (!actual) {
     const r = await store.setJSON(k, { ...datos, creada: datos.pagada }, { onlyIfNew: true });
-    if (!r || r.modified !== false) return { ...datos, clave: k };
+    if (!r || r.modified !== false) final = { ...datos, creada: datos.pagada };
+  }
+  if (final) {
+    await store.setJSON(`ses/${sesion.id}`, { clave: k });
+    await store.setJSON(`tok/${final.token}`, { clave: k });
+    return { ...final, clave: k };
   }
   // El horario lo tomó otra persona mientras esta pagaba: se guarda aparte para devolver el dinero o mover la cita.
   await store.setJSON(`conflicto/${sesion.id}`, { ...datos, creada: datos.pagada });
   return { ...datos, clave: k, conflicto: true };
+}
+
+// Cuántos días de calendario faltan para la cita (hora de Texas). 0 = es hoy.
+export const diasParaCita = (fecha, ahora = ahoraLocal()) => Math.round((minutos(fecha) - minutos(ahora.fecha)) / 1440);
+export function politica(cfg) {
+  const dias = Math.max(0, parseInt(cfg && cfg.cancelarDias, 10));
+  return { dias: Number.isFinite(dias) ? dias : 1, cambiosMax: Math.max(0, parseInt(cfg && cfg.cambiosMax, 10) || 0) || 2 };
+}
+export function textoPolitica(cfg) {
+  if (cfg && texto(cfg.politicaTexto, 2000)) return texto(cfg.politicaTexto, 2000);
+  const { dias } = politica(cfg);
+  const antes = dias <= 1 ? "hasta el día anterior a tu cita" : `hasta ${dias} días antes de tu cita`;
+  return `Puedes cancelar o cambiar tu cita ${antes} y se te devuelve el pago completo. Si cancelas ${dias <= 1 ? "el mismo día de la cita" : "después de ese plazo"}, el pago no es reembolsable.`;
 }
 
 // ───────── Queen Shop ─────────
@@ -200,7 +227,8 @@ export async function confirmarOrden(store, sesion) {
   if (o.estado !== "creada") return o;
   const cd = sesion.customer_details || {};
   const envio = (sesion.collected_information && sesion.collected_information.shipping_details) || sesion.shipping_details || null;
-  const listo = { ...o, estado: "pagada", pagada: deps.ahora().toISOString(), email: cd.email || "", nombre: cd.name || "", telefono: cd.phone || "", envio, total: (sesion.amount_total || 0) / 100 };
+  const c = o.cliente || {};
+  const listo = { ...o, estado: "pagada", pagada: deps.ahora().toISOString(), email: c.email || cd.email || "", nombre: c.nombre ? `${c.nombre} ${c.apellido}` : cd.name || "", telefono: c.telefono || cd.phone || "", envio, total: (sesion.amount_total || 0) / 100 };
   await store.setJSON(k, listo);
   return listo;
 }

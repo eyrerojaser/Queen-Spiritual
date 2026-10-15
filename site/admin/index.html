@@ -19,6 +19,8 @@
 <style>
 body{font-size:16px}
 [hidden]{display:none!important}
+input,select,textarea{box-sizing:border-box;max-width:100%}
+details.card > div{min-width:0}
 .bar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
 .bar .in{max-width:1080px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .logo{font-family:"Cormorant",Georgia,serif;font-size:1.45rem;font-weight:600;color:var(--ink);text-decoration:none;line-height:1}
@@ -179,6 +181,9 @@ const ICON = {
   tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.4 1.4 0 0 1 0 2l-6.6 6.6a1.4 1.4 0 0 1-2 0z"/><circle cx="8" cy="8" r="1.4"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.8l2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7z"/></svg>',
   store: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9.5V20h16V9.5M3 9.5l1.6-5h14.8l1.6 5a2.6 2.6 0 0 1-4.5 1.8 2.6 2.6 0 0 1-4.5 0 2.6 2.6 0 0 1-4.5 0A2.6 2.6 0 0 1 3 9.5z"/><path d="M9.5 20v-5h5v5"/></svg>',
+  clip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>',
+  doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l7 2.8v5.2c0 4.3-3 7.6-7 9-4-1.4-7-4.7-7-9V6.3z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>',
+  bouquet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="7" r="2.6"/><circle cx="16" cy="7" r="2.6"/><circle cx="12" cy="5" r="2.6"/><path d="M6.5 11h11l-3.5 9.5h-4z"/><path d="M12 7.6V11M8.8 9.2 10 11M15.2 9.2 14 11"/></svg>',
   key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8.5-8.5M16 7l2.5 2.5M14 9l2 2"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>',
@@ -192,6 +197,43 @@ let avisoInstalar = null;
 addEventListener("beforeinstallprompt", e => { e.preventDefault(); avisoInstalar = e; const t = document.getElementById("instalar"); if (t) t.replaceWith(tarjetaInstalar()); });
 addEventListener("appinstalled", () => { avisoInstalar = null; const t = document.getElementById("instalar"); if (t) t.remove(); toast("Panel instalado ✓"); });
 const instalada = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+/* ═════════ Notificaciones en este equipo ═════════ */
+const b64aU8 = b => { const p = "=".repeat((4 - b.length % 4) % 4), r = atob((b + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(r, c => c.charCodeAt(0)); };
+function tarjetaAvisos() {
+  const soporta = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const card = h("div", { class: "card", id: "avisos", style: "display:flex;gap:14px;align-items:center;flex-wrap:wrap" });
+  const txt = h("p", { class: "sub", style: "margin:0 0 8px" });
+  const btn = h("button", { class: "btn btn-solid btn-sm", type: "button" }, "Activar notificaciones");
+  const cuerpo = h("div", { style: "flex:1;min-width:200px" }, h("h2", null, "🔔 Avisos en este teléfono"), txt);
+  card.append(cuerpo);
+  if (!soporta) {
+    txt.textContent = ios && !instalada() ? "En iPhone, primero instala el panel (Compartir → Agregar a inicio) y ábrelo desde ese ícono. Ahí podrás activar los avisos." : "Este navegador no permite notificaciones. Prueba con Chrome o con el panel instalado.";
+    return card;
+  }
+  const activar = async (probar) => {
+    btn.disabled = true; btn.textContent = "Activando…";
+    try {
+      const permiso = await Notification.requestPermission();
+      if (permiso !== "granted") throw new Error("No diste permiso. Puedes activarlo en los ajustes del navegador para este sitio.");
+      const reg = await navigator.serviceWorker.ready;
+      const { clave } = await api("/api/panel/push");
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64aU8(clave) });
+      await api("/api/panel/push", { method: "POST", body: { sub: sub.toJSON(), probar } });
+      pintar(true); if (probar) toast("Listo: te mandé un aviso de prueba ✓");
+    } catch (e) { fallo(e); pintar(false); }
+  };
+  const pintar = (on) => {
+    btn.disabled = false;
+    if (on) { txt.textContent = "Activados. Te avisa de nuevas citas, cambios, cancelaciones, compras y solicitudes."; btn.textContent = "Mandar aviso de prueba"; btn.className = "btn btn-line btn-sm"; btn.onclick = () => activar(true); }
+    else { txt.textContent = "Recibe un aviso al momento cuando alguien reserve, cancele, compre o te mande una solicitud."; btn.textContent = "Activar notificaciones"; btn.className = "btn btn-solid btn-sm"; btn.onclick = () => activar(true); }
+  };
+  cuerpo.append(btn);
+  pintar(false);
+  if (Notification.permission === "granted") navigator.serviceWorker.ready.then(r => r.pushManager.getSubscription()).then(sub => { if (sub) { pintar(true); api("/api/panel/push", { method: "POST", body: { sub: sub.toJSON() } }).catch(() => {}); } }).catch(() => {});
+  return card;
+}
 function tarjetaInstalar() {
   if (instalada()) return null;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -387,14 +429,19 @@ function pantallaEntrar(msg) {
 
 /* ═════════ Inicio ═════════ */
 const SECCIONES = [
-  ["Tu día", [["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
-  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"]]],
+  ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
+  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
   ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"]]],
 ];
 async function inicio() {
   cargando();
-  const [res, hor, tie, arr] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos")]);
+  const [res, hor, tie, arr, sol, enc] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos"), api("/api/panel/solicitudes"), api("/api/panel/encargos")]);
+  const activos = enc.encargos.filter(a => !a.pasado && a.estado !== "cancelado" && a.estado !== "entregado");
+  const semana = activos.filter(a => (new Date(a.fecha + "T12:00") - new Date(enc.hoy + "T12:00")) / 864e5 <= 7).length;
+  const nuevas = sol.solicitudes.filter(x => x.estado === "nueva").length, abiertas = sol.solicitudes.filter(x => x.estado !== "terminada").length;
   const extra = {
+    encargos: { badge: semana, sub: activos.length ? `${activos.length} por entregar${semana ? ` · ${semana} esta semana` : ""}` : "Nada pendiente" },
+    solicitudes: { badge: nuevas, sub: nuevas ? `${nuevas} nueva${nuevas === 1 ? "" : "s"}` : abiertas ? `${abiertas} en curso` : "Nada pendiente" },
     reservas: { badge: res.reservas.length + res.conflictos.length, sub: res.reservas.length ? `${res.reservas.length} próxima${res.reservas.length === 1 ? "" : "s"}` : "Sin citas próximas" },
     pedidos: { badge: res.pedidos.length, sub: res.pedidos.length ? `${res.pedidos.length} por entregar` : "Nada pendiente" },
     calendario: { pill: hor.reservasActivas === false ? ["Reservas cerradas", "off"] : ["Reservas abiertas", "ok"] },
@@ -403,7 +450,7 @@ async function inicio() {
   };
   marco(
     h("h1", null, "Hola 👋"), h("p", { class: "lead" }, "Todo lo de tu página, en un solo lugar. Los cambios se ven al momento."),
-    tarjetaInstalar(),
+    tarjetaInstalar(), tarjetaAvisos(),
     SECCIONES.map(([g, ts]) => [h("div", { class: "group" }, g), h("div", { class: "tiles" }, ts.map(([id, ic, t, d]) => {
       const x = extra[id] || {};
       return h("a", { class: "tile", href: "#/" + id }, ico(ic), h("div", null, h("b", null, t), h("span", null, x.sub || d), x.pill ? h("em", { class: "pill " + x.pill[1], style: "font-style:normal" }, x.pill[0]) : null), x.badge ? h("i", { class: "badge", "aria-label": `${x.badge} pendientes`, style: "font-style:normal" }, x.badge) : null);
@@ -424,9 +471,8 @@ async function reservas() {
       h("div", { class: "btns" },
         link ? h("a", { class: "btn btn-solid btn-sm", href: link, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
         h("button", { class: "btn danger btn-sm", type: "button", onclick: async e => {
-          if (!conf && !confirm(`¿Cancelar la cita de ${r.nombre}? La hora queda libre otra vez. Si corresponde, devuelve el dinero desde Stripe.`)) return;
-          e.target.disabled = true;
-          try { await api("/api/reservas", { method: "POST", body: { accion: conf ? "resolver" : "cancelar", clave: r.clave } }); toast(conf ? "Listo ✓" : "Cita cancelada"); reservas(); } catch (er) { fallo(er); e.target.disabled = false; }
+          if (conf) { e.target.disabled = true; try { await api("/api/reservas", { method: "POST", body: { accion: "resolver", clave: r.clave } }); toast("Listo ✓"); reservas(); } catch (er) { fallo(er); e.target.disabled = false; } return; }
+          cancelarCita(r);
         } }, conf ? "Ya lo resolví" : "Cancelar cita")));
   };
   const nodos = [];
@@ -436,25 +482,181 @@ async function reservas() {
   d.reservas.forEach(r => { if (r.fecha !== dia) { dia = r.fecha; nodos.push(h("h2", { class: "day" }, r.fechaBonita[0].toUpperCase() + r.fechaBonita.slice(1))); } nodos.push(tarjeta(r)); });
   marco(...cabeza("Reservas", "Lecturas pagadas, de la más próxima a la más lejana. Stripe también te avisa por correo de cada pago."), ...nodos);
 }
+function cancelarCita(r) {
+  const hacer = async (reembolsar, btn) => {
+    btn.disabled = true; dlg.dataset.busy = "1";
+    try { const x = await api("/api/reservas", { method: "POST", body: { accion: "cancelar", clave: r.clave, reembolsar } }); delete dlg.dataset.busy; dlg.close(); toast(x.reembolso ? `Cita cancelada. Se devolvieron $${x.reembolso} ✓` : "Cita cancelada ✓"); reservas(); }
+    catch (e) { delete dlg.dataset.busy; btn.disabled = false; fallo(e); }
+  };
+  const con = h("button", { class: "btn btn-solid", type: "button", onclick: e => hacer(true, e.currentTarget) }, `Cancelar y devolver $${r.precio}`);
+  const sin = h("button", { class: "btn danger", type: "button", onclick: e => hacer(false, e.currentTarget) }, "Cancelar sin devolver");
+  dlgIn.replaceChildren(
+    h("header", null, h("h2", null, "Cancelar cita"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, h("p", null, h("b", null, r.nombre), ` · ${r.lectura}`), h("p", { class: "muted" }, `${r.fechaBonita} a las ${r.horaBonita}. La hora queda libre otra vez y al cliente le llega un correo avisándole.`)),
+    h("footer", null, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "No cancelar"), h("div", { class: "r", style: "flex-wrap:wrap" }, sin, con)));
+  dlg.showModal();
+}
 async function pedidos() {
   cargando();
   const d = await api("/api/reservas");
   const nodos = d.pedidos.map(o => {
-    const a = o.envio && o.envio.address;
-    const donde = o.entrega === "envio" && a ? "Enviar a: " + [o.envio.name, a.line1, a.line2, [a.city, a.state].filter(Boolean).join(", ") + " " + (a.postal_code || "")].filter(Boolean).join(" · ") : "Lo recoge en persona";
-    const link = wa(o.telefono, `Hola ${o.nombre || ""}, gracias por tu compra en Queen Shop. `);
+    const c = o.cliente, a = o.envio && o.envio.address;
+    const lineas = c && c.direccion1 ? [`${c.nombre} ${c.apellido}`, c.direccion1, c.direccion2, `${c.ciudad}, ${c.estado} ${c.zip}`].filter(Boolean)
+      : a ? [o.envio.name, a.line1, a.line2, `${a.city}, ${a.state} ${a.postal_code || ""}`].filter(Boolean) : [];
+    const donde = o.entrega === "envio" && lineas.length ? h("div", { class: "nota" }, lineas.map(l => h("div", null, l))) : h("span", { class: "muted" }, "Lo recoge en persona");
+    const paq = o.envioOpcion ? [o.envioOpcion.transportista, o.envioOpcion.servicio].filter(Boolean).join(" ") + ` · $${o.envioOpcion.cobrado} cobrado` : "";
+    const tel = String(o.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
     return h("div", { class: "bk" },
       h("div", { class: "rw" }, h("b", null, o.nombre || o.email || "Cliente"), h("span", { class: "when" }, `$${o.total}`)),
       h("ul", null, o.items.filter(i => !i.digital).map(i => h("li", null, `${i.cantidad} × ${i.titulo}`))),
-      h("span", { class: "muted" }, donde), h("span", { class: "muted" }, [o.telefono, o.email].filter(Boolean).join(" · ")),
+      paq ? h("span", { class: "pill" }, "📦 " + paq) : null,
+      donde, h("span", { class: "muted" }, [o.telefono, o.email].filter(Boolean).join(" · ")),
       h("div", { class: "btns" },
-        link ? h("a", { class: "btn btn-solid btn-sm", href: link, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
+        tel ? h("a", { class: "btn btn-solid btn-sm", href: `tel:+${t1}` }, "Llamar") : null,
+        tel ? h("a", { class: "btn btn-line btn-sm", href: `sms:+${t1}` }, "Mensaje") : null,
+        o.email ? h("a", { class: "btn btn-line btn-sm", href: `mailto:${o.email}?subject=${encodeURIComponent("Tu pedido de Queen Shop")}` }, "Correo") : null,
+        lineas.length && o.entrega === "envio" ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => {
+          const txt = [...lineas, o.telefono].filter(Boolean).join("\n");
+          try { await navigator.clipboard.writeText(txt); toast("Dirección copiada ✓"); } catch (er) { prompt("Copia la dirección:", txt.replace(/\n/g, ", ")); }
+        } }, "Copiar dirección") : null,
         h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async e => {
           e.target.disabled = true;
           try { await api("/api/reservas", { method: "POST", body: { accion: "entregado", clave: o.clave } }); toast("Marcado como entregado ✓"); pedidos(); } catch (er) { fallo(er); e.target.disabled = false; }
         } }, o.entrega === "envio" ? "Ya lo envié" : "Ya lo entregué")));
   });
   marco(...cabeza("Pedidos", "Productos físicos pagados que te falta entregar. Las compras digitales se descargan solas."), ...(nodos.length ? nodos : [h("div", { class: "empty" }, "No tienes pedidos pendientes.")]));
+}
+
+/* ═════════ Arreglos personalizados ═════════ */
+const EST_ARR = [["confirmado", "Confirmado"], ["preparando", "Preparando"], ["listo", "Listo"], ["entregado", "Entregado"]];
+let filtroEnc = "proximos";
+async function encargos() {
+  cargando();
+  const d = await api("/api/panel/encargos");
+  const grupos = { proximos: x => !x.pasado && !["entregado", "cancelado"].includes(x.estado), terminados: x => x.estado === "entregado" || (x.pasado && x.estado !== "cancelado"), cancelados: x => x.estado === "cancelado" };
+  const tabs = h("div", { class: "seg", role: "group", style: "margin-bottom:16px;flex-wrap:wrap" },
+    [["proximos", "Próximos"], ["terminados", "Entregados"], ["cancelados", "Cancelados"]].map(([k, t]) => h("button", { type: "button", "aria-pressed": String(filtroEnc === k), onclick: () => { filtroEnc = k; encargos(); } }, `${t} (${d.encargos.filter(grupos[k]).length})`)));
+  const pendiente = d.encargos.filter(grupos.proximos).reduce((t, x) => t + (x.saldo || 0), 0);
+  const accion = async (body, okMsg) => { try { await api("/api/panel/encargos", { method: "POST", body }); toast(okMsg); encargos(); } catch (e) { fallo(e); } };
+  const tarjeta = x => {
+    const c = x.cliente, tel = String(c.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
+    const dias = Math.round((new Date(x.fecha + "T12:00") - new Date(d.hoy + "T12:00")) / 864e5);
+    const cuando = dias === 0 ? "Hoy" : dias === 1 ? "Mañana" : dias > 1 ? `En ${dias} días` : "";
+    const estado = h("select", { "aria-label": "Estado", disabled: x.estado === "cancelado", onchange: e => accion({ clave: x.clave, accion: "estado", estado: e.target.value }, "Guardado ✓") }, EST_ARR.map(([k, t]) => h("option", { value: k }, t)), x.estado === "cancelado" ? h("option", { value: "cancelado" }, "Cancelado") : null);
+    estado.value = x.estado;
+    const nota = h("textarea", { rows: 2, placeholder: "Notas para ti", "aria-label": "Notas" }); nota.value = x.nota || "";
+    const flores = h("div", null,
+      x.arreglo ? h("div", { style: "display:flex;gap:12px;align-items:center;margin-bottom:8px" }, h("div", { class: "th" }, x.arreglo.foto ? h("img", { src: x.arreglo.foto, alt: "" }) : ""), h("div", null, h("b", null, x.arreglo.nombre), h("div", { class: "muted" }, `Precio del arreglo: ${dinero(x.arreglo.precio)}`))) : null,
+      x.lineas.length ? h("div", null, h("div", { class: "lab", style: "margin-bottom:6px" }, "Flores favoritas"), h("div", { style: "display:flex;flex-wrap:wrap;gap:6px" }, x.lineas.map(l => h("span", { class: "pill", style: "display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 3px" }, l.foto ? h("img", { src: l.foto, alt: "", style: "width:22px;height:22px;border-radius:50%;object-fit:cover" }) : null, l.nombre)))) : h("div", { class: "muted" }, "Sin flores favoritas: a tu gusto."));
+    const btnsPago = x.estado !== "cancelado" && x.saldo > 0 ? [
+      h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => registrarPago(x) }, "Registrar pago"),
+      h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async e => {
+        e.target.disabled = true;
+        try { const r = await api("/api/panel/encargos", { method: "POST", body: { clave: x.clave, accion: "cobrarSaldo" } });
+          try { await navigator.clipboard.writeText(r.url); } catch (er) {}
+          toast(r.enviado ? "Le envié el enlace de pago por correo ✓ (también quedó copiado)" : "Enlace de pago copiado ✓ Pégalo en un mensaje al cliente."); }
+        catch (er) { fallo(er); } e.target.disabled = false;
+      } }, "Cobrar saldo con tarjeta")] : [];
+    return h("div", { class: "bk" + (dias >= 0 && dias <= 2 && x.estado !== "entregado" && x.estado !== "cancelado" ? " conf" : "") },
+      h("div", { class: "rw" }, h("b", null, `${c.nombre} ${c.apellido}`), h("span", { class: "when" }, x.fechaBonita[0].toUpperCase() + x.fechaBonita.slice(1))),
+      h("div", null, cuando ? h("span", { class: "pill" + (dias <= 2 ? " off" : "") }, cuando) : null, h("span", { class: "pill" }, `Pedido ${x.numero}`), h("span", { class: "pill " + (x.saldo > 0 ? "off" : "ok") }, x.saldo > 0 ? `Saldo ${dinero(x.saldo)}` : "Pagado")),
+      x.ocasion ? h("div", null, h("b", null, "Para: "), x.ocasion) : null,
+      flores,
+      x.colores ? h("div", { class: "nota" }, x.colores) : null,
+      h("div", { class: "muted" }, x.entrega === "entrega" ? `Entrega en: ${x.lugar}` : "Lo recoge"),
+      h("div", { class: "nota" }, h("div", null, `Total: ${dinero(x.total)}`), h("div", null, `Pagado: ${dinero(x.pagado)}`), ...(x.pagos || []).map(p => h("div", { class: "muted", style: "font-size:.88rem" }, `· ${({ deposito: "Depósito", total: "Pago total", saldo: "Saldo" })[p.tipo] || p.tipo} ${p.metodo === "tarjeta" ? "con tarjeta" : "· " + p.metodo} ${dinero(p.monto)}`)), h("div", null, h("b", null, `Saldo pendiente: ${dinero(x.saldo)}`)), x.reembolso ? h("div", null, `Reembolsado: ${dinero(x.reembolso)}`) : null),
+      h("div", { class: "muted" }, `${c.telefono} · ${c.email}`),
+      h("div", { class: "btns" },
+        tel ? h("a", { class: "btn btn-solid btn-sm", href: `tel:+${t1}` }, "Llamar") : null,
+        tel ? h("a", { class: "btn btn-line btn-sm", href: `sms:+${t1}` }, "Mensaje") : null,
+        h("a", { class: "btn btn-line btn-sm", href: `mailto:${c.email}?subject=${encodeURIComponent("Tu arreglo para el " + x.fechaBonita)}` }, "Correo"), ...btnsPago),
+      h("div", { class: "fld" }, h("div", { class: "lab" }, "Estado"), estado),
+      h("div", { class: "fld" }, nota, h("div", null, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ clave: x.clave, accion: "nota", nota: nota.value }, "Nota guardada ✓") }, "Guardar nota"))),
+      x.estado !== "cancelado" && x.estado !== "entregado" ? h("div", null, h("button", { class: "lnk", type: "button", style: "color:var(--warn)", onclick: () => cancelarEncargo(x) }, "Cancelar pedido")) : null);
+  };
+  const lista = d.encargos.filter(grupos[filtroEnc]);
+  if (filtroEnc !== "proximos") lista.reverse();
+  marco(...cabeza("Arreglos personalizados", "Ordenados por fecha del evento. Te llegan recordatorios 3 días antes (comprar flores) y 1 día antes (preparar)."),
+    pendiente ? h("p", { class: "note ok" }, `Saldo por cobrar en pedidos próximos: ${dinero(Math.round(pendiente * 100) / 100)}`) : null,
+    tabs, ...(lista.length ? lista.map(tarjeta) : [h("div", { class: "empty" }, filtroEnc === "proximos" ? "No tienes arreglos pendientes." : "No hay pedidos aquí.")]));
+}
+function registrarPago(x) {
+  editar({ titulo: "Registrar pago del saldo", valor: { monto: x.saldo, metodo: "Efectivo" },
+    defs: [{ k: "monto", t: "money", label: `Cuánto te pagaron (saldo: ${dinero(x.saldo)})` }, { k: "metodo", t: "seg", label: "Cómo pagó", ops: [["Efectivo", "Efectivo"], ["Zelle", "Zelle"], ["Cash App", "Cash App"], ["Tarjeta en persona", "Tarjeta"]] }],
+    requeridos: [["monto", "Escribe el monto."]],
+    onGuardar: async v => { await api("/api/panel/encargos", { method: "POST", body: { clave: x.clave, accion: "pagoManual", monto: v.monto, metodo: v.metodo } }); toast("Pago registrado ✓"); encargos(); } });
+}
+function cancelarEncargo(x) {
+  const hacer = async (reembolsar, btn) => {
+    btn.disabled = true;
+    try { await api("/api/panel/encargos", { method: "POST", body: { clave: x.clave, accion: "cancelar", reembolsar } }); dlg.close(); toast("Pedido cancelado"); encargos(); } catch (e) { btn.disabled = false; fallo(e); }
+  };
+  const conTarjeta = (x.pagos || []).some(p => p.metodo === "tarjeta");
+  dlgIn.replaceChildren(
+    h("header", null, h("h2", null, "Cancelar pedido"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, h("p", null, `${x.cliente.nombre} ${x.cliente.apellido} · ${x.fechaBonita}`), h("p", { class: "muted" }, `Pagó ${dinero(x.pagado)}. Según tu política, el depósito no es reembolsable; decide tú si devuelves el dinero.`)),
+    h("footer", null, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "No cancelar"),
+      h("div", { class: "r", style: "flex-wrap:wrap" }, h("button", { class: "btn danger", type: "button", onclick: e => hacer(false, e.currentTarget) }, "Cancelar sin devolver"),
+        conTarjeta ? h("button", { class: "btn btn-solid", type: "button", onclick: e => hacer(true, e.currentTarget) }, "Cancelar y devolver lo pagado con tarjeta") : null)));
+  dlg.showModal();
+}
+
+/* ═════════ Solicitudes ═════════ */
+const EST = [["nueva", "Nuevas"], ["proceso", "En proceso"], ["confirmada", "Confirmadas"], ["terminada", "Terminadas"]];
+let filtroSol = "abiertas";
+async function solicitudes() {
+  cargando();
+  const [d, cfg] = await Promise.all([api("/api/panel/solicitudes"), leer("solicitudes")]);
+  const todas = d.solicitudes;
+  const cuenta = k => todas.filter(x => k === "abiertas" ? x.estado !== "terminada" : x.estado === k).length;
+  const tabs = h("div", { class: "seg", role: "group", style: "margin-bottom:16px;flex-wrap:wrap" },
+    [["abiertas", "Pendientes"], ...EST].map(([k, t]) => h("button", { type: "button", "aria-pressed": String(filtroSol === k), onclick: () => { filtroSol = k; solicitudes(); } }, `${t} (${cuenta(k)})`)));
+  const lista = todas.filter(x => filtroSol === "abiertas" ? x.estado !== "terminada" : x.estado === filtroSol);
+  const tarjeta = x => {
+    const tel = String(x.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
+    const asunto = `Tu solicitud${x.tipo !== "Otra consulta" ? " de " + x.tipo.toLowerCase() : ""}${x.fechaBonita ? " para el " + x.fechaBonita : ""}`;
+    const estado = h("select", { "aria-label": "Estado", onchange: async e => { try { await api("/api/panel/solicitudes", { method: "POST", body: { clave: x.clave, estado: e.target.value } }); toast("Guardado ✓"); solicitudes(); } catch (er) { fallo(er); } } }, EST.map(([k, t]) => h("option", { value: k }, ({ Nuevas: "Nueva", "En proceso": "En proceso", Confirmadas: "Confirmada", Terminadas: "Terminada" })[t])));
+    estado.value = x.estado;
+    const nota = h("textarea", { rows: 2, placeholder: "Notas para ti (precio acordado, flores, etc.)", "aria-label": "Notas" }); nota.value = x.nota || "";
+    const gNota = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { try { await api("/api/panel/solicitudes", { method: "POST", body: { clave: x.clave, nota: nota.value } }); toast("Nota guardada ✓"); } catch (er) { fallo(er); } } }, "Guardar nota");
+    return h("div", { class: "bk" + (x.estado === "nueva" ? " conf" : "") },
+      h("div", { class: "rw" }, h("b", null, `${x.nombre} ${x.apellido}`), h("span", { class: "when" }, x.fechaBonita ? x.fechaBonita[0].toUpperCase() + x.fechaBonita.slice(1) : "Consulta")),
+      h("div", null, h("span", { class: "pill" }, x.tipo), x.estado === "nueva" ? h("span", { class: "pill off" }, "Nueva") : null, x.cantidad ? h("span", { class: "pill" }, `Cantidad: ${x.cantidad}`) : null),
+      x.ocasion ? h("div", null, h("b", null, "Para: "), x.ocasion) : null,
+      x.referencia ? h("div", { class: "muted" }, `Basado en: ${x.referencia}`) : null,
+      x.detalles ? h("div", { class: "nota" }, x.detalles) : null,
+      x.presupuesto ? h("div", { class: "muted" }, `Presupuesto: ${x.presupuesto}`) : null,
+      x.entrega ? h("div", { class: "muted" }, x.entrega === "entrega" ? `Entrega en: ${x.lugar}` : "Lo recoge") : null,
+      h("div", { class: "muted" }, `${x.telefono} · ${x.email} · Prefiere: ${x.contacto}`),
+      h("div", { class: "btns" },
+        tel ? h("a", { class: "btn btn-solid btn-sm", href: `tel:+${t1}` }, "Llamar") : null,
+        tel ? h("a", { class: "btn btn-line btn-sm", href: `sms:+${t1}` }, "Mensaje") : null,
+        h("a", { class: "btn btn-line btn-sm", href: `mailto:${x.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(`Hola ${x.nombre}, gracias por tu solicitud. `)}` }, "Correo"),
+        x.contacto === "WhatsApp" && tel ? h("a", { class: "btn btn-line btn-sm", href: wa(tel, `Hola ${x.nombre}, gracias por tu solicitud. `), target: "_blank", rel: "noopener" }, "WhatsApp") : null),
+      h("div", { class: "fld" }, h("div", { class: "lab" }, "Estado"), estado),
+      h("div", { class: "fld" }, nota, h("div", null, gNota)),
+      h("div", null, h("button", { class: "lnk", type: "button", style: "color:var(--warn)", onclick: async () => { if (!confirm("¿Eliminar esta solicitud?")) return; try { await api("/api/panel/solicitudes", { method: "POST", body: { clave: x.clave, accion: "eliminar" } }); toast("Eliminada"); solicitudes(); } catch (er) { fallo(er); } } }, "Eliminar")));
+  };
+  // Ajustes
+  const aj = formulario([
+    { k: "activo", t: "bool", label: "Aceptar solicitudes", hint: "Apágalo cuando no puedas tomar más pedidos." },
+    { k: "anticipacionDias", t: "num", label: "Días mínimos de anticipación", min: 0, hint: "Ej: 3 = no pueden pedir para dentro de menos de 3 días." },
+    { k: "intro", t: "area", label: "Texto que ve el cliente" },
+  ], cfg);
+  let cerrados = clon(cfg.cerrados || []);
+  const cajaC = h("div", { class: "lst" });
+  const pintarC = () => cajaC.replaceChildren(...(cerrados.length ? cerrados.map((c, i) => h("div", { class: "r" },
+      h("input", { type: "date", value: c.fecha || "", "aria-label": "Fecha", oninput: e => c.fecha = e.target.value }),
+      h("input", { type: "text", value: c.motivo || "", placeholder: "Motivo (solo lo ves tú)", "aria-label": "Motivo", oninput: e => c.motivo = e.target.value }),
+      h("button", { class: "ib", type: "button", "aria-label": "Quitar", onclick: () => { cerrados.splice(i, 1); pintarC(); } }, "×")))
+    : [h("p", { class: "muted", style: "margin:0" }, "Todas las fechas están abiertas.")]),
+    h("div", null, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.push({ fecha: "", motivo: "" }); pintarC(); } }, "+ Bloquear una fecha")));
+  pintarC();
+  const gAj = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => { gAj.disabled = true; try { await guardar("solicitudes", { ...aj.valores(), cerrados: cerrados.filter(c => c.fecha) }); } catch (e) { fallo(e); } gAj.disabled = false; } }, "Guardar ajustes");
+  const ajustes = h("details", { class: "card" }, h("summary", { style: "cursor:pointer;font-weight:700" }, "Ajustes de solicitudes"), h("div", { style: "margin-top:16px" }, aj.nodo,
+    h("h2", { style: "margin-top:20px" }, "Fechas sin disponibilidad"), h("p", { class: "sub" }, "Días en que no puedes hacer arreglos. El cliente no podrá elegirlos."), cajaC, h("div", { style: "margin-top:16px" }, gAj)));
+  marco(...cabeza("Solicitudes", "Lo que te piden desde tu página, ordenado por fecha del evento."), tabs,
+    ...(lista.length ? lista.map(tarjeta) : [h("div", { class: "empty" }, filtroSol === "abiertas" ? "No tienes solicitudes pendientes." : "No hay solicitudes aquí.")]), ajustes);
 }
 
 /* ═════════ Listas (lecturas, arreglos, productos, reseñas) ═════════ */
@@ -489,7 +691,7 @@ async function vistaLista(cfg) {
       const b = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { b.disabled = true; try { doc = await guardar(cfg.n, { ...doc, intro: t.value }); } catch (e) { fallo(e); } b.disabled = false; } }, "Guardar texto");
       return h("div", { class: "card" }, h("div", { class: "fld" }, h("label", { for: "intro" }, cfg.intro), t), h("div", { style: "margin-top:12px" }, b));
     })() : null;
-    marco(...cabeza(cfg.titulo, cfg.lead), intro, lista, h("button", { class: "btn btn-solid add", type: "button", onclick: () => abrir(null) }, `+ Agregar ${cfg.singular}`), cfg.pie ? cfg.pie() : null);
+    marco(...cabeza(cfg.titulo, cfg.lead), intro, cfg.cabecera ? cfg.cabecera(doc, d => { doc = d; }) : null, lista, h("button", { class: "btn btn-solid add", type: "button", onclick: () => abrir(null) }, `+ Agregar ${cfg.singular}`), cfg.pie ? cfg.pie() : null);
   };
   pintar();
 }
@@ -523,7 +725,7 @@ const arreglos = () => vistaLista({
     { k: "ocasion", t: "text", label: "Para qué celebración u orisha", ph: "Ej: Cumpleaños de santo de Oshún" },
     { k: "descripcion", t: "area", label: "Descripción" },
     { k: "flores", t: "area", label: "Flores y materiales", rows: 2 },
-    { k: "precio", t: "text", label: "Precio", ph: "Ej: 85", hint: "Solo el número. Si lo dejas vacío dice “Precio a consultar”." },
+    { k: "precio", t: "text", label: "Precio del arreglo completo", ph: "Ej: 250", hint: "Solo el número. Con precio, el cliente puede personalizarlo y pagar el depósito en línea. Vacío = “Precio a consultar”." },
     { k: "visible", t: "bool", label: "Mostrar en la página" },
   ],
   resumen: a => ({ foto: a.foto, titulo: a.nombre, sub: [a.ocasion, a.precio ? "$" + a.precio : "Precio a consultar"].filter(Boolean).join(" · "), pills: [[a.tipo || "Arreglo floral"]] }),
@@ -554,6 +756,39 @@ async function tienda() {
     pie: () => h("p", { class: "muted", style: "margin-top:18px" }, h("a", { href: "/tienda.html", target: "_blank", rel: "noopener" }, "Ver Queen Shop"), " · ", h("a", { href: "#/categorias" }, "Categorías y entregas")),
   });
 }
+
+const flores = () => vistaLista({
+  n: "flores", clave: "flores", titulo: "Flores", singular: "flor", lead: "Las flores que tus clientes marcan como favoritas en “Personaliza tu arreglo”. No tienen precio: el precio es el del arreglo.",
+  nuevo: () => ({ nombre: "", foto: "", visible: true, agotada: false }),
+  requeridos: [["nombre", "Escribe el nombre de la flor."]],
+  campos: [
+    { k: "foto", t: "foto", label: "Foto de la flor", hint: "Mejor una foto cuadrada y de cerca." },
+    { k: "nombre", t: "text", label: "Nombre", ph: "Ej: Rosa roja" },
+    { k: "agotada", t: "bool", label: "No disponible por ahora", hint: "Se ve, pero no se puede elegir." },
+    { k: "visible", t: "bool", label: "Mostrar en la galería" },
+  ],
+  resumen: f => ({ foto: f.foto, titulo: f.nombre, pills: f.agotada ? [["No disponible", "off"]] : [] }),
+  cabecera: (doc, setDoc) => {
+    const fm = formulario([
+      { k: "activo", t: "bool", label: "Aceptar arreglos personalizados" },
+      { k: "anticipacionDias", t: "num", label: "Días mínimos de anticipación", min: 0, hint: "Las fechas antes de esto se bloquean solas en el calendario." },
+      { k: "depositoPorcentaje", t: "num", label: "Depósito para confirmar (%)", min: 10, hint: "Ej: 50 = el cliente paga la mitad para reservar." },
+      { k: "permitirPagoTotal", t: "bool", label: "Dejar que paguen todo de una vez" },
+      { k: "aviso", t: "area", label: "Aviso que ven antes de empezar", rows: 2 },
+      { k: "intro", t: "area", label: "Texto de la página", rows: 2 },
+    ], doc);
+    const ent = formulario([{ k: "activo", t: "bool", label: "Hago entregas en el evento" }, { k: "costo", t: "money", label: "Costo de la entrega", si: v => v.activo }, { k: "texto", t: "text", label: "Texto de la entrega", si: v => v.activo }], doc.entrega || {});
+    const rec = formulario([{ k: "activo", t: "bool", label: "Se puede recoger" }, { k: "texto", t: "text", label: "Texto para recoger", si: v => v.activo }], doc.recoger || {});
+    const b = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => {
+      b.disabled = true;
+      try { const d = await guardar("flores", { ...doc, ...fm.valores(), entrega: ent.valores(), recoger: rec.valores() }); setDoc(d); } catch (e) { fallo(e); }
+      b.disabled = false;
+    } }, "Guardar ajustes");
+    return h("details", { class: "card" }, h("summary", { style: "cursor:pointer;font-weight:700" }, "Ajustes: anticipación, depósito y entrega"),
+      h("div", { class: "f", style: "margin-top:16px" }, fm.nodo, h("p", { class: "muted", style: "margin:0" }, "El precio de cada arreglo se pone en “Arreglos y mesas”."), h("h2", null, "Entrega"), ent.nodo, h("h2", null, "Recoger"), rec.nodo, h("div", null, b),
+        h("p", { class: "muted" }, "Las fechas sin disponibilidad se bloquean en Solicitudes → Ajustes de solicitudes."), h("p", null, h("a", { href: "/personaliza.html", target: "_blank", rel: "noopener" }, "Ver la página Personaliza tu arreglo"))));
+  },
+});
 
 const resenas = () => vistaLista({
   n: "resenas", clave: "resenas", titulo: "Reseñas", singular: "reseña", lead: "Copia aquí lo que te dicen tus clientes. El enlace para que dejen reseña en Google va en “Negocio y contacto”.",
@@ -622,22 +857,38 @@ async function categorias() {
   }), h("div", null, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cats.push(""); pintarCats(); const ins = caja.querySelectorAll(".r input"); ins[ins.length - 1].focus(); } }, "+ Agregar categoría")));
   pintarCats();
   const env = formulario([
-    { k: "activo", t: "bool", label: "Hago envíos" },
-    { k: "costo", t: "money", label: "Costo del envío", hint: "Un solo costo por pedido. 0 = gratis.", si: v => v.activo },
-    { k: "gratisDesde", t: "money", label: "Envío gratis a partir de", hint: "Opcional. 0 = no aplica.", si: v => v.activo },
+    { k: "activo", t: "bool", label: "Hago envíos", hint: "El cliente llena nombre, apellido, dirección, correo y teléfono, y elige la paquetería." },
+    { k: "gratisDesde", t: "money", label: "Envío gratis a partir de", hint: "Opcional. 0 = no aplica." },
   ], doc.envio || {});
+  let ops = clon((doc.envio && doc.envio.opciones) || []);
+  const cajaOps = h("div", { class: "items" });
+  const TR = ["USPS", "FedEx", "UPS", "DHL"];
+  const pintarOps = () => cajaOps.replaceChildren(...ops.map((o, i) => h("div", { class: "card", style: "margin:0;padding:14px" },
+    h("div", { class: "row2" },
+      h("div", { class: "fld" }, h("label", null, "Paquetería"), (() => { const sl = h("select", { "aria-label": "Paquetería", onchange: e => o.transportista = e.target.value }, TR.map(t => h("option", { value: t }, t))); sl.value = o.transportista || "USPS"; return sl; })()),
+      h("div", { class: "fld" }, h("label", null, "Servicio"), h("input", { type: "text", value: o.servicio || "", placeholder: "Ej: Priority Mail", "aria-label": "Servicio", oninput: e => o.servicio = e.target.value }))),
+    h("div", { class: "row2", style: "margin-top:10px" },
+      h("div", { class: "fld" }, h("label", null, "Precio que cobras"), h("div", { class: "money" }, h("input", { type: "number", step: "0.01", min: 0, inputmode: "decimal", value: o.precio ?? "", "aria-label": "Precio", oninput: e => o.precio = Number(e.target.value) }))),
+      h("div", { class: "fld" }, h("label", null, "Tiempo de entrega"), h("input", { type: "text", value: o.dias || "", placeholder: "Ej: 2 a 5 días", "aria-label": "Tiempo de entrega", oninput: e => o.dias = e.target.value }))),
+    h("div", { style: "display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px" },
+      (() => { const c = h("input", { type: "checkbox", checked: o.activo !== false, role: "switch", onchange: e => o.activo = e.target.checked }); return h("label", { class: "sw", style: "flex:1" }, h("span", null, "Ofrecer esta opción"), c); })(),
+      h("button", { class: "ib", type: "button", "aria-label": "Quitar opción", onclick: () => { ops.splice(i, 1); pintarOps(); } }, "×")))),
+    h("div", null, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { ops.push({ transportista: "USPS", servicio: "", precio: 0, dias: "", activo: true }); pintarOps(); } }, "+ Agregar paquetería")));
+  pintarOps();
   const rec = formulario([
     { k: "activo", t: "bool", label: "Se puede recoger" },
     { k: "texto", t: "area", label: "Mensaje para quien recoge", si: v => v.activo },
   ], doc.recoger || {});
   const b = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
     b.disabled = true;
-    try { await guardar("tienda-ajustes", { categorias: cats.map(c => ({ nombre: s(c) })).filter(c => c.nombre), envio: env.valores(), recoger: rec.valores() }); } catch (e) { fallo(e); }
+    const v = env.valores();
+    if (v.activo && !ops.some(o => o.activo !== false && s(o.servicio))) { toast("Agrega al menos una paquetería con su servicio, o apaga los envíos.", "err"); b.disabled = false; return; }
+    try { await guardar("tienda-ajustes", { categorias: cats.map(c => ({ nombre: s(c) })).filter(c => c.nombre), envio: { ...v, opciones: ops.filter(o => s(o.servicio)) }, recoger: rec.valores() }); } catch (e) { fallo(e); }
     b.disabled = false;
   } }, "Guardar cambios");
   marco(...cabeza("Categorías y entregas", "Las categorías son los botones de Queen Shop. Envío y recoger aplican solo a productos físicos."),
     h("div", { class: "card" }, h("h2", null, "Categorías"), h("p", { class: "sub" }, "Solo aparecen en la tienda las que tienen productos."), caja),
-    h("div", { class: "card" }, h("h2", null, "Envío"), env.nodo),
+    h("div", { class: "card" }, h("h2", null, "Envío"), env.nodo, h("h2", { style: "margin-top:20px" }, "Paqueterías y tarifas"), h("p", { class: "sub" }, "El cliente elige una. Pon lo que tú cobras por enviar un pedido normal."), cajaOps),
     h("div", { class: "card" }, h("h2", null, "Recoger"), rec.nodo),
     h("div", { class: "save-bar" }, b));
 }
@@ -698,6 +949,33 @@ async function calendario() {
     err, h("div", { class: "save-bar" }, b));
 }
 
+/* ═════════ Políticas ═════════ */
+async function politicas() {
+  cargando();
+  const [hor, pol] = await Promise.all([leer("horario"), leer("politicas")]);
+  const can = formulario([
+    { k: "cancelarDias", t: "num", label: "Días antes de la cita para cancelar con reembolso o cambiar", min: 0, hint: "1 = hasta el día anterior (el mismo día ya no se reembolsa). 0 = hasta el mismo día." },
+    { k: "cambiosMax", t: "num", label: "Cuántas veces puede cambiar el día", min: 1 },
+    { k: "politicaTexto", t: "area", label: "Texto de la política (opcional)", hint: "Si lo dejas vacío, se escribe solo según los días de arriba." },
+  ], { cancelarDias: 1, cambiosMax: 2, ...hor });
+  const tx = formulario([
+    { k: "lecturas", t: "area", label: "Lecturas", rows: 4 },
+    { k: "envios", t: "area", label: "Envíos y devoluciones", rows: 4 },
+    { k: "arreglos", t: "area", label: "Arreglos y montajes", rows: 3 },
+    { k: "privacidad", t: "area", label: "Privacidad", rows: 4 },
+  ], pol);
+  const b = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
+    b.disabled = true;
+    try { const v = can.valores(); await guardar("horario", { ...(await leer("horario")), ...v }); await guardar("politicas", tx.valores()); } catch (e) { fallo(e); }
+    b.disabled = false;
+  } }, "Guardar políticas");
+  marco(...cabeza("Políticas", "Se ven en tu página (enlaces abajo, en el footer), al reservar y en los correos de confirmación."),
+    h("div", { class: "card" }, h("h2", null, "Cancelaciones y cambios de citas"), h("p", { class: "sub" }, "El reembolso es automático cuando el cliente cancela dentro del plazo."), can.nodo),
+    h("div", { class: "card" }, h("h2", null, "Otras políticas"), tx.nodo),
+    h("p", null, h("a", { href: "/politicas.html", target: "_blank", rel: "noopener" }, "Ver la página de políticas")),
+    h("div", { class: "save-bar" }, b));
+}
+
 /* ═════════ Contraseña ═════════ */
 function clave() {
   const fm = formulario([
@@ -720,7 +998,7 @@ function clave() {
 }
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { "": inicio, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave };
+const RUTAS = { "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

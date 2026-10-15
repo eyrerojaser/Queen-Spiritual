@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Políticas</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/iconos/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/estilo.css">
+<style>
+main{max-width:720px;margin:0 auto;padding:28px 22px 80px}
+.brand{font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--ink);text-decoration:none}
+h1{font-size:clamp(2.4rem,7vw,3.4rem);margin:36px 0 8px}
+section{padding:26px 0;border-top:1px solid var(--line);scroll-margin-top:16px}
+section h2{font-size:1.8rem;margin-bottom:10px}
+section p{margin:0 0 10px;max-width:62ch}
+nav.idx{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 28px}
+nav.idx a{font-size:.92rem;font-weight:600;padding:8px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;background:var(--surface)}
+</style>
+</head>
+<body>
+<main>
+  <a class="brand" href="/" id="marca">Queen Spiritual</a>
+  <h1>Políticas</h1>
+  <p class="muted">Para que sepas cómo trabajo antes de reservar o comprar.</p>
+  <nav class="idx" aria-label="Secciones">
+    <a href="#cancelaciones">Cancelaciones</a><a href="#lecturas">Lecturas</a><a href="#envios">Envíos y devoluciones</a><a href="#arreglos">Arreglos</a><a href="#privacidad">Privacidad</a>
+  </nav>
+  <section id="cancelaciones"><h2>Cancelaciones y cambios de citas</h2><div id="tCancel"></div></section>
+  <section id="lecturas"><h2>Lecturas</h2><div id="tLecturas"></div></section>
+  <section id="envios"><h2>Envíos y devoluciones</h2><div id="tEnvios"></div></section>
+  <section id="arreglos"><h2>Arreglos y montajes</h2><div id="tArreglos"></div></section>
+  <section id="privacidad"><h2>Privacidad</h2><div id="tPrivacidad"></div></section>
+  <p style="margin-top:30px"><a href="/">← Volver a la página principal</a></p>
+</main>
+<script src="/politicas.js"></script>
+<script>
+const leer = n => fetch(`/api/contenido?n=${n}`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+const parrafos = (id, t) => { const box = document.getElementById(id); box.replaceChildren(...String(t || "").split(/\n+/).filter(Boolean).map(x => { const p = document.createElement("p"); p.textContent = x; return p; })); if (!box.children.length) box.closest("section").hidden = true; };
+Promise.all(["negocio", "politicas", "horario"].map(leer)).then(([N, P, H]) => {
+  if (N.nombre) { document.getElementById("marca").textContent = N.nombre; document.title = `Políticas · ${N.nombre}`; }
+  parrafos("tCancel", textoPolitica(H) + "\nPara cancelar o cambiar tu cita, usa el botón “Administrar mi cita” del correo de confirmación. Los reembolsos regresan a la misma tarjeta y pueden tardar de 5 a 10 días hábiles en verse.");
+  parrafos("tLecturas", P.lecturas); parrafos("tEnvios", P.envios); parrafos("tArreglos", P.arreglos); parrafos("tPrivacidad", P.privacidad);
+  if (location.hash) { const t = document.querySelector(location.hash); if (t) t.scrollIntoView(); }
+});
+</script>
+</body>
+</html>

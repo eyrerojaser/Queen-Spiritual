@@ -12,8 +12,44 @@
   ],
   "envio": {
     "activo": false,
-    "costo": 0,
-    "gratisDesde": 0
+    "gratisDesde": 0,
+    "opciones": [
+      {
+        "transportista": "USPS",
+        "servicio": "Ground Advantage",
+        "precio": 7,
+        "dias": "2 a 5 días",
+        "activo": true
+      },
+      {
+        "transportista": "USPS",
+        "servicio": "Priority Mail",
+        "precio": 11,
+        "dias": "1 a 3 días",
+        "activo": true
+      },
+      {
+        "transportista": "FedEx",
+        "servicio": "Ground",
+        "precio": 13,
+        "dias": "1 a 5 días",
+        "activo": false
+      },
+      {
+        "transportista": "UPS",
+        "servicio": "Ground",
+        "precio": 13,
+        "dias": "1 a 5 días",
+        "activo": false
+      },
+      {
+        "transportista": "DHL",
+        "servicio": "Express",
+        "precio": 35,
+        "dias": "1 a 3 días",
+        "activo": false
+      }
+    ]
   },
   "recoger": {
     "activo": true,

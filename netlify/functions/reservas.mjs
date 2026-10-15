@@ -2,6 +2,8 @@
 import { deps, json, manejar, texto, Fallo, ahoraLocal, reservasDesde, fechaBonita, horaBonita } from "../lib/comun.mjs";
 
 import { requireAdmin } from "../lib/panel.mjs";
+import { correoCita } from "../lib/avisos.mjs";
+import { origen } from "../lib/comun.mjs";
 deps.autorizar = deps.autorizar || requireAdmin;
 
 export default manejar(async (req) => {
@@ -12,8 +14,16 @@ export default manejar(async (req) => {
     const k = texto(b.clave, 80);
     if (b.accion === "cancelar" && /^r\//.test(k)) {
       const r = await store.get(k, { type: "json" });
-      if (r) { await store.setJSON(`cancelada/${Date.now()}_${k.slice(2)}`, { ...r, estado: "cancelada", cancelada: deps.ahora().toISOString() }); await store.delete(k); }
-      return json({ ok: true });
+      if (!r) return json({ ok: true });
+      let reembolso = 0;
+      if (b.reembolsar && r.pago && r.precio > 0) { await deps.stripe().refunds.create({ payment_intent: r.pago }); reembolso = r.precio; }
+      const kc = `cancelada/${Date.now()}_${k.slice(2)}`, final = { ...r, estado: "cancelada", cancelada: deps.ahora().toISOString(), canceladaPor: "negocio", reembolso };
+      await store.setJSON(kc, final);
+      if (r.token) await store.setJSON(`tok/${r.token}`, { clave: kc });
+      if (r.sesion) await store.setJSON(`ses/${r.sesion}`, { clave: kc });
+      await store.delete(k);
+      if (b.avisarCliente !== false) await correoCita("cancelada", final, { origen: origen(req), reembolso });
+      return json({ ok: true, reembolso });
     }
     if (b.accion === "resolver" && /^conflicto\//.test(k)) { await store.delete(k); return json({ ok: true }); }
     if (b.accion === "entregado" && /^orden\//.test(k)) {
@@ -25,7 +35,7 @@ export default manejar(async (req) => {
   }
   const hoy = ahoraLocal();
   const lista = (await reservasDesde(store, hoy.fecha)).filter((r) => r.estado === "pagada")
-    .map((r) => ({ ...r, fechaBonita: fechaBonita(r.fecha), horaBonita: horaBonita(r.hora) }))
+    .map(({ token, ...r }) => ({ ...r, fechaBonita: fechaBonita(r.fecha), horaBonita: horaBonita(r.hora) }))
     .sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
   const { blobs } = await store.list({ prefix: "conflicto/" });
   const conflictos = [];

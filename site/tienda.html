@@ -49,7 +49,18 @@ dialog::backdrop{background:rgba(14,19,38,.55)}
 .total{display:flex;justify-content:space-between;font-weight:600;font-size:1.1rem}
 fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0}
 legend{font-weight:600;font-size:.95rem;padding:0 4px}
+.lines fieldset{margin:16px 0 0}
+.datos{display:grid;gap:10px;padding:12px 14px 14px}
+.datos .fld{display:grid;gap:4px;font-size:.85rem;font-weight:600;padding:0}
+.datos input,.datos select{font:inherit;font-size:16px;font-weight:400;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+fieldset label.carrier{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+fieldset label.carrier:first-of-type{border-top:0}
+.carrier b{display:block;font-weight:600}
+.carrier small{color:var(--muted)}
+.carrier input{margin:0}
 fieldset label{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:.95rem}
+.datos label.fld{display:grid}
 fieldset input{margin-top:5px}
 </style>
 </head>
@@ -71,6 +82,7 @@ fieldset input{margin-top:5px}
     <div id="grid"></div>
     <p style="margin-top:48px"><a href="/">← Volver a la página principal</a></p>
   </main>
+  <footer class="pie" style="border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);font-size:.9rem"><span>Pagos seguros con Stripe</span><nav class="pie-links" aria-label="Políticas"><a href="/politicas.html#cancelaciones">Cancelaciones</a><a href="/politicas.html#envios">Envíos y devoluciones</a><a href="/politicas.html#privacidad">Privacidad</a><a href="/politicas.html">Todas las políticas</a></nav></footer>
 </div>
 
 <dialog id="cartDlg" aria-labelledby="cartTitle">
@@ -148,10 +160,56 @@ const dlg = $("#cartDlg");
 $("#openCart").onclick = () => { pintarCarrito(); dlg.showModal(); };
 $("#closeCart").onclick = () => dlg.close();
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-let entrega = null;
+let entrega = null, envioId = null;
+// Datos de envío: se recuerdan en este navegador para la próxima compra.
+let cliente = {};
+try { cliente = JSON.parse(localStorage.getItem("queenEnvio") || "{}") || {}; } catch (e) { cliente = {}; }
+const guardarCliente = () => { try { localStorage.setItem("queenEnvio", JSON.stringify(cliente)); } catch (e) {} };
+const ESTADOS = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","PR","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+function opcionesEnvio(env) {
+  let ops = Array.isArray(env.opciones) ? env.opciones : [];
+  if (!ops.length && env.costo !== undefined) ops = [{ transportista: "", servicio: "Envío", precio: Number(env.costo) || 0, dias: "" }];
+  return ops.filter(o => o && o.activo !== false && s(o.servicio || o.transportista))
+    .map(o => ({ id: slug(`${o.transportista} ${o.servicio}`) || "envio", transportista: s(o.transportista), servicio: s(o.servicio), precio: Math.max(0, Number(o.precio) || 0), dias: s(o.dias) }));
+}
+function faltaDato(conDireccion) {
+  const c = cliente;
+  if (!s(c.nombre) || !s(c.apellido)) return "Escribe tu nombre y apellido.";
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s(c.email))) return "Escribe un correo válido.";
+  if (s(c.telefono).replace(/\D/g, "").length < 10) return "Escribe tu teléfono con código de área.";
+  if (conDireccion) {
+    if (!s(c.direccion1) || !s(c.ciudad)) return "Escribe tu dirección y ciudad.";
+    if (!ESTADOS.includes(s(c.estado))) return "Elige tu estado.";
+    if (!/^\d{5}(-\d{4})?$/.test(s(c.zip))) return "Escribe un código postal válido (5 números).";
+  }
+  return "";
+}
+function formularioCliente(conDireccion, alCambiar) {
+  const fs = el("fieldset", "datos"); fs.append(el("legend", null, conDireccion ? "Datos de envío" : "Tus datos"));
+  const campo = (k, lab, tipo = "text", ac = "", extra = {}) => {
+    const L = el("label", "fld"), i = el("input"); i.type = tipo; i.name = k; i.autocomplete = ac; i.value = cliente[k] || ""; Object.assign(i, extra);
+    i.oninput = () => { cliente[k] = i.value; guardarCliente(); alCambiar(); };
+    L.append(el("span", null, lab), i); return L;
+  };
+  const fila = (...xs) => { const d = el("div", "two"); d.append(...xs); return d; };
+  fs.append(fila(campo("nombre", "Nombre", "text", "given-name"), campo("apellido", "Apellido", "text", "family-name")));
+  if (conDireccion) {
+    fs.append(campo("direccion1", "Dirección", "text", "address-line1", { placeholder: "Número y calle" }),
+      campo("direccion2", "Apartamento, suite (opcional)", "text", "address-line2"),
+      campo("ciudad", "Ciudad", "text", "address-level2"));
+    const Le = el("label", "fld"), sel = el("select"); sel.name = "estado"; sel.autocomplete = "address-level1";
+    sel.append(new Option("Estado", ""), ...ESTADOS.map(e => new Option(e, e))); sel.value = cliente.estado || "";
+    sel.onchange = () => { cliente.estado = sel.value; guardarCliente(); alCambiar(); };
+    Le.append(el("span", null, "Estado"), sel);
+    fs.append(fila(Le, campo("zip", "Código postal", "text", "postal-code", { inputMode: "numeric", maxLength: 10 })));
+  }
+  fs.append(campo("email", "Correo electrónico", "email", "email"), campo("telefono", "Teléfono", "tel", "tel", { placeholder: "512 555 1234" }));
+  return fs;
+}
 
 function pintarCarrito() {
   const lines = $("#lines"), foot = $("#foot");
+  const scroll = lines.scrollTop;
   lines.replaceChildren(); foot.replaceChildren();
   if (!carrito.length) { lines.append(el("p", "muted", "Tu carrito está vacío.")); return; }
   let subtotal = 0, fisicos = false;
@@ -172,39 +230,60 @@ function pintarCarrito() {
     l.append(th, info, rm); lines.append(l);
   });
   const env = AJ.envio || {}, rec = AJ.recoger || {};
+  const gratis = Number(env.gratisDesde) > 0 && subtotal >= Number(env.gratisDesde);
+  const ops = env.activo ? opcionesEnvio(env) : [];
+  let envioCosto = 0;
+  const err = el("p", "note err"); err.hidden = true;
+  const pagar = el("button", "btn btn-solid", "Pagar con tarjeta"); pagar.type = "button";
+  const tot = el("div", "total");
+  const actualizar = () => {
+    const op = entrega === "envio" ? ops.find(o => o.id === envioId) : null;
+    envioCosto = op && !gratis ? op.precio : 0;
+    tot.replaceChildren(el("span", null, "Total"), el("span", null, dinero(subtotal + envioCosto)));
+    pagar.disabled = fisicos && (!entrega || (entrega === "envio" && !op));
+  };
   if (fisicos) {
     const fs = el("fieldset"); fs.append(el("legend", null, "¿Cómo quieres recibirlo?"));
-    const opciones = [];
-    if (env.activo) {
-      const gratis = Number(env.gratisDesde) > 0 && subtotal >= Number(env.gratisDesde);
-      opciones.push(["envio", `Envío a domicilio${Number(env.costo) > 0 && !gratis ? " · " + dinero(env.costo) : " · gratis"}`]);
-    }
-    if (rec.activo) opciones.push(["recoger", "Lo recojo yo" + (s(rec.texto) ? ` · ${s(rec.texto)}` : "")]);
-    if (!opciones.some(o => o[0] === entrega)) entrega = opciones.length === 1 ? opciones[0][0] : null;
-    opciones.forEach(([v, t]) => {
+    const formas = [];
+    if (ops.length) formas.push(["envio", "Envío a domicilio" + (gratis ? " · gratis" : "")]);
+    if (rec.activo) formas.push(["recoger", "Lo recojo yo" + (s(rec.texto) ? ` · ${s(rec.texto)}` : "")]);
+    if (!formas.some(o => o[0] === entrega)) entrega = formas.length === 1 ? formas[0][0] : null;
+    formas.forEach(([v, t]) => {
       const L = el("label"), r = el("input"); r.type = "radio"; r.name = "entrega"; r.value = v; r.checked = entrega === v;
       r.onchange = () => { entrega = v; pintarCarrito(); };
       L.append(r, el("span", null, t)); fs.append(L);
     });
-    if (!opciones.length) fs.append(el("p", "note err", "Por ahora no hay forma de entrega disponible. Escríbeme por WhatsApp."));
-    foot.append(fs);
+    if (!formas.length) fs.append(el("p", "note err", "Por ahora no hay forma de entrega disponible. Escríbeme por WhatsApp."));
+    lines.append(fs);
+    if (entrega === "envio") {
+      if (!ops.some(o => o.id === envioId)) envioId = ops.length === 1 ? ops[0].id : null;
+      const fp = el("fieldset"); fp.append(el("legend", null, "Paquetería"));
+      ops.forEach(o => {
+        const L = el("label", "carrier"), r = el("input"); r.type = "radio"; r.name = "paq"; r.value = o.id; r.checked = envioId === o.id;
+        r.onchange = () => { envioId = o.id; actualizar(); };
+        const t = el("span"); t.append(el("b", null, [o.transportista, o.servicio].filter(Boolean).join(" ")), el("small", null, o.dias || ""));
+        L.append(r, t, el("strong", null, gratis ? "Gratis" : dinero(o.precio))); fp.append(L);
+      });
+      lines.append(fp);
+    }
+    if (entrega) lines.append(formularioCliente(entrega === "envio", () => { err.hidden = true; }));
   }
-  const envioCosto = fisicos && entrega === "envio" && !(Number(env.gratisDesde) > 0 && subtotal >= Number(env.gratisDesde)) ? Number(env.costo) || 0 : 0;
-  const tot = el("div", "total"); tot.append(el("span", null, "Total"), el("span", null, dinero(subtotal + envioCosto)));
-  const err = el("p", "note err"); err.hidden = true;
-  const pagar = el("button", "btn btn-solid", "Pagar con tarjeta"); pagar.type = "button";
-  pagar.disabled = fisicos && !entrega;
+  actualizar();
   pagar.onclick = async () => {
-    err.hidden = true; pagar.disabled = true; pagar.textContent = "Abriendo el pago…";
+    err.hidden = true;
+    if (fisicos) { const f = faltaDato(entrega === "envio"); if (f) { err.textContent = f; err.hidden = false; const i = lines.querySelector("fieldset.datos"); if (i) i.scrollIntoView({ behavior: "smooth", block: "start" }); return; } }
+    pagar.disabled = true; pagar.textContent = "Abriendo el pago…";
     try {
-      const r = await fetch("/api/comprar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ items: carrito, entrega }) });
+      const body = { items: carrito, entrega };
+      if (fisicos) { body.cliente = cliente; body.envioId = envioId; }
+      const r = await fetch("/api/comprar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d.error || "No se pudo abrir el pago. Intenta de nuevo.");
       location.href = d.url;
     } catch (e) { err.textContent = e.message; err.hidden = false; pagar.disabled = false; pagar.textContent = "Pagar con tarjeta"; }
   };
   foot.append(tot, err, pagar);
-  if (fisicos && entrega === "envio") foot.append(el("small", "muted", "Tu dirección te la pide la página de pago."));
+  lines.scrollTop = scroll;
 }
 
 Promise.all(["negocio", "tienda", "tienda-ajustes"].map(leer)).then(([N, T, A]) => {

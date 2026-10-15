@@ -7,7 +7,7 @@
       "ocasion": "Cumpleaños de santo, coronaciones y ofrendas a Obatalá",
       "descripcion": "Todo en blanco, con lirios, claveles y hojas plateadas. Paz, claridad y pureza para el padre de los orishas.",
       "flores": "Rosas blancas, claveles, lirios, perritos, campanas de Irlanda y follaje fresco.",
-      "precio": "",
+      "precio": "250",
       "foto": "/images/uploads/paz-blanca.jpg",
       "visible": true
     },
@@ -17,7 +17,7 @@
       "ocasion": "Tambores, cumpleaños de santo y ofrendas a Yemayá",
       "descripcion": "Azul y blanco, los colores de la madre del mar, con listón de lentejuelas y nube celeste que brilla como el agua.",
       "flores": "Rosas azules, rosas blancas, claveles blancos, nube celeste, ruscus y helecho.",
-      "precio": "",
+      "precio": "250",
       "foto": "/images/uploads/cielo-azul.jpg",
       "visible": true
     },
@@ -27,7 +27,7 @@
       "ocasion": "Para Oshún y Yemayá juntas",
       "descripcion": "El amarillo de Oshún y el azul de Yemayá: girasoles y rosas amarillas con rosas blancas pintadas a mano en azul con brillo y tul turquesa.",
       "flores": "Girasoles, rosas amarillas, rosas blancas y pintadas, tul y helecho.",
-      "precio": "",
+      "precio": "250",
       "foto": "/images/uploads/luz-de-girasol.jpg",
       "visible": true
     }

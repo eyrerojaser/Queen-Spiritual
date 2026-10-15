@@ -7,7 +7,7 @@ const uno = (ops, def) => (v) => (ops.includes(v) ? v : def);
 const hora = (def = "") => (v) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v || "")) ? String(v) : def);
 const fecha = () => (v) => (/^\d{4}-\d{2}-\d{2}/.test(String(v || "")) ? String(v).slice(0, 10) : "");
 const url = (max = 500) => (v) => { const s = str(max)(v); return /^(https?:\/\/|\/)/i.test(s) || s === "" ? s : ""; };
-const foto = () => (v) => { const s = str(300)(v); return /^\/(img\/[0-9a-f-]{36}|images\/uploads\/[\w.-]+)$/.test(s) ? s : ""; };
+const foto = () => (v) => { const s = str(300)(v); return /^\/(img\/[0-9a-f-]{36}|images\/(uploads|flores)\/[\w.-]+)$/.test(s) ? s : ""; };
 const obj = (campos) => (v) => { const o = v && typeof v === "object" && !Array.isArray(v) ? v : {}; return Object.fromEntries(Object.entries(campos).map(([k, f]) => [k, f(o[k])])); };
 const lista = (item, max = 300, ok = () => true) => (v) => (Array.isArray(v) ? v.slice(0, max).map(item).filter(ok) : []);
 const DIAS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"];
@@ -27,6 +27,7 @@ export const ESQUEMAS = {
   }),
   horario: obj({
     reservasActivas: bool(true), duracion: int(15, 240, 60), anticipacionDias: int(1, 120, 30), avisoHoras: int(0, 168, 12),
+    cancelarDias: int(0, 30, 1), cambiosMax: int(1, 10, 2), politicaTexto: str(2000),
     semana: lista(obj({ dia: uno(DIAS, "lunes"), desde: hora(), hasta: hora() }), 50, (b) => b.desde && b.hasta && b.desde < b.hasta),
     cerrados: lista(obj({ fecha: fecha(), motivo: str(120) }), 400, (c) => c.fecha),
     especiales: lista(obj({ fecha: fecha(), desde: hora(), hasta: hora() }), 400, (e) => e.fecha && e.desde && e.hasta && e.desde < e.hasta),
@@ -41,8 +42,23 @@ export const ESQUEMAS = {
   }),
   "tienda-ajustes": obj({
     categorias: lista(obj({ nombre: str(60) }), 50, (c) => c.nombre),
-    envio: obj({ activo: bool(false), costo: num(0, 1000, 0), gratisDesde: num(0, 100000, 0) }),
+    envio: obj({
+      activo: bool(false), gratisDesde: num(0, 100000, 0),
+      opciones: lista(obj({ transportista: uno(["USPS", "FedEx", "UPS", "DHL", ""], "USPS"), servicio: str(60), precio: num(0, 1000, 0), dias: str(40), activo: bool(true) }), 12, (o) => o.servicio),
+    }),
     recoger: obj({ activo: bool(true), texto: str(400) }),
+  }),
+  flores: obj({
+    activo: bool(true), intro: str(600), aviso: str(400), anticipacionDias: int(0, 60, 5),
+    depositoPorcentaje: int(10, 100, 50), permitirPagoTotal: bool(true),
+    entrega: obj({ activo: bool(true), costo: num(0, 1000, 0), texto: str(300) }),
+    recoger: obj({ activo: bool(true), texto: str(300) }),
+    flores: lista(obj({ nombre: str(80), foto: foto(), visible: bool(true), agotada: bool(false) }), 200, (f) => f.nombre),
+  }),
+  politicas: obj({ lecturas: str(3000), envios: str(3000), arreglos: str(3000), privacidad: str(3000) }),
+  solicitudes: obj({
+    activo: bool(true), anticipacionDias: int(0, 90, 3), intro: str(600),
+    cerrados: lista(obj({ fecha: fecha(), motivo: str(120) }), 400, (c) => c.fecha),
   }),
   resenas: obj({
     resenas: lista(obj({ nombre: str(80), estrellas: uno(["5", "4", "3", "2", "1"], "5"), texto: str(1200) }), 300, (r) => r.texto),

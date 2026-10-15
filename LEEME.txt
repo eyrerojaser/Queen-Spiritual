@@ -33,13 +33,19 @@ TU PANEL: TU-SITIO.netlify.app/admin
 - Entras solo con tu contraseña. La sesión dura 30 días en cada teléfono o computadora.
 - Todo se guarda al momento: la página cambia en cuanto tocas Guardar.
 - Cuadros del panel:
-    Reservas ............ tus lecturas pagadas, botón de WhatsApp y cancelar
+    Solicitudes ......... lo que te piden desde el formulario (arreglos, centros de mesa,
+                          montajes y consultas) con fecha del evento. Las marcas como
+                          Nueva, En proceso, Confirmada o Terminada y les dejas notas.
+                          En "Ajustes de solicitudes": días mínimos de anticipación
+                          y fechas sin disponibilidad.
+    Reservas ............ tus lecturas pagadas; cancelar con o sin reembolso
     Pedidos ............. productos físicos por entregar (dirección o "lo recoge")
     Mi calendario ....... aceptar reservas (on/off), tu semana, días que NO trabajas y días extra
     Lecturas ............ nombre, duración, precio y descripción
     Arreglos y mesas .... fotos, tipo (arreglo, centro de mesa, montaje), celebración y precio
     Queen Shop .......... productos digitales (subes el PDF) o físicos (envío o recoger)
-    Categorías y entregas  botones de la tienda, costo de envío y recoger
+    Categorías y entregas  botones de la tienda, paqueterías (USPS, FedEx, UPS, DHL)
+                          con el precio y tiempo de entrega que tú pones, y recoger
     Reseñas ............. lo que dicen tus clientes
     Negocio y contacto .. nombre, portada, WhatsApp, Instagram, TikTok, mapa
     Contraseña .......... cámbiala cuando quieras
@@ -54,6 +60,71 @@ COMO APLICACIÓN EN TU TELÉFONO
   Queda con ícono de corona dorada sobre azul: "Queen".
 - Tus clientes también pueden instalar tu página así.
 
+PASO 4 — CORREOS (confirmación al cliente y avisos para ti)
+Sin este paso todo funciona, pero NO salen correos (ni la confirmación con
+"Administrar mi cita"). Lo más fácil es usar tu Gmail:
+1. En tu cuenta de Google activa la verificación en 2 pasos
+   (myaccount.google.com > Seguridad > Verificación en 2 pasos).
+2. Crea una "contraseña de aplicación": myaccount.google.com/apppasswords
+   Ponle de nombre "Queen" y copia las 16 letras que te da.
+3. En Netlify > Environment variables agrega:
+     GMAIL_USER         = tu correo de Gmail
+     GMAIL_APP_PASSWORD = las 16 letras (con o sin espacios)
+     AVISOS_EMAIL       = (opcional) dónde quieres tus avisos; si no, llegan a tu Gmail
+4. Deploys > Trigger deploy.
+Los correos salen a nombre de tu negocio desde tu Gmail, y si el cliente responde, te llega a ti.
+(Alternativa: Resend con RESEND_API_KEY y CORREO_DESDE, si tienes dominio propio.)
+
+NOTIFICACIONES EN TU TELÉFONO
+- Entra al panel (mejor desde el panel instalado) y en "Avisos en este teléfono" toca
+  "Activar notificaciones" y acepta el permiso. Te llega un aviso de prueba.
+- Te avisa al momento: nueva cita pagada, cita cambiada, cita cancelada, compra en
+  Queen Shop y solicitud nueva. Tocando el aviso se abre el panel en esa sección.
+- En iPhone: primero instala el panel (Safari > Compartir > Agregar a inicio),
+  ábrelo desde el ícono y ahí activa los avisos (iOS 16.4 o más nuevo).
+- Actívalo en cada teléfono o computadora donde quieras recibirlos.
+
+ARREGLOS PERSONALIZADOS (página tu-sitio/personaliza.html)
+- En tu página, el botón de los arreglos florales con precio dice "Personaliza tu arreglo".
+- El cliente ve primero el aviso de anticipación (5 días) y luego:
+    1. Elige el arreglo (foto, nombre y precio del arreglo completo).
+    2. Marca sus flores favoritas con "Añadir" (opcional, SIN costo extra).
+    3. Escribe para qué orisha o celebración y los colores que le gustan.
+    4. Toca la fecha en el calendario (los días con menos de 5 días salen apagados).
+    5. Elige recoger o entrega en su evento.
+    6. Pone nombre completo, teléfono, correo y dirección de entrega.
+    7. Ve el total y paga el depósito (50%) o todo.
+- Total = precio del arreglo + entrega (si la pide). Las flores no cambian el precio.
+- El precio de cada arreglo se pone en "Arreglos y mesas" (precio del arreglo completo).
+  Solo los arreglos florales CON precio aparecen para personalizar.
+  IMPORTANTE: dejé $250 de ejemplo en tus tres arreglos. Pon tus precios reales.
+- Cuadro "Flores" del panel: sube, cambia o elimina las fotos de las flores que el cliente
+  puede elegir, márcalas "No disponible por ahora" u ocúltalas. En "Ajustes": días de
+  anticipación, % de depósito, pago total, costo y texto de la entrega.
+- Cuadro "Arreglos personalizados": cada pedido con el arreglo elegido, las flores
+  favoritas, la fecha, la entrega, el depósito recibido y el saldo pendiente. Puedes:
+    · cambiar el estado (Confirmado, Preparando, Listo, Entregado)
+    · "Registrar pago" del saldo en efectivo, Zelle, Cash App o tarjeta en persona
+    · "Cobrar saldo con tarjeta": al cliente le llega un correo con el enlace de pago
+    · cancelar con o sin devolución
+- Al pagar, al cliente le llega su confirmación por correo y a ti una notificación.
+- Recordatorios automáticos (cada mañana, alrededor de las 8):
+    · a ti, 3 días antes: qué arreglo y flores preparar/comprar
+    · al cliente, 2 días antes: su arreglo casi está listo y su saldo pendiente
+    · a ti, 1 día antes: preparar el arreglo y cobrar el saldo
+- Las fechas sin disponibilidad se bloquean en Solicitudes > Ajustes de solicitudes.
+
+CANCELACIONES Y CAMBIOS (cuadro "Políticas" del panel)
+- El cliente acepta la política al reservar. En su correo de confirmación tiene
+  el botón "Administrar mi cita" para cancelar o cambiar de día.
+- Si cancela dentro del plazo (por defecto: hasta el día anterior), Stripe le devuelve
+  el pago automáticamente. Si cancela el mismo día, no hay reembolso.
+- Puede cambiar el día hasta 2 veces (lo ajustas en el panel), también hasta el día anterior.
+- Tú también puedes cancelar desde Reservas: "Cancelar y devolver" o "Cancelar sin devolver".
+- Ojo: cuando Stripe devuelve un pago, la comisión de Stripe no se recupera.
+- Las políticas (cancelaciones, lecturas, envíos, arreglos y privacidad) se ven en
+  tu página, abajo en el footer, y las editas en el cuadro "Políticas".
+
 ¿OLVIDASTE LA CONTRASEÑA?
 - En Netlify cambia la variable ADMIN_PASSWORD y haz Trigger deploy.
   Esa nueva vuelve a ser tu contraseña.
@@ -63,5 +134,9 @@ CÓMO FUNCIONA
 - Lecturas: el cliente elige día y hora; la hora se le aparta 35 minutos mientras paga.
   Si paga, queda reservada; si no, se libera sola. Todas las horas son de Texas.
 - Queen Shop (tu-sitio/tienda.html): carrito; los digitales se descargan al pagar
-  (enlace válido 30 días); los físicos te llegan a Pedidos.
+  (enlace válido 30 días). En los físicos con envío el cliente llena nombre, apellido,
+  dirección, correo y teléfono, y elige la paquetería; te llega todo a Pedidos
+  con botón "Copiar dirección" para hacer la etiqueta.
+- Formulario de solicitudes: reemplaza los botones de WhatsApp. El cliente elige qué
+  necesita, para qué orisha o celebración, la fecha y cómo prefiere que lo contactes.
 - Stripe te avisa por correo de cada pago.

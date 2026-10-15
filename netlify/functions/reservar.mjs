@@ -9,6 +9,7 @@ export default manejar(async (req) => {
   if (!nombre) throw new Fallo(400, "Escribe tu nombre.");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Fallo(400, "Escribe un correo válido.");
   if (whatsapp.replace(/\D/g, "").length < 10) throw new Fallo(400, "Escribe tu número de WhatsApp con código de área.");
+  if (b.acepta !== true) throw new Fallo(400, "Para reservar, acepta la política de cancelación.");
 
   const { lecturas = [] } = await deps.contenido(o, "lecturas");
   const lectura = lecturas.find((l) => l && l.visible !== false && slug(l.nombre) === b.lectura);

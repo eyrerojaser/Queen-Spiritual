@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Personaliza tu arreglo</title>
+<meta name="description" content="Elige tu arreglo, marca tus flores favoritas, la fecha de tu celebración y paga un depósito para confirmarlo.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/iconos/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
+<meta name="theme-color" content="#1A2340">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/estilo.css">
+<script src="/mes.js"></script>
+<style>
+body{padding-bottom:110px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px}
+.brand{font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--ink);text-decoration:none}
+.head{padding:18px 0 8px}
+.head h1{font-size:clamp(2.6rem,8vw,4.2rem);letter-spacing:-.01em}
+.head p{color:var(--muted);max-width:54ch;margin:12px 0 0;font-size:1.06rem}
+.aviso{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--gold);background:color-mix(in srgb,var(--gold) 9%,var(--surface));border-radius:14px;padding:16px 18px;margin:22px 0 8px}
+.aviso .ic{font-size:1.5rem;line-height:1}
+.aviso b{display:block;margin-bottom:2px}
+.paso{padding:34px 0 8px;border-top:1px solid var(--line);margin-top:30px;scroll-margin-top:12px}
+.paso h2{font-size:clamp(1.8rem,5vw,2.3rem);display:flex;align-items:baseline;gap:12px}
+.paso h2 .num{font-family:"Figtree",sans-serif;font-size:.85rem;font-weight:700;color:var(--bg);background:var(--blue);border-radius:999px;width:28px;height:28px;display:inline-grid;place-items:center;flex:none;transform:translateY(-4px)}
+.paso h2 .ok{background:var(--ok)}
+.paso > p.muted{margin:8px 0 18px}
+.flores{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.flor{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.flor.sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
+.flor .ft{aspect-ratio:1;background:var(--blue-soft);position:relative}
+.flor .ft img{width:100%;height:100%;object-fit:cover}
+.flor .ft .badge{position:absolute;top:8px;right:8px;background:var(--blue);color:var(--bg);font-weight:700;font-size:.85rem;border-radius:999px;min-width:28px;height:28px;display:grid;place-items:center;padding:0 8px}
+.flor .bd{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.flor b{font-weight:600;line-height:1.25}
+.flor .pr{color:var(--muted);font-size:.88rem}
+.flor .acc{margin-top:auto;padding-top:8px}
+.flor .btn{width:100%;padding:10px 12px;font-size:.92rem}
+.step{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--blue);border-radius:999px;overflow:hidden}
+.step button{width:42px;height:40px;border:0;background:var(--blue-soft);color:var(--blue);font:inherit;font-size:1.3rem;font-weight:700;cursor:pointer}
+.step span{font-weight:700;min-width:34px;text-align:center}
+.agotada{font-size:.85rem;font-weight:600;color:var(--warn)}
+.form{display:grid;gap:14px;max-width:560px}
+.form label{display:grid;gap:5px;font-size:.92rem;font-weight:500}
+.form input,.form textarea,.form select{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opciones{display:grid;gap:10px;max-width:560px}
+.op{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);cursor:pointer}
+.op:has(input:checked){border-color:var(--blue);box-shadow:0 0 0 1px var(--blue) inset}
+.op input{width:20px;height:20px;margin-top:2px;flex:none}
+.op b{display:block}
+.op small{color:var(--muted)}
+.resumen{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:560px}
+.fila{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:.95rem}
+.fila.t{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:700;font-size:1.1rem}
+.fila.d{color:var(--blue);font-weight:700}
+.politica{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.9rem;margin-top:14px}
+.politica p{margin:4px 0;color:var(--muted)}
+.acepto{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:14px 0}
+.acepto input{width:20px;height:20px;margin-top:2px;flex:none}
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.06);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.barra .in{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.barra .tot{line-height:1.2}
+.barra .tot b{font-family:"Cormorant",Georgia,serif;font-size:1.6rem}
+.barra .tot small{display:block;color:var(--muted);font-size:.8rem}
+.arrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.arr{position:relative;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;padding:0;cursor:pointer;display:flex;flex-direction:column}
+.arr[aria-pressed="true"]{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
+.arr .ft{aspect-ratio:4/5;background:var(--blue-soft)}
+.arr .ft img{width:100%;height:100%;object-fit:cover}
+.arr .bd{padding:14px;display:grid;gap:4px}
+.arr h3{font-size:1.5rem}
+.arr .oc{color:var(--leaf);font-size:.88rem;font-weight:600}
+.arr .pz{font-family:"Cormorant",Georgia,serif;font-size:1.6rem;font-weight:600}
+.arr .chk{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:var(--blue);color:var(--bg);display:none;place-items:center;font-weight:700;font-size:1.1rem}
+.arr[aria-pressed="true"] .chk,.flor.sel .chk{display:grid}
+.flor .chk{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--bg);display:none;place-items:center;font-weight:700}
+.otros{margin-top:14px;font-size:.95rem}
+.cerrado{background:var(--blue-soft);border-radius:14px;padding:26px;max-width:620px;margin-top:20px}
+@media (max-width:520px){.two{grid-template-columns:1fr}.flores{grid-template-columns:1fr 1fr;gap:10px}.flor .bd{padding:10px}.arrs{grid-template-columns:1fr 1fr;gap:10px}.arr h3{font-size:1.2rem}.arr .bd{padding:10px}.arr .pz{font-size:1.35rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/" id="marca">Queen Spiritual</a>
+    <a href="/#arreglos" style="font-weight:600;font-size:.95rem">← Arreglos</a>
+  </header>
+  <div class="head">
+    <h1>Personaliza tu arreglo</h1>
+    <p id="intro"></p>
+  </div>
+  <div class="aviso" role="note"><span class="ic" aria-hidden="true">⏳</span><div><b id="avisoTit">Mínimo 5 días de anticipación</b><span id="aviso"></span></div></div>
+  <main id="app"><p class="muted" style="margin-top:20px">Cargando los arreglos…</p></main>
+</div>
+<div class="barra" id="barra" hidden><div class="in"><div class="tot"><b id="bTotal">$0</b><small id="bInfo">Elige tu arreglo</small></div><button class="btn btn-solid" type="button" id="bBtn">Continuar</button></div></div>
+
+<script src="/politicas.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const s = v => (typeof v === "string" ? v.trim() : v == null ? "" : String(v));
+const slug = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const dinero = n => "$" + (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace(/\.00$/, "");
+const leer = n => fetch(`/api/contenido?n=${n}`, { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const precioDe = a => { const n = Number(String((a && a.precio) || "").replace(/[^\d.]/g, "")); return Number.isFinite(n) && n > 0 ? n : 0; };
+function toast(m) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = el("div", "toast", m); t.setAttribute("role", "status"); t.style.bottom = "96px"; document.body.append(t); setTimeout(() => t.remove(), 4000); }
+const ESTADOS = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","PR","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+
+// Lo que el cliente va eligiendo (se recuerda en este navegador)
+const q = new URLSearchParams(location.search);
+let P = { arreglo: "", favs: [], ocasion: "", colores: "", fecha: "", entrega: "recoger", pago: "deposito", c: {} };
+try { const g = JSON.parse(localStorage.getItem("queenArreglo") || "null"); if (g && typeof g === "object") P = { ...P, ...g, favs: Array.isArray(g.favs) ? g.favs : [] }; } catch (e) {}
+if (q.get("ref")) P.arreglo = slug(q.get("ref"));
+const guardar = () => { try { localStorage.setItem("queenArreglo", JSON.stringify(P)); } catch (e) {} };
+let CFG = {}, FLORES = [], ARREGLOS = [], CERRADOS = new Set(), POL = {};
+
+const elegido = () => ARREGLOS.find(a => a.id === P.arreglo);
+function calcular() {
+  const a = elegido(), c = n => Math.round(Number(n || 0) * 100);
+  const precio = a ? c(a.precioN) : 0, entrega = a && P.entrega === "entrega" ? c(CFG.entrega && CFG.entrega.costo) : 0;
+  const total = precio + entrega, pct = Math.min(100, Math.max(10, parseInt(CFG.depositoPorcentaje, 10) || 50));
+  const todo = P.pago === "total" && CFG.permitirPagoTotal !== false, cobrar = todo ? total : Math.round(total * pct / 100);
+  return { a, precio: precio / 100, entrega: entrega / 100, total: total / 100, pct, todo, cobrar: cobrar / 100, saldo: (total - cobrar) / 100, deposito: Math.round(total * pct / 100) / 100 };
+}
+
+/* ── 1. Arreglo ── */
+function pintarArreglos() {
+  const g = $("#arrs"); g.replaceChildren();
+  ARREGLOS.forEach(a => {
+    const b = el("button", "arr"); b.type = "button"; b.setAttribute("aria-pressed", String(P.arreglo === a.id));
+    const ft = el("div", "ft"); if (a.foto) { const im = el("img"); im.src = a.foto; im.alt = a.nombre; im.loading = "lazy"; ft.append(im); }
+    const bd = el("div", "bd"); bd.append(el("h3", null, a.nombre)); if (s(a.ocasion)) bd.append(el("span", "oc", a.ocasion)); bd.append(el("span", "pz", dinero(a.precioN)));
+    b.append(ft, bd, el("span", "chk", "✓"));
+    b.onclick = () => { P.arreglo = a.id; if (!s(P.ocasion) && s(a.ocasion)) { P.ocasion = ""; } guardar(); pintarArreglos(); actualizar(); setTimeout(() => $("#paso2").scrollIntoView({ behavior: "smooth", block: "start" }), 150); };
+    g.append(b);
+  });
+}
+
+/* ── 2. Flores favoritas ── */
+function pintarFlores() {
+  const g = $("#flores"); g.replaceChildren();
+  FLORES.forEach(f => {
+    const on = P.favs.includes(f.id), card = el("article", "flor" + (on ? " sel" : "")), ft = el("div", "ft");
+    if (f.foto) { const im = el("img"); im.src = f.foto; im.alt = f.nombre; im.loading = "lazy"; ft.append(im); }
+    ft.append(el("span", "chk", "✓"));
+    const bd = el("div", "bd"); bd.append(el("b", null, f.nombre));
+    const acc = el("div", "acc");
+    if (f.agotada) acc.append(el("span", "agotada", "No disponible por ahora"));
+    else {
+      const b = el("button", on ? "btn btn-solid" : "btn btn-line", on ? "✓ Añadida" : "Añadir"); b.type = "button";
+      b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-label", `${on ? "Quitar" : "Añadir"} ${f.nombre}`);
+      b.onclick = () => { P.favs = on ? P.favs.filter(x => x !== f.id) : [...P.favs, f.id]; guardar(); pintarFlores(); actualizar(); };
+      acc.append(b);
+    }
+    bd.append(acc); card.append(ft, bd); g.append(card);
+  });
+}
+
+/* ── 4. Fecha ── */
+function pintarFecha() {
+  const min = new Date(); min.setDate(min.getDate() + (parseInt(CFG.anticipacionDias, 10) || 0));
+  const max = new Date(); max.setDate(max.getDate() + 365);
+  if (P.fecha && (P.fecha < isoLocal(min) || CERRADOS.has(P.fecha))) P.fecha = "";
+  const dicho = $("#fechaDicha");
+  const decir = () => { dicho.textContent = P.fecha ? "Fecha del evento: " + new Date(P.fecha + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : `Puedes elegir a partir del ${min.toLocaleDateString("es", { day: "numeric", month: "long" })}.`; };
+  const ley = el("div", "mes-ley"); const a = el("span"); a.append(el("i"), "Fechas disponibles"); ley.append(a, el("span", null, "Los días apagados no cumplen los días de anticipación"));
+  const cal = Mes({ min: isoLocal(min), max: isoLocal(max), mesInicial: P.fecha || isoLocal(min),
+    tipo: f => CERRADOS.has(f) ? "bloqueado" : "libre", seleccion: f => P.fecha === f,
+    alTocar: f => { P.fecha = f; guardar(); decir(); actualizar(); }, leyenda: ley });
+  $("#cal").replaceChildren(cal.el); decir();
+}
+
+/* ── 5. Entrega y 6. Datos ── */
+function pintarDatos() {
+  const ops = $("#entregas"); ops.replaceChildren();
+  const formas = [];
+  if (!CFG.recoger || CFG.recoger.activo !== false) formas.push(["recoger", "Lo recojo", s(CFG.recoger && CFG.recoger.texto)]);
+  if (CFG.entrega && CFG.entrega.activo !== false) formas.push(["entrega", `Entrega en mi evento${Number(CFG.entrega.costo) > 0 ? " · " + dinero(CFG.entrega.costo) : ""}`, s(CFG.entrega.texto)]);
+  if (!formas.some(f => f[0] === P.entrega)) P.entrega = formas[0] ? formas[0][0] : "recoger";
+  formas.forEach(([v, t, d]) => {
+    const L = el("label", "op"), r = el("input"); r.type = "radio"; r.name = "entrega"; r.value = v; r.checked = P.entrega === v;
+    r.onchange = () => { P.entrega = v; guardar(); pintarDatos(); actualizar(); };
+    const tx = el("div"); tx.append(el("b", null, t)); if (d) tx.append(el("small", null, d));
+    L.append(r, tx); ops.append(L);
+  });
+  const f = $("#datos"); f.replaceChildren();
+  const c = P.c;
+  const campo = (k, lab, tipo = "text", extra = {}) => { const L = el("label", null, lab), i = el("input"); i.type = tipo; i.name = k; i.value = c[k] || ""; Object.assign(i, extra); i.oninput = () => { c[k] = i.value; guardar(); actualizar(); }; L.append(i); return L; };
+  f.append(campo("nombreCompleto", "Nombre completo", "text", { autocomplete: "name", placeholder: "Nombre y apellido" }));
+  const d2 = el("div", "two"); d2.append(campo("telefono", "Teléfono", "tel", { autocomplete: "tel", placeholder: "512 555 1234" }), campo("email", "Correo electrónico", "email", { autocomplete: "email" })); f.append(d2);
+  if (P.entrega === "entrega") {
+    f.append(el("p", "muted", "Dirección de entrega"), campo("direccion1", "Dirección", "text", { autocomplete: "address-line1", placeholder: "Número y calle" }), campo("direccion2", "Apartamento, salón o referencia (opcional)", "text", { autocomplete: "address-line2" }), campo("ciudad", "Ciudad", "text", { autocomplete: "address-level2" }));
+    const d3 = el("div", "two"), Le = el("label", null, "Estado"), sel = el("select"); sel.name = "estado";
+    sel.append(new Option("Estado", ""), ...ESTADOS.map(e => new Option(e, e))); sel.value = c.estado || "TX"; c.estado = sel.value;
+    sel.onchange = () => { c.estado = sel.value; guardar(); actualizar(); }; Le.append(sel);
+    d3.append(Le, campo("zip", "Código postal", "text", { autocomplete: "postal-code", inputMode: "numeric", maxLength: 10 })); f.append(d3);
+  }
+}
+
+/* ── Validación por paso ── */
+const falta1 = () => elegido() ? "" : "Elige tu arreglo.";
+const falta4 = () => P.fecha ? "" : "Elige la fecha de tu evento.";
+function falta6() {
+  const c = P.c;
+  if (s(c.nombreCompleto).split(/\s+/).filter(Boolean).length < 2) return "Escribe tu nombre completo.";
+  if (s(c.telefono).replace(/\D/g, "").length < 10) return "Escribe tu teléfono con código de área.";
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s(c.email))) return "Escribe un correo válido.";
+  if (P.entrega === "entrega") {
+    if (!s(c.direccion1) || !s(c.ciudad)) return "Escribe la dirección de entrega y la ciudad.";
+    if (!ESTADOS.includes(s(c.estado))) return "Elige el estado.";
+    if (!/^\d{5}(-\d{4})?$/.test(s(c.zip))) return "Escribe un código postal válido.";
+  }
+  return "";
+}
+const PASOS = [["paso1", falta1], ["paso4", falta4], ["paso6", falta6]];
+function faltante() { for (const [id, f] of PASOS) { const m = f(); if (m) return [id, m]; } return null; }
+
+/* ── 7. Resumen y pago ── */
+function pintarResumen() {
+  const k = calcular(), r = $("#resumen"); r.replaceChildren();
+  const fila = (a, b, cl = "") => { const d = el("div", "fila " + cl); d.append(el("span", null, a), el("span", null, b)); r.append(d); };
+  if (!k.a) { r.append(el("p", "muted", "Todavía no has elegido tu arreglo.")); $("#pagos").replaceChildren(); return; }
+  fila(k.a.nombre, dinero(k.precio));
+  const favs = FLORES.filter(f => P.favs.includes(f.id) && !f.agotada).map(f => f.nombre);
+  if (favs.length) { const d = el("div", "fila"); d.append(el("span", "muted", "Flores favoritas: " + favs.join(", ")), el("span", "muted", "Incluidas")); r.append(d); }
+  if (k.entrega) fila("Entrega en tu evento", dinero(k.entrega));
+  fila("Total", dinero(k.total), "t");
+  const pagos = $("#pagos"); pagos.replaceChildren();
+  const opts = [["deposito", `Pagar depósito del ${k.pct}% · ${dinero(k.deposito)}`, `Saldo de ${dinero(k.total - k.deposito)} antes de la entrega.`]];
+  if (CFG.permitirPagoTotal !== false && k.pct < 100) opts.push(["total", `Pagar todo ahora · ${dinero(k.total)}`, "Sin saldo pendiente."]);
+  if (!opts.some(o => o[0] === P.pago)) P.pago = "deposito";
+  opts.forEach(([v, t, d]) => {
+    const L = el("label", "op"), i = el("input"); i.type = "radio"; i.name = "pago"; i.value = v; i.checked = P.pago === v;
+    i.onchange = () => { P.pago = v; guardar(); actualizar(); };
+    const tx = el("div"); tx.append(el("b", null, t), el("small", null, d)); L.append(i, tx); pagos.append(L);
+  });
+}
+function actualizar() {
+  const k = calcular(), falta = faltante();
+  $("#bTotal").textContent = k.a ? dinero(k.total) : "$0";
+  $("#bInfo").textContent = k.a ? `${k.a.nombre}${P.favs.length ? ` · ${P.favs.length} flor${P.favs.length === 1 ? "" : "es"} favorita${P.favs.length === 1 ? "" : "s"}` : ""}` : "Elige tu arreglo";
+  const b = $("#bBtn");
+  if (falta) { b.textContent = "Continuar"; b.onclick = () => { document.getElementById(falta[0]).scrollIntoView({ behavior: "smooth", block: "start" }); toast(falta[1]); }; }
+  else { b.textContent = k.todo ? `Pagar ${dinero(k.cobrar)}` : `Pagar depósito ${dinero(k.cobrar)}`; b.onclick = () => document.getElementById("paso7").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  PASOS.forEach(([id, f]) => { const n = document.querySelector(`#${id} .num`); if (n) n.classList.toggle("ok", !f()); });
+  const n2 = document.querySelector("#paso2 .num"); if (n2) n2.classList.toggle("ok", P.favs.length > 0);
+  pintarResumen();
+  $("#pagar").textContent = k.todo ? `Pagar ${dinero(k.cobrar)} y confirmar` : `Pagar depósito de ${dinero(k.cobrar)} y confirmar`;
+}
+
+async function pagar() {
+  const err = $("#err"); err.hidden = true;
+  const falta = faltante();
+  if (falta) { err.textContent = falta[1]; err.hidden = false; document.getElementById(falta[0]).scrollIntoView({ behavior: "smooth" }); return; }
+  if (!$("#acepta").checked) { err.textContent = "Para confirmar, marca que aceptas la política de arreglos."; err.hidden = false; return; }
+  const b = $("#pagar"); b.disabled = true; b.textContent = "Abriendo el pago…";
+  try {
+    const r = await fetch("/api/arreglo", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+      arreglo: P.arreglo, flores: P.favs, fecha: P.fecha, entrega: P.entrega, pago: P.pago, ocasion: P.ocasion, colores: P.colores, cliente: P.c, acepta: true }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "No se pudo abrir el pago. Intenta de nuevo.");
+    location.href = d.url;
+  } catch (e) { err.textContent = e.message; err.hidden = false; b.disabled = false; actualizar(); }
+}
+
+function armar() {
+  const app = $("#app");
+  const paso = (id, n, titulo, sub, ...kids) => { const sct = el("section", "paso"); sct.id = id; const h = el("h2"); h.append(el("span", "num", n), titulo); sct.append(h); if (sub) sct.append(el("p", "muted", sub)); sct.append(...kids); return sct; };
+  const arrs = el("div", "arrs"); arrs.id = "arrs";
+  const otros = el("p", "otros"); otros.append("¿Buscas otro arreglo, centro de mesa o montaje? "); const ol = el("a", null, "Mándame una consulta"); ol.href = "/#contacto"; otros.append(ol);
+  const grid = el("div", "flores"); grid.id = "flores";
+  const oc = el("div", "form");
+  const campo = (k, lab, tipo = "text", extra = {}) => { const L = el("label", null, lab), i = el(tipo === "textarea" ? "textarea" : "input"); if (tipo !== "textarea") i.type = tipo; i.value = P[k] || ""; Object.assign(i, extra); i.oninput = () => { P[k] = i.value; guardar(); }; L.append(i); return L; };
+  oc.append(campo("ocasion", "¿Para qué orisha o celebración?", "text", { placeholder: "Ej: Cumpleaños de santo de Oshún" }), campo("colores", "Colores o detalles que te gustan (opcional)", "textarea", { rows: 3, maxLength: 600 }));
+  const cal = el("div"); cal.id = "cal"; const fd = el("p", "muted"); fd.id = "fechaDicha"; fd.style.margin = "10px 0 0";
+  const ent = el("div", "opciones"); ent.id = "entregas";
+  const dat = el("div", "form"); dat.id = "datos"; dat.style.marginTop = "18px";
+  const res = el("div", "resumen"); res.id = "resumen";
+  const pagos = el("div", "opciones"); pagos.id = "pagos"; pagos.style.margin = "16px 0 0";
+  const pol = el("div", "politica"); pol.append(el("b", null, "Política de arreglos"), el("p", null, s(POL.arreglos) || "El depósito asegura tu fecha."));
+  const ver = el("a", null, "Ver todas las políticas"); ver.href = "/politicas.html#arreglos"; ver.target = "_blank"; ver.rel = "noopener"; pol.append(ver);
+  const ac = el("label", "acepto"), ai = el("input"); ai.type = "checkbox"; ai.id = "acepta"; ac.append(ai, el("span", null, "Leí y acepto la política de arreglos"));
+  const err = el("p", "note err"); err.id = "err"; err.hidden = true;
+  const pb = el("button", "btn btn-solid"); pb.id = "pagar"; pb.type = "button"; pb.style.width = "100%"; pb.style.maxWidth = "560px"; pb.onclick = pagar;
+  const fin = el("div"); fin.style.maxWidth = "560px"; fin.append(pagos, pol, ac, err, pb, el("p", "muted", "Pagas con tarjeta de forma segura con Stripe. Te llega la confirmación por correo."));
+  app.replaceChildren(
+    paso("paso1", "1", "Elige tu arreglo", "El precio es por el arreglo completo.", arrs, otros),
+    paso("paso2", "2", "Tus flores favoritas", "Opcional. Toca “Añadir” en las que te gusten y las incluyo en tu arreglo, sin costo extra.", grid),
+    paso("paso3", "3", "Tu celebración", null, oc),
+    paso("paso4", "4", "Fecha del evento", "Toca el día de tu celebración.", cal, fd),
+    paso("paso5", "5", "Entrega", null, ent),
+    paso("paso6", "6", "Tus datos", null, dat),
+    paso("paso7", "7", "Resumen y pago", null, res, fin));
+  pintarArreglos(); pintarFlores(); pintarFecha(); pintarDatos(); actualizar();
+  $("#barra").hidden = false;
+  if (q.get("ref") && elegido()) setTimeout(() => $("#paso2").scrollIntoView({ block: "start" }), 50);
+}
+
+Promise.all(["negocio", "flores", "solicitudes", "politicas", "arreglos"].map(leer)).then(([N, F, SO, PO, AR]) => {
+  if (s(N.nombre)) { $("#marca").textContent = N.nombre; document.title = `Personaliza tu arreglo · ${N.nombre}`; }
+  CFG = F || {}; POL = PO || {};
+  CERRADOS = new Set((SO.cerrados || []).map(c => String(c.fecha).slice(0, 10)));
+  const dias = parseInt(CFG.anticipacionDias, 10) || 0;
+  $("#intro").textContent = s(CFG.intro);
+  $("#avisoTit").textContent = `Mínimo ${dias} día${dias === 1 ? "" : "s"} de anticipación`;
+  $("#aviso").textContent = s(CFG.aviso);
+  ARREGLOS = (AR.arreglos || []).filter(a => a && a.visible !== false && s(a.nombre) && (a.tipo || "Arreglo floral") === "Arreglo floral" && precioDe(a) > 0).map(a => ({ ...a, id: slug(a.nombre), precioN: precioDe(a) }));
+  FLORES = (CFG.flores || []).filter(f => f && f.visible !== false && s(f.nombre)).map(f => ({ ...f, id: slug(f.nombre) }));
+  P.favs = P.favs.filter(id => FLORES.some(f => f.id === id && !f.agotada));
+  if (!ARREGLOS.some(a => a.id === P.arreglo)) P.arreglo = "";
+  if (CFG.activo === false || !ARREGLOS.length) { const c = el("div", "cerrado"); c.append(el("p", null, "Por ahora no hay arreglos para personalizar en línea. Puedes dejarme una consulta en la página principal.")); const a = el("a", "btn btn-solid", "Ir a la página principal"); a.href = "/#contacto"; c.append(a); $("#app").replaceChildren(c); return; }
+  armar();
+  if (q.has("cancelado")) { toast("No se completó el pago. Tu selección sigue aquí."); history.replaceState(null, "", location.pathname); }
+});
+</script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
+</body>
+</html>

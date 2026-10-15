@@ -52,3 +52,28 @@ h1,h2,h3{font-family:"Cormorant",Georgia,"Times New Roman",serif;font-weight:600
 .chips button{font:inherit;font-size:.92rem;font-weight:500;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--bg)}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;max-width:calc(100vw - 32px);z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+/* calendario de mes */
+.mes{border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--surface);min-width:0;max-width:420px}
+.mes-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.mes-tit{font-family:"Cormorant",Georgia,serif;font-size:1.4rem;font-weight:600}
+.mes-flecha{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer}
+.mes-flecha[disabled]{opacity:.3;cursor:default}
+.mes-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.mes-dsem{text-align:center;font-size:.75rem;font-weight:600;color:var(--muted);padding:4px 0}
+.mes-dia{position:relative;aspect-ratio:1;min-width:0;width:100%;border-radius:10px;border:1px solid transparent;background:none;color:var(--ink);font:inherit;font-size:.95rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0}
+.mes-dia .pt{font-size:.6rem;color:var(--muted);line-height:1}
+.mes-dia.t-libre{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.mes-dia.t-libre:hover{border-color:var(--blue)}
+.mes-dia.t-fuera,.mes-dia.t-lleno{color:var(--muted);opacity:.45;cursor:default}
+.mes-dia.t-bloqueado{color:var(--muted);text-decoration:line-through;opacity:.55;cursor:default}
+.mes-dia.hoy .n{text-decoration:underline;text-underline-offset:3px}
+.mes-dia[aria-pressed="true"]{background:var(--blue);color:var(--bg);border-color:var(--blue)}
+.mes-dia[aria-pressed="true"] .pt{color:inherit}
+.mes-ley{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:10px}
+.mes-ley i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:5px;background:var(--blue-soft);border:1px solid var(--blue)}
+
+/* footer */
+.pie{display:flex;justify-content:space-between;align-items:center;gap:14px 24px;flex-wrap:wrap}
+.pie-links{display:flex;flex-wrap:wrap;gap:8px 18px}
+.pie-links a{color:var(--muted);font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
+.pie-links a:hover{color:var(--ink)}

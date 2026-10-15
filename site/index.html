@@ -16,6 +16,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Queen">
 <link rel="stylesheet" href="/estilo.css">
+<script src="/mes.js"></script>
+<script src="/politicas.js"></script>
 <style>
 /* barra */
 .top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px}
@@ -87,7 +89,7 @@ footer{padding:36px 0 48px;color:var(--muted);font-size:.9rem;border-top:1px sol
 /* ventana de reserva */
 dialog{border:0;border-radius:18px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog::backdrop{background:rgba(14,19,38,.6)}
-.dlg{padding:24px 22px 22px;overflow:auto;max-height:calc(100dvh - 24px)}
+.dlg{padding:24px 18px 22px;overflow:auto;overflow-x:hidden;max-height:calc(100dvh - 24px)}
 .dlg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
 .dlg-head h3{font-size:1.8rem}
 .x{background:none;border:0;font-size:1.8rem;line-height:1;color:var(--muted);cursor:pointer;padding:4px 8px}
@@ -105,6 +107,21 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 .form label{display:grid;gap:4px;font-size:.9rem;font-weight:500}
 .form input,.form textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .summary{background:var(--blue-soft);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:.95rem}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{font:inherit;font-size:.92rem;font-weight:500;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form select{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.form .lab{font-size:.9rem;font-weight:500}
+.form .sub2{font-family:"Cormorant",Georgia,serif;font-size:1.35rem;font-weight:600;margin:10px 0 -2px}
+.trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.done{text-align:center;padding:10px 0}
+.done h4{font-family:"Cormorant",Georgia,serif;font-size:2rem;margin:0 0 8px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.politica{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.9rem}
+.politica p{margin:4px 0 6px;color:var(--muted)}
+.acepto{display:flex!important;gap:10px;align-items:flex-start;font-weight:600}
+.acepto input{width:20px;height:20px;margin-top:2px;flex:none}
 @media (max-width:820px){
   .hero{grid-template-columns:1fr;gap:32px;padding-top:16px}
   .arch{max-width:420px}
@@ -133,7 +150,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <h1 id="heroTitle"></h1>
       <p id="heroText"></p>
       <div class="pillars">
-        <a href="#arreglos"><b>Arreglos y mesas</b><span>Celebraciones yorubas</span></a>
+        <a href="/personaliza.html"><b>Arreglos y mesas</b><span>Personaliza el tuyo</span></a>
         <a href="#lecturas"><b>Lecturas</b><span>Cartas españolas</span></a>
         <a href="/tienda.html"><b>Queen Shop</b><span>Baños espirituales y más</span></a>
       </div>
@@ -144,7 +161,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 
 <section id="arreglos">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p></div>
+    <div class="sec-head"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><p style="margin-top:18px"><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></p></div>
     <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo" hidden></div>
     <div id="catalog"></div>
   </div>
@@ -180,8 +197,8 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 <section id="contacto">
   <div class="wrap contact">
     <div>
-      <h3>Escríbeme</h3>
-      <p class="muted">Para pedidos de arreglos, fechas especiales o cualquier duda.</p>
+      <h3>Pedidos y consultas</h3>
+      <p class="muted" id="solIntro">Cuéntame qué necesitas y para qué fecha. Reviso tu solicitud y te contacto para confirmar los detalles.</p>
       <div class="btns" id="contactBtns"></div>
     </div>
     <div>
@@ -194,7 +211,17 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   </div>
 </section>
 
-<footer><div class="wrap" id="footText"></div></footer>
+<footer><div class="wrap pie"><span id="footText"></span><nav class="pie-links" aria-label="Políticas"><a href="/politicas.html#cancelaciones">Cancelaciones</a><a href="/politicas.html#envios">Envíos y devoluciones</a><a href="/politicas.html#privacidad">Privacidad</a><a href="/politicas.html">Todas las políticas</a></nav></div></footer>
+
+<dialog id="solDlg" aria-labelledby="solTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><h3 id="solTitle">Solicitar un arreglo</h3><div class="muted" id="solMeta"></div></div>
+      <button class="x" type="button" id="solClose" aria-label="Cerrar">×</button>
+    </div>
+    <div id="solBody"></div>
+  </div>
+</dialog>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
   <div class="dlg">
@@ -247,7 +274,9 @@ function renderNegocio(N) {
   $("#areaText").textContent = s(C.zona);
   const map = safeUrl(s(C.mapa)); if (map) $("#mapBtn").href = map; else $("#mapBtn").remove();
   const cb = $("#contactBtns");
-  const w = el("a", "btn btn-solid", "Escribir por WhatsApp"); w.href = waLink("Hola, quiero información."); cb.append(ext(w));
+  const w = el("a", "btn btn-solid", "Personaliza tu arreglo"); w.href = "/personaliza.html";
+  const q = el("button", "btn btn-line", "Hacer una consulta"); q.type = "button"; q.onclick = () => abrirSolicitud({ tipo: "Otra consulta" });
+  cb.append(w, q);
   const tel = s(C.telefono).replace(/\D/g, "") || WA;
   if (tel) { const t = el("a", "btn btn-line", "Llamar"); t.href = "tel:+" + (tel.length === 10 ? "1" + tel : tel); cb.append(t); }
   const sl = $("#socialLinks");
@@ -276,8 +305,10 @@ function renderArreglos(A) {
     if (s(a.flores)) tx.append(el("p", "flowers", a.flores));
     const pr = el("p", "price"), precio = s(a.precio).replace(/^\$/, "");
     if (precio) { pr.textContent = `$${precio} `; pr.append(el("small", null, "USD")); } else pr.append(el("small", null, "Precio a consultar"));
-    const o = el("a", "btn btn-solid", "Pedir por WhatsApp"); o.href = waLink(`Hola, me interesa "${a.nombre}" (${tipo.toLowerCase()}) para mi celebración.`);
-    const b = el("div", "btns"); b.append(ext(o));
+    let o;
+    if (tipo === "Arreglo floral" && Number(String(a.precio || "").replace(/[^\d.]/g, "")) > 0) { o = el("a", "btn btn-solid", "Personaliza tu arreglo"); o.href = `/personaliza.html?ref=${encodeURIComponent(a.nombre)}&ocasion=${encodeURIComponent(s(a.ocasion))}`; }
+    else { o = el("button", "btn btn-solid", "Solicitar"); o.type = "button"; o.onclick = () => abrirSolicitud({ tipo, referencia: a.nombre, ocasion: s(a.ocasion) }); }
+    const b = el("div", "btns"); b.append(o);
     tx.append(pr, b); item.append(ph, tx); cat.append(item);
   });
   if (!cat.children.length) { cat.append(el("p", "muted", "Muy pronto encontrarás aquí mis arreglos.")); return; }
@@ -331,22 +362,25 @@ async function abrirReserva(l) {
   pintarCalendario(l, d);
 }
 function sinCalendario(msg) {
-  const w = el("a", "btn btn-solid", "Escribirme por WhatsApp"); w.href = waLink("Hola, quiero reservar una lectura de cartas.");
-  body.replaceChildren(el("p", null, msg + " Escríbeme y buscamos un espacio."), ext(w));
+  const w = el("button", "btn btn-solid", "Hacer una consulta"); w.type = "button"; w.onclick = () => { dlg.close(); abrirSolicitud({ tipo: "Otra consulta", detalles: "Quiero reservar una lectura de cartas." }); };
+  body.replaceChildren(el("p", null, msg + " Déjame tu consulta y buscamos un espacio."), w);
 }
 function pintarCalendario(l, d) {
   let dia = null, hora = null;
-  const days = el("div", "days"), slots = el("div", "slots"), next = el("div");
-  days.setAttribute("role", "group"); days.setAttribute("aria-label", "Días disponibles");
-  d.dias.forEach(x => {
-    const [semana, num, , mes] = x.etiqueta.split(" ");
-    const b = el("button", "day"); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", x.etiqueta);
-    b.append(el("small", null, semana.slice(0, 3)), el("b", null, num), el("small", null, mes.slice(0, 3)));
-    b.onclick = () => { dia = x; hora = null; days.querySelectorAll(".day").forEach(y => y.setAttribute("aria-pressed", y === b)); pintarHoras(); next.replaceChildren(); };
-    days.append(b);
+  const slots = el("div", "slots"), next = el("div");
+  const porFecha = new Map(d.dias.map(x => [x.fecha, x]));
+  const ley = el("div", "mes-ley"); const li = el("span"); li.append(el("i"), "Días con horarios disponibles"); ley.append(li);
+  const cal = Mes({
+    min: d.dias[0].fecha, max: d.dias[d.dias.length - 1].fecha, mesInicial: d.dias[0].fecha,
+    tipo: f => porFecha.has(f) ? "libre" : "lleno",
+    seleccion: f => !!dia && dia.fecha === f,
+    alTocar: f => { dia = porFecha.get(f); hora = null; pintarHoras(); next.replaceChildren(); setTimeout(() => slots.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50); },
+    leyenda: ley,
   });
+  const days = cal.el;
   function pintarHoras() {
-    slots.replaceChildren();
+    slots.replaceChildren(el("p", "muted", dia.etiqueta[0].toUpperCase() + dia.etiqueta.slice(1) + ":"));
+    slots.firstChild.style.cssText = "grid-column:1/-1;margin:0";
     dia.horas.forEach(h => {
       const b = el("button", "slot", h.etiqueta); b.type = "button"; b.setAttribute("aria-pressed", "false");
       b.onclick = () => { hora = h; slots.querySelectorAll(".slot").forEach(y => y.setAttribute("aria-pressed", y === b)); pintarFormulario(); };
@@ -361,6 +395,10 @@ function pintarCalendario(l, d) {
     campo("Tu WhatsApp (ahí te mando el enlace de la videollamada)", "whatsapp", "tel", { autocomplete: "tel", required: true, placeholder: "512 555 1234" });
     campo("Tu correo (para el recibo)", "email", "email", { autocomplete: "email", required: true });
     campo("¿Algo que quieras contarme antes? (opcional)", "nota", "textarea", { rows: 2, maxLength: 450 });
+    const pol = el("div", "politica"); pol.append(el("b", null, "Política de cancelación"), el("p", null, textoPolitica(HORARIO)));
+    const ver = el("a", null, "Ver todas las políticas"); ver.href = "/politicas.html#cancelaciones"; ver.target = "_blank"; ver.rel = "noopener"; pol.append(ver);
+    const acL = el("label", "acepto"), ac = el("input"); ac.type = "checkbox"; ac.name = "acepta"; acL.append(ac, el("span", null, "Leí y acepto la política de cancelación"));
+    f.append(pol, acL);
     const err = el("p", "note err"); err.hidden = true;
     const go = el("button", "btn btn-solid", `Pagar ${dinero(l.precio)} y reservar`); go.type = "submit";
     f.append(err, go);
@@ -368,7 +406,8 @@ function pintarCalendario(l, d) {
       ev.preventDefault(); err.hidden = true; go.disabled = true; go.textContent = "Abriendo el pago…";
       const v = Object.fromEntries(new FormData(f));
       try {
-        const r = await api("/api/reservar", { ...v, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora });
+        if (!ac.checked) throw new Error("Para reservar, marca que aceptas la política de cancelación.");
+        const r = await api("/api/reservar", { ...v, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora });
         try { sessionStorage.setItem("reservaPendiente", r.sesion); } catch (e) {}
         location.href = r.url;
       } catch (e) {
@@ -379,9 +418,9 @@ function pintarCalendario(l, d) {
     next.replaceChildren(sum, f);
     f.querySelector("input").focus();
   }
-  body.replaceChildren(el("p", "step", "1. Elige el día"), days, el("p", "step", "2. Elige la hora"), slots, next,
+  body.replaceChildren(el("p", "step", "1. Toca el día que quieras"), days, el("p", "step", "2. Elige la hora"), slots, next,
     el("p", "muted", `Todos los horarios son en ${d.zona}.`));
-  slots.append(el("span", "muted", "Primero elige un día."));
+  slots.append(el("span", "muted", "Primero toca un día en el calendario.")); slots.lastChild.style.gridColumn = "1/-1";
 }
 
 /* ───── Queen Shop (vista previa; la tienda completa está en /tienda.html) ───── */
@@ -423,12 +462,97 @@ function renderResenas(R, C) {
   } else {
     const e = el("div", "empty");
     e.append(el("p", null, "Las reseñas de mis clientes aparecerán aquí muy pronto. Si ya recibiste un arreglo o una lectura, me encantaría saber tu opinión."));
-    const b = el("a", "btn btn-solid", "Dejar una reseña"); b.href = linkRes || waLink("Hola, quiero dejar una reseña:");
-    e.append(ext(b)); rl.append(e);
+    if (linkRes) { const b = el("a", "btn btn-solid", "Dejar una reseña"); b.href = linkRes; e.append(ext(b)); }
+    rl.append(e);
   }
 }
 
-Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas"].map(leer)).then(([N, A, L, P, R]) => {
+/* ───── Solicitudes (arreglos, centros de mesa, montajes y consultas) ───── */
+let SOL = { activo: true, anticipacionDias: 3, cerrados: [] };
+const TIPOS_SOL = ["Arreglo floral", "Centro de mesa", "Montaje de mesa", "Otra consulta"];
+const solDlg = $("#solDlg"), solBody = $("#solBody");
+$("#solClose").onclick = () => solDlg.close();
+solDlg.addEventListener("click", e => { if (e.target === solDlg) solDlg.close(); });
+
+const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+let datosSol = {};
+try { datosSol = JSON.parse(localStorage.getItem("queenContacto") || "{}") || {}; } catch (e) { datosSol = {}; }
+
+function abrirSolicitud(pre) {
+  if (SOL.activo === false) { toast("Por ahora no estoy tomando solicitudes. Vuelve pronto."); return; }
+  const v = { tipo: "Arreglo floral", entrega: "recoger", contacto: "Llamada", ...datosSol, ...pre };
+  const f = el("form", "form"); f.noValidate = true;
+  const campo = (lab, name, type = "text", extra = {}) => {
+    const L = el("label", null, lab), i = el(type === "textarea" ? "textarea" : "input");
+    if (type !== "textarea") i.type = type; i.name = name; i.value = v[name] ?? ""; Object.assign(i, extra); L.append(i); return L;
+  };
+  const seg = (lab, name, ops, alCambiar) => {
+    const box = el("div"), g = el("div", "seg"); g.setAttribute("role", "group"); g.setAttribute("aria-label", lab);
+    ops.forEach(o => { const b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", String(v[name] === o[0])); b.onclick = () => { v[name] = o[0]; g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); alCambiar && alCambiar(); }; g.append(b); });
+    box.append(el("div", "lab", lab), g); return box;
+  };
+  const min = new Date(); min.setDate(min.getDate() + (parseInt(SOL.anticipacionDias, 10) || 0));
+  const bloque = el("div", "form"), lugar = campo("Dirección o lugar del evento", "lugar", "text", { autocomplete: "street-address" });
+  const pintar = () => {
+    const consulta = v.tipo === "Otra consulta";
+    $("#solTitle").textContent = consulta ? "Hacer una consulta" : "Solicitar " + v.tipo.toLowerCase();
+    bloque.replaceChildren(...(consulta ? [campo("Tu consulta", "detalles", "textarea", { rows: 4, maxLength: 1500, required: true })] : [
+      v.referencia ? el("p", "summary", `Basado en: ${v.referencia}`) : null,
+      campo("¿Para qué orisha o celebración?", "ocasion", "text", { placeholder: "Ej: Cumpleaños de santo de Oshún" }),
+      (() => {
+        const box = el("div"), oculto = el("input"); oculto.type = "hidden"; oculto.name = "fecha"; oculto.value = v.fecha || "";
+        const elegida = el("p", "muted"); elegida.style.margin = "8px 0 0";
+        const decir = () => { elegida.textContent = v.fecha ? "Fecha elegida: " + new Date(v.fecha + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "Toca la fecha de tu evento."; };
+        const bloq = new Set((SOL.cerrados || []).map(c => String(c.fecha).slice(0, 10)));
+        const max = new Date(); max.setDate(max.getDate() + 730);
+        const cal = Mes({ min: isoLocal(min), max: isoLocal(max), mesInicial: v.fecha || isoLocal(min),
+          tipo: f => bloq.has(f) ? "bloqueado" : "libre", seleccion: f => v.fecha === f,
+          alTocar: f => { v.fecha = f; oculto.value = f; decir(); } });
+        decir(); box.append(el("div", "lab", "Fecha del evento"), cal.el, elegida, oculto); return box;
+      })(),
+      campo(v.tipo === "Arreglo floral" ? "¿Cuántos? (opcional)" : "¿Cuántas mesas o piezas? (opcional)", "cantidad", "number", { min: 1, inputMode: "numeric" }),
+      campo("Colores, flores o detalles que te gustan", "detalles", "textarea", { rows: 3, maxLength: 1500 }),
+      campo("Presupuesto aproximado (opcional)", "presupuesto", "text", { placeholder: "Ej: $150" }),
+      seg("¿Cómo lo recibes?", "entrega", [["recoger", "Lo recojo"], ["entrega", "Entrega en mi evento"]], () => lugar.hidden = v.entrega !== "entrega"),
+      lugar,
+    ].filter(Boolean)));
+    lugar.hidden = v.entrega !== "entrega";
+    $("#solMeta").textContent = consulta ? "Te respondo lo antes posible." : (SOL.anticipacionDias ? `Pide con al menos ${SOL.anticipacionDias} día${SOL.anticipacionDias == 1 ? "" : "s"} de anticipación.` : "");
+  };
+  const tipos = seg("¿Qué necesitas?", "tipo", TIPOS_SOL.map(t => [t, t]), () => { guardarCampos(); pintar(); });
+  const guardarCampos = () => f.querySelectorAll("input[name],textarea[name],select[name]").forEach(i => { if (i.name !== "web") v[i.name] = i.value; });
+  const pref = el("label", null, "¿Cómo prefieres que te contacte?"), sel = el("select"); sel.name = "contacto";
+  ["Llamada", "Mensaje de texto", "Correo", "WhatsApp"].forEach(o => sel.append(new Option(o, o))); sel.value = v.contacto; pref.append(sel);
+  const trampa = el("label", "trampa", "No llenes esto"); const ti = el("input"); ti.name = "web"; ti.tabIndex = -1; ti.autocomplete = "off"; trampa.append(ti);
+  const err = el("p", "note err"); err.hidden = true;
+  const go = el("button", "btn btn-solid", "Enviar solicitud"); go.type = "submit";
+  const nom = el("div", "two"); nom.append(campo("Nombre", "nombre", "text", { autocomplete: "given-name", required: true }), campo("Apellido", "apellido", "text", { autocomplete: "family-name", required: true }));
+  const con = el("div", "two"); con.append(campo("Teléfono", "telefono", "tel", { autocomplete: "tel", placeholder: "512 555 1234", required: true }), campo("Correo", "email", "email", { autocomplete: "email", required: true }));
+  f.append(tipos, bloque, el("p", "sub2", "Tus datos"), nom, con, pref, trampa, err, go);
+  f.onsubmit = async ev => {
+    ev.preventDefault(); err.hidden = true; guardarCampos();
+    const consulta = v.tipo === "Otra consulta";
+    if (!consulta && v.fecha && (SOL.cerrados || []).some(c => String(c.fecha).slice(0, 10) === v.fecha)) { err.textContent = "Ese día no tengo disponibilidad. Elige otra fecha, por favor."; err.hidden = false; return; }
+    go.disabled = true; go.textContent = "Enviando…";
+    try {
+      const r = await api("/api/solicitud", { ...v, web: ti.value });
+      datosSol = { nombre: v.nombre, apellido: v.apellido, telefono: v.telefono, email: v.email, contacto: v.contacto };
+      try { localStorage.setItem("queenContacto", JSON.stringify(datosSol)); } catch (e) {}
+      const ok = el("div", "done");
+      ok.append(el("h4", null, "¡Recibí tu solicitud!"), el("p", null, consulta ? "Te respondo lo antes posible." : `Para el ${r.fecha}. La reviso y te contacto por ${v.contacto.toLowerCase()} para confirmar los detalles y el precio.`));
+      const c = el("button", "btn btn-line", "Cerrar"); c.type = "button"; c.onclick = () => solDlg.close(); ok.append(c);
+      solBody.replaceChildren(ok); $("#solMeta").textContent = "";
+    } catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = "Enviar solicitud"; err.scrollIntoView({ block: "nearest" }); }
+  };
+  pintar();
+  solBody.replaceChildren(f);
+  solDlg.showModal();
+}
+
+let HORARIO = {};
+Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario"].map(leer)).then(([N, A, L, P, R, SL, HO]) => {
+  HORARIO = HO || {};
+  if (SL && typeof SL === "object" && "activo" in SL) { SOL = SL; if (s(SL.intro)) $("#solIntro").textContent = SL.intro; if (SL.activo === false) { $("#solCta").hidden = true; } }
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
 });
 
