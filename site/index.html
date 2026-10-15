@@ -131,9 +131,43 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .top nav{display:none}
   .pillars{grid-template-columns:1fr}
 }
+/* Barrita de secciones en el celular (fija arriba) */
+.navm{display:none}
+@media (max-width:820px){
+  .navm{display:flex;position:sticky;top:0;z-index:40;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 14px;background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .navm::-webkit-scrollbar{display:none}
+  .navm a{flex:none;font-size:.88rem;font-weight:600;color:var(--ink);text-decoration:none;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+  .navm a.on{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+  section{scroll-margin-top:58px}
+}
+/* Portada compacta en el celular: se llega más rápido a las fotos (sin achicarlas) */
+@media (max-width:640px){
+  .top{padding:12px 0}
+  .brand{font-size:1.35rem}
+  .hero{gap:22px;padding:2px 0 34px}
+  .hero h1{font-size:2.2rem;line-height:1.05}
+  .hero p{font-size:.98rem;line-height:1.5;margin:10px 0 16px}
+  .pillars{grid-template-columns:repeat(3,1fr);border-radius:12px;margin:0}
+  .pillars a{padding:10px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:2px}
+  .pillars b{font-size:1.05rem;line-height:1.1}
+  .pillars span{font-size:.7rem;line-height:1.2}
+  section{padding:44px 0}
+  .sec-head{margin-bottom:26px}
+  .sec-head p{margin-top:8px}
+  .item{margin-bottom:48px}
+  .occasion{margin:4px 0 10px}
+}
 </style>
 </head>
 <body>
+<nav class="navm" aria-label="Secciones">
+  <a href="#arreglos" data-s="arreglos">Arreglos</a>
+  <a href="/personaliza.html">Personaliza</a>
+  <a href="#lecturas" data-s="lecturas">Lecturas</a>
+  <a href="/tienda.html">Queen Shop</a>
+  <a href="#resenas" data-s="resenas">Reseñas</a>
+  <a href="#contacto" data-s="contacto">Contacto</a>
+</nav>
 <div class="wrap">
   <header class="top">
     <a class="brand" href="#" id="brandName"></a>
@@ -150,9 +184,9 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <h1 id="heroTitle"></h1>
       <p id="heroText"></p>
       <div class="pillars">
-        <a href="/personaliza.html"><b>Arreglos y mesas</b><span>Personaliza el tuyo</span></a>
+        <a href="/personaliza.html"><b>Arreglos</b><span>Personalízalo</span></a>
         <a href="#lecturas"><b>Lecturas</b><span>Cartas españolas</span></a>
-        <a href="/tienda.html"><b>Queen Shop</b><span>Baños espirituales y más</span></a>
+        <a href="/tienda.html"><b>Queen Shop</b><span>Baños y más</span></a>
       </div>
     </div>
     <div class="arch" id="heroArch"><img id="heroImg" alt=""></div>
@@ -303,13 +337,11 @@ function renderArreglos(A) {
     if (s(a.ocasion)) tx.append(el("p", "occasion", a.ocasion));
     if (s(a.descripcion)) tx.append(el("p", "desc", a.descripcion));
     if (s(a.flores)) tx.append(el("p", "flowers", a.flores));
-    const pr = el("p", "price"), precio = s(a.precio).replace(/^\$/, "");
-    if (precio) { pr.textContent = `$${precio} `; pr.append(el("small", null, "USD")); } else pr.append(el("small", null, "Precio a consultar"));
     let o;
     if (tipo === "Arreglo floral" && Number(String(a.precio || "").replace(/[^\d.]/g, "")) > 0) { o = el("a", "btn btn-solid", "Personaliza tu arreglo"); o.href = `/personaliza.html?ref=${encodeURIComponent(a.nombre)}&ocasion=${encodeURIComponent(s(a.ocasion))}`; }
     else { o = el("button", "btn btn-solid", "Solicitar"); o.type = "button"; o.onclick = () => abrirSolicitud({ tipo, referencia: a.nombre, ocasion: s(a.ocasion) }); }
     const b = el("div", "btns"); b.append(o);
-    tx.append(pr, b); item.append(ph, tx); cat.append(item);
+    tx.append(b); item.append(ph, tx); cat.append(item);
   });
   if (!cat.children.length) { cat.append(el("p", "muted", "Muy pronto encontrarás aquí mis arreglos.")); return; }
   // Botones para filtrar, solo si hay más de un tipo
@@ -549,6 +581,16 @@ function abrirSolicitud(pre) {
   solDlg.showModal();
 }
 
+// Barrita del celular: marca la sección que se está viendo
+(() => {
+  const links = [...document.querySelectorAll(".navm a[data-s]")];
+  if (!("IntersectionObserver" in window) || !links.length) return;
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(a => { const on = a.dataset.s === e.target.id; a.classList.toggle("on", on); if (on) { const n = a.parentElement; n.scrollTo({ left: Math.max(0, a.offsetLeft - 14), behavior: "smooth" }); } });
+  }), { rootMargin: "-45% 0px -50% 0px" });
+  links.forEach(a => { const sec = document.getElementById(a.dataset.s); if (sec) io.observe(sec); });
+})();
 let HORARIO = {};
 Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario"].map(leer)).then(([N, A, L, P, R, SL, HO]) => {
   HORARIO = HO || {};
