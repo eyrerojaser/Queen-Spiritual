@@ -1,0 +1,25 @@
+{
+  "reservasActivas": true,
+  "duracion": 60,
+  "anticipacionDias": 30,
+  "avisoHoras": 12,
+  "semana": [
+    {
+      "dia": "martes",
+      "desde": "10:00",
+      "hasta": "14:00"
+    },
+    {
+      "dia": "jueves",
+      "desde": "16:00",
+      "hasta": "20:00"
+    },
+    {
+      "dia": "sabado",
+      "desde": "10:00",
+      "hasta": "13:00"
+    }
+  ],
+  "cerrados": [],
+  "especiales": []
+}

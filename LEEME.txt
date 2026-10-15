@@ -1,0 +1,54 @@
+WEBSITE: ARREGLOS + LECTURAS DE CARTAS + TIENDA DE PDFs
+
+QUÉ HAY EN ESTA CARPETA
+- site/ ............. la página (index.html), la página de gracias y el panel (site/admin)
+- site/content/ ..... la información que cambias desde el panel
+- private/pdfs/ ..... tus PDFs a la venta (privados: solo los descarga quien paga)
+- netlify/ .......... las funciones de reservas, pagos y descargas
+
+PASO 1 — GITHUB
+- Crea un repositorio nuevo y márcalo como PRIVADO (importante: así nadie ve tus PDFs).
+- Sube TODO el contenido de esta carpeta (no la carpeta, su contenido).
+
+PASO 2 — NETLIFY
+- Add new site > Import an existing project > GitHub > elige el repositorio > Deploy.
+- Identity: Site configuration > Identity > Enable Identity > Registration: Invite only
+  > Services > Git Gateway > Enable > Invite users > tu correo. Acepta la invitación del correo.
+
+PASO 3 — STRIPE (para cobrar lecturas y PDFs)
+- Crea tu cuenta en stripe.com y completa los datos de tu negocio y tu banco.
+- En Stripe: Developers > API keys > copia la "Secret key" (empieza con sk_live_).
+- En Netlify: Site configuration > Environment variables > Add:
+    STRIPE_SECRET_KEY = (la clave que copiaste)
+- Recomendado (confirma la reserva aunque el cliente cierre la página al pagar):
+  En Stripe: Developers > Webhooks > Add endpoint
+    URL: https://TU-SITIO.netlify.app/api/stripe-webhook
+    Eventos: checkout.session.completed y checkout.session.expired
+  Copia el "Signing secret" (whsec_...) y agrégalo en Netlify como:
+    STRIPE_WEBHOOK_SECRET = (el secreto)
+- Después de agregar las claves: Deploys > Trigger deploy.
+- Para probar sin cobrar de verdad, usa primero la clave de prueba (sk_test_) y la tarjeta 4242 4242 4242 4242.
+
+EL PANEL: TU-SITIO.netlify.app/admin
+- Arreglos y mesas: arreglos, centros de mesa y montajes (foto, tipo, orisha o celebración, precio).
+- Lecturas de cartas > Tipos de lectura y precios.
+- Lecturas de cartas > Mi disponibilidad:
+    · "Aceptar reservas": apágalo para cerrar todo (on/off).
+    · Mi horario de cada semana: días y horas que trabajas.
+    · Días que NO trabajo (off) y Días extra que SÍ trabajo (on).
+- Tienda de PDFs: portada, título, precio y el archivo PDF.
+- Reseñas y Negocio y contacto (WhatsApp, Instagram, TikTok, mapa).
+Toca "Publicar" y en 1-2 minutos se ve en la página.
+
+TUS RESERVAS: TU-SITIO.netlify.app/admin/reservas.html
+(también con el botón "Ver mis reservas" dentro del panel)
+- Ves cada cita con nombre, hora, lo que pagó y su nota.
+- Botón WhatsApp: le escribe al cliente con el mensaje listo para pegar el enlace de la videollamada.
+- Cancelar cita: libera la hora. Si devuelves el dinero, hazlo desde Stripe.
+- Stripe te avisa por correo de cada pago.
+
+CÓMO FUNCIONA
+- El cliente elige lectura, día y hora; la hora se le aparta 35 minutos mientras paga.
+- Si paga, queda reservada; si no, la hora se libera sola.
+- Los PDFs: paga y descarga al momento. El enlace de descarga dura 30 días.
+- Todas las horas son de Texas (centro).

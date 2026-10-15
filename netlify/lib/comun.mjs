@@ -1,0 +1,149 @@
+// Código compartido por las funciones (reservas, pagos y descargas).
+import { getStore } from "@netlify/blobs";
+import Stripe from "stripe";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+export class Fallo extends Error {
+  constructor(status, mensaje) { super(mensaje); this.status = status; }
+}
+
+// Dependencias externas en un solo lugar (las pruebas las reemplazan).
+export const deps = {
+  store: () => getStore({ name: "reservas", consistency: "strong" }),
+  stripe: () => {
+    const k = process.env.STRIPE_SECRET_KEY;
+    if (!k) throw new Fallo(503, "Los pagos todavía no están configurados. Escríbeme por WhatsApp para reservar.");
+    return new Stripe(k);
+  },
+  contenido: async (origen, nombre) => {
+    const r = await fetch(`${origen}/content/${nombre}.json`, { cache: "no-store" });
+    if (!r.ok) throw new Fallo(500, "No se pudo leer la información del sitio.");
+    return r.json();
+  },
+  leerArchivo: (rel) => {
+    const limpio = String(rel || "").replace(/^\/+/, "");
+    if (!limpio.startsWith("private/pdfs/") || limpio.includes("..")) return null;
+    const aqui = path.dirname(fileURLToPath(import.meta.url));
+    const raices = [process.cwd(), process.env.LAMBDA_TASK_ROOT, aqui, path.resolve(aqui, ".."), path.resolve(aqui, "../.."), path.resolve(aqui, "../../..")].filter(Boolean);
+    for (const r of raices) {
+      const f = path.join(r, limpio);
+      if (fs.existsSync(f)) return fs.readFileSync(f);
+    }
+    return null;
+  },
+  ahora: () => new Date(),
+};
+
+export const json = (data, status = 200) =>
+  new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+
+export const manejar = (fn) => async (req, ctx) => {
+  try { return await fn(req, ctx); }
+  catch (e) {
+    if (e instanceof Fallo) return json({ error: e.message }, e.status);
+    console.error(e);
+    return json({ error: "Ocurrió un error. Intenta de nuevo en un momento." }, 500);
+  }
+};
+
+export const slug = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+export const origen = (req) => new URL(req.url).origin;
+export const texto = (v, max = 200) => String(v ?? "").trim().slice(0, max);
+
+// ───────── Fechas: todo se maneja en hora de Texas (America/Chicago) ─────────
+export const TZ = "America/Chicago";
+const DIAS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const DIAS_BONITOS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
+// minutos "de reloj" (sin zona) para comparar fechas y horas locales
+export const minutos = (fecha, hora = "00:00") => {
+  const [y, m, d] = fecha.split("-").map(Number), [h, mi] = hora.split(":").map(Number);
+  return Date.UTC(y, m - 1, d, h, mi) / 60000;
+};
+export function ahoraLocal(d = deps.ahora()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .formatToParts(d).map((x) => [x.type, x.value]));
+  const fecha = `${p.year}-${p.month}-${p.day}`, hora = `${p.hour}:${p.minute}`;
+  return { fecha, hora, min: minutos(fecha, hora) };
+}
+const sumarDias = (fecha, n) => new Date(minutos(fecha) * 60000 + n * 864e5).toISOString().slice(0, 10);
+const diaSemana = (fecha) => DIAS[new Date(minutos(fecha) * 60000).getUTCDay()];
+export const fechaBonita = (fecha) => { const dt = new Date(minutos(fecha) * 60000); return `${DIAS_BONITOS[dt.getUTCDay()]} ${dt.getUTCDate()} de ${MESES[dt.getUTCMonth()]}`; };
+export const horaBonita = (hora) => { const [h, m] = hora.split(":").map(Number); return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "am" : "pm"}`; };
+const esHora = (h) => /^\d{2}:\d{2}$/.test(String(h || ""));
+const soloFecha = (f) => String(f || "").slice(0, 10);
+
+function horasEntre(desde, hasta, dur) {
+  if (!esHora(desde) || !esHora(hasta)) return [];
+  const out = [], [a, b] = [desde, hasta].map((h) => { const [x, y] = h.split(":").map(Number); return x * 60 + y; });
+  for (let t = a; t + dur <= b; t += dur) out.push(`${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`);
+  return out;
+}
+
+export function horasDelDia(cfg, fecha) {
+  const dur = Math.max(15, parseInt(cfg.duracion, 10) || 60);
+  if ((cfg.cerrados || []).some((c) => soloFecha(c && c.fecha) === fecha)) return [];
+  const esp = (cfg.especiales || []).filter((e) => e && soloFecha(e.fecha) === fecha);
+  const bloques = esp.length ? esp : (cfg.semana || []).filter((s) => s && s.dia === diaSemana(fecha));
+  return [...new Set(bloques.flatMap((b) => horasEntre(b.desde, b.hasta, dur)))].sort();
+}
+
+export function calcularDisponibilidad(cfg, ocupadas, ahora = ahoraLocal()) {
+  if (!cfg || cfg.reservasActivas === false) return [];
+  const dias = Math.min(120, Math.max(1, parseInt(cfg.anticipacionDias, 10) || 30));
+  const limite = ahora.min + Math.max(0, Number(cfg.avisoHoras) || 0) * 60;
+  const out = [];
+  for (let i = 0; i <= dias; i++) {
+    const fecha = sumarDias(ahora.fecha, i);
+    const horas = horasDelDia(cfg, fecha).filter((h) => minutos(fecha, h) >= limite && !ocupadas.has(clave(fecha, h)));
+    if (horas.length) out.push({ fecha, etiqueta: fechaBonita(fecha), horas: horas.map((h) => ({ hora: h, etiqueta: horaBonita(h) })) });
+  }
+  return out;
+}
+
+// ───────── Reservas guardadas (Netlify Blobs) ─────────
+export const clave = (fecha, hora) => `r/${fecha}_${hora.replace(":", "")}`;
+export const RETENCION_MIN = 35; // lo que se aparta un horario mientras la persona paga
+
+export async function reservasDesde(store, fechaMin, ahora = deps.ahora()) {
+  const { blobs } = await store.list({ prefix: "r/" });
+  const out = [];
+  for (const b of blobs) {
+    if (b.key.slice(2, 12) < fechaMin) continue;
+    const r = await store.get(b.key, { type: "json" });
+    if (!r) continue;
+    if (r.estado === "pendiente" && ahora.getTime() - Date.parse(r.creada) > RETENCION_MIN * 60000) {
+      await store.delete(b.key);
+      continue;
+    }
+    out.push({ ...r, clave: b.key });
+  }
+  return out;
+}
+
+// Marca la reserva como pagada. Se llama desde la página de gracias y desde el webhook (lo que llegue primero).
+export async function confirmarReserva(store, sesion) {
+  const m = sesion.metadata || {};
+  if (m.tipo !== "reserva" || sesion.payment_status !== "paid") return null;
+  const k = m.clave;
+  const datos = {
+    estado: "pagada", sesion: sesion.id, fecha: m.fecha, hora: m.hora, lectura: m.lectura,
+    nombre: m.nombre, whatsapp: m.whatsapp, email: (sesion.customer_details && sesion.customer_details.email) || m.email || "",
+    nota: m.nota || "", precio: (sesion.amount_total || 0) / 100, pagada: deps.ahora().toISOString(),
+  };
+  const actual = await store.get(k, { type: "json" });
+  if (actual && actual.sesion === sesion.id) {
+    if (actual.estado !== "pagada") await store.setJSON(k, { ...actual, ...datos, creada: actual.creada });
+    return { ...datos, clave: k };
+  }
+  if (!actual) {
+    const r = await store.setJSON(k, { ...datos, creada: datos.pagada }, { onlyIfNew: true });
+    if (!r || r.modified !== false) return { ...datos, clave: k };
+  }
+  // El horario lo tomó otra persona mientras esta pagaba: se guarda aparte para devolver el dinero o mover la cita.
+  await store.setJSON(`conflicto/${sesion.id}`, { ...datos, creada: datos.pagada });
+  return { ...datos, clave: k, conflicto: true };
+}

@@ -1,0 +1,26 @@
+{
+  "intro": "Lecturas con cartas españolas por videollamada. Eliges el día y la hora, pagas al reservar y te escribo por WhatsApp con el enlace de la llamada.",
+  "lecturas": [
+    {
+      "nombre": "Lectura general",
+      "duracion": "30 minutos",
+      "descripcion": "Una mirada a tu momento actual: amor, trabajo, salud y lo que viene.",
+      "precio": 35,
+      "visible": true
+    },
+    {
+      "nombre": "Lectura de amor",
+      "duracion": "30 minutos",
+      "descripcion": "Para tu relación, alguien especial o lo que el amor te tiene preparado.",
+      "precio": 40,
+      "visible": true
+    },
+    {
+      "nombre": "Lectura completa",
+      "duracion": "60 minutos",
+      "descripcion": "Una lectura profunda con tiempo para todas tus preguntas.",
+      "precio": 70,
+      "visible": true
+    }
+  ]
+}

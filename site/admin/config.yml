@@ -1,0 +1,160 @@
+backend:
+  name: git-gateway
+  branch: main
+
+locale: "es"
+site_url: "/"
+media_folder: "site/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "arreglos"
+    label: "Arreglos y mesas"
+    editor: { preview: false }
+    files:
+      - label: "Arreglos, centros de mesa y montajes"
+        name: "arreglos"
+        file: "site/content/arreglos.json"
+        fields:
+          - { label: "Texto de la sección", name: "intro", widget: "text", required: false }
+          - label: "Arreglos"
+            name: "arreglos"
+            widget: "list"
+            label_singular: "trabajo"
+            summary: "{{fields.tipo}} · {{fields.nombre}}"
+            hint: "Arrastra para cambiar el orden."
+            fields:
+              - { label: "Tipo", name: "tipo", widget: "select", options: ["Arreglo floral", "Centro de mesa", "Montaje de mesa"], default: "Arreglo floral", hint: "Si tienes más de un tipo, la página muestra botones para filtrar." }
+              - { label: "Foto", name: "foto", widget: "image" }
+              - { label: "Nombre", name: "nombre", widget: "string" }
+              - { label: "Para qué celebración u orisha", name: "ocasion", widget: "string", required: false, hint: "Ej: Cumpleaños de santo de Oshún" }
+              - { label: "Descripción", name: "descripcion", widget: "text", required: false }
+              - { label: "Flores que lleva", name: "flores", widget: "text", required: false }
+              - { label: "Precio", name: "precio", widget: "string", required: false, hint: "Solo el número, sin $. Vacío = 'Precio a consultar'." }
+              - { label: "Mostrar en la página", name: "visible", widget: "boolean", default: true }
+
+  - name: "lecturas"
+    label: "Lecturas de cartas"
+    editor: { preview: false }
+    files:
+      - label: "Tipos de lectura y precios"
+        name: "lecturas"
+        file: "site/content/lecturas.json"
+        fields:
+          - { label: "Texto de la sección", name: "intro", widget: "text", required: false }
+          - label: "Lecturas"
+            name: "lecturas"
+            widget: "list"
+            label_singular: "lectura"
+            summary: "{{fields.nombre}} · ${{fields.precio}}"
+            fields:
+              - { label: "Nombre", name: "nombre", widget: "string" }
+              - { label: "Duración", name: "duracion", widget: "string", required: false, hint: "Ej: 30 minutos" }
+              - { label: "Descripción", name: "descripcion", widget: "text", required: false }
+              - { label: "Precio (USD)", name: "precio", widget: "number", value_type: "float", min: 1, hint: "Es lo que el cliente paga al reservar." }
+              - { label: "Mostrar en la página", name: "visible", widget: "boolean", default: true }
+      - label: "Mi disponibilidad (calendario)"
+        name: "horario"
+        file: "site/content/horario.json"
+        fields:
+          - { label: "Aceptar reservas", name: "reservasActivas", widget: "boolean", default: true, hint: "Apágalo para cerrar todas las reservas (vacaciones, descanso). Las que ya están hechas se quedan." }
+          - { label: "Duración de cada cita (minutos)", name: "duracion", widget: "number", value_type: "int", min: 15, default: 60, hint: "Cada reserva ocupa un espacio de este tamaño." }
+          - { label: "Se puede reservar con cuántos días de anticipación", name: "anticipacionDias", widget: "number", value_type: "int", min: 1, default: 30 }
+          - { label: "Aviso mínimo (horas)", name: "avisoHoras", widget: "number", value_type: "int", min: 0, default: 12, hint: "Ej: 12 = nadie puede reservar para dentro de menos de 12 horas." }
+          - label: "Mi horario de cada semana"
+            name: "semana"
+            widget: "list"
+            label_singular: "horario"
+            summary: "{{fields.dia}} {{fields.desde}}–{{fields.hasta}}"
+            hint: "Los días que no pongas aquí quedan cerrados. Puedes poner el mismo día dos veces (ej. mañana y tarde). Horas de Texas."
+            fields:
+              - { label: "Día", name: "dia", widget: "select", options: [{label: "Lunes", value: "lunes"}, {label: "Martes", value: "martes"}, {label: "Miércoles", value: "miercoles"}, {label: "Jueves", value: "jueves"}, {label: "Viernes", value: "viernes"}, {label: "Sábado", value: "sabado"}, {label: "Domingo", value: "domingo"}] }
+              - { label: "Desde", name: "desde", widget: "select", options: [{label: "6:00 am", value: "06:00"}, {label: "6:30 am", value: "06:30"}, {label: "7:00 am", value: "07:00"}, {label: "7:30 am", value: "07:30"}, {label: "8:00 am", value: "08:00"}, {label: "8:30 am", value: "08:30"}, {label: "9:00 am", value: "09:00"}, {label: "9:30 am", value: "09:30"}, {label: "10:00 am", value: "10:00"}, {label: "10:30 am", value: "10:30"}, {label: "11:00 am", value: "11:00"}, {label: "11:30 am", value: "11:30"}, {label: "12:00 pm", value: "12:00"}, {label: "12:30 pm", value: "12:30"}, {label: "1:00 pm", value: "13:00"}, {label: "1:30 pm", value: "13:30"}, {label: "2:00 pm", value: "14:00"}, {label: "2:30 pm", value: "14:30"}, {label: "3:00 pm", value: "15:00"}, {label: "3:30 pm", value: "15:30"}, {label: "4:00 pm", value: "16:00"}, {label: "4:30 pm", value: "16:30"}, {label: "5:00 pm", value: "17:00"}, {label: "5:30 pm", value: "17:30"}, {label: "6:00 pm", value: "18:00"}, {label: "6:30 pm", value: "18:30"}, {label: "7:00 pm", value: "19:00"}, {label: "7:30 pm", value: "19:30"}, {label: "8:00 pm", value: "20:00"}, {label: "8:30 pm", value: "20:30"}, {label: "9:00 pm", value: "21:00"}, {label: "9:30 pm", value: "21:30"}, {label: "10:00 pm", value: "22:00"}] }
+              - { label: "Hasta", name: "hasta", widget: "select", options: [{label: "6:00 am", value: "06:00"}, {label: "6:30 am", value: "06:30"}, {label: "7:00 am", value: "07:00"}, {label: "7:30 am", value: "07:30"}, {label: "8:00 am", value: "08:00"}, {label: "8:30 am", value: "08:30"}, {label: "9:00 am", value: "09:00"}, {label: "9:30 am", value: "09:30"}, {label: "10:00 am", value: "10:00"}, {label: "10:30 am", value: "10:30"}, {label: "11:00 am", value: "11:00"}, {label: "11:30 am", value: "11:30"}, {label: "12:00 pm", value: "12:00"}, {label: "12:30 pm", value: "12:30"}, {label: "1:00 pm", value: "13:00"}, {label: "1:30 pm", value: "13:30"}, {label: "2:00 pm", value: "14:00"}, {label: "2:30 pm", value: "14:30"}, {label: "3:00 pm", value: "15:00"}, {label: "3:30 pm", value: "15:30"}, {label: "4:00 pm", value: "16:00"}, {label: "4:30 pm", value: "16:30"}, {label: "5:00 pm", value: "17:00"}, {label: "5:30 pm", value: "17:30"}, {label: "6:00 pm", value: "18:00"}, {label: "6:30 pm", value: "18:30"}, {label: "7:00 pm", value: "19:00"}, {label: "7:30 pm", value: "19:30"}, {label: "8:00 pm", value: "20:00"}, {label: "8:30 pm", value: "20:30"}, {label: "9:00 pm", value: "21:00"}, {label: "9:30 pm", value: "21:30"}, {label: "10:00 pm", value: "22:00"}] }
+          - label: "Días que NO trabajo (off)"
+            name: "cerrados"
+            widget: "list"
+            label_singular: "día cerrado"
+            summary: "{{fields.fecha}} {{fields.motivo}}"
+            required: false
+            fields:
+              - { label: "Fecha", name: "fecha", widget: "datetime", format: "YYYY-MM-DD", date_format: "DD/MM/YYYY", time_format: false, picker_utc: false }
+              - { label: "Motivo (solo lo ves tú)", name: "motivo", widget: "string", required: false }
+          - label: "Días extra que SÍ trabajo (on)"
+            name: "especiales"
+            widget: "list"
+            label_singular: "día extra"
+            summary: "{{fields.fecha}} {{fields.desde}}–{{fields.hasta}}"
+            required: false
+            hint: "Para abrir un día que normalmente no trabajas, o cambiar el horario de un día. Reemplaza el horario normal de esa fecha."
+            fields:
+              - { label: "Fecha", name: "fecha", widget: "datetime", format: "YYYY-MM-DD", date_format: "DD/MM/YYYY", time_format: false, picker_utc: false }
+              - { label: "Desde", name: "desde", widget: "select", options: [{label: "6:00 am", value: "06:00"}, {label: "6:30 am", value: "06:30"}, {label: "7:00 am", value: "07:00"}, {label: "7:30 am", value: "07:30"}, {label: "8:00 am", value: "08:00"}, {label: "8:30 am", value: "08:30"}, {label: "9:00 am", value: "09:00"}, {label: "9:30 am", value: "09:30"}, {label: "10:00 am", value: "10:00"}, {label: "10:30 am", value: "10:30"}, {label: "11:00 am", value: "11:00"}, {label: "11:30 am", value: "11:30"}, {label: "12:00 pm", value: "12:00"}, {label: "12:30 pm", value: "12:30"}, {label: "1:00 pm", value: "13:00"}, {label: "1:30 pm", value: "13:30"}, {label: "2:00 pm", value: "14:00"}, {label: "2:30 pm", value: "14:30"}, {label: "3:00 pm", value: "15:00"}, {label: "3:30 pm", value: "15:30"}, {label: "4:00 pm", value: "16:00"}, {label: "4:30 pm", value: "16:30"}, {label: "5:00 pm", value: "17:00"}, {label: "5:30 pm", value: "17:30"}, {label: "6:00 pm", value: "18:00"}, {label: "6:30 pm", value: "18:30"}, {label: "7:00 pm", value: "19:00"}, {label: "7:30 pm", value: "19:30"}, {label: "8:00 pm", value: "20:00"}, {label: "8:30 pm", value: "20:30"}, {label: "9:00 pm", value: "21:00"}, {label: "9:30 pm", value: "21:30"}, {label: "10:00 pm", value: "22:00"}] }
+              - { label: "Hasta", name: "hasta", widget: "select", options: [{label: "6:00 am", value: "06:00"}, {label: "6:30 am", value: "06:30"}, {label: "7:00 am", value: "07:00"}, {label: "7:30 am", value: "07:30"}, {label: "8:00 am", value: "08:00"}, {label: "8:30 am", value: "08:30"}, {label: "9:00 am", value: "09:00"}, {label: "9:30 am", value: "09:30"}, {label: "10:00 am", value: "10:00"}, {label: "10:30 am", value: "10:30"}, {label: "11:00 am", value: "11:00"}, {label: "11:30 am", value: "11:30"}, {label: "12:00 pm", value: "12:00"}, {label: "12:30 pm", value: "12:30"}, {label: "1:00 pm", value: "13:00"}, {label: "1:30 pm", value: "13:30"}, {label: "2:00 pm", value: "14:00"}, {label: "2:30 pm", value: "14:30"}, {label: "3:00 pm", value: "15:00"}, {label: "3:30 pm", value: "15:30"}, {label: "4:00 pm", value: "16:00"}, {label: "4:30 pm", value: "16:30"}, {label: "5:00 pm", value: "17:00"}, {label: "5:30 pm", value: "17:30"}, {label: "6:00 pm", value: "18:00"}, {label: "6:30 pm", value: "18:30"}, {label: "7:00 pm", value: "19:00"}, {label: "7:30 pm", value: "19:30"}, {label: "8:00 pm", value: "20:00"}, {label: "8:30 pm", value: "20:30"}, {label: "9:00 pm", value: "21:00"}, {label: "9:30 pm", value: "21:30"}, {label: "10:00 pm", value: "22:00"}] }
+
+  - name: "tienda"
+    label: "Tienda de PDFs"
+    editor: { preview: false }
+    files:
+      - label: "PDFs a la venta"
+        name: "pdfs"
+        file: "site/content/pdfs.json"
+        fields:
+          - { label: "Texto de la sección", name: "intro", widget: "text", required: false }
+          - label: "PDFs"
+            name: "pdfs"
+            widget: "list"
+            label_singular: "PDF"
+            summary: "{{fields.titulo}} · ${{fields.precio}}"
+            fields:
+              - { label: "Portada (imagen)", name: "portada", widget: "image", required: false }
+              - { label: "Título", name: "titulo", widget: "string" }
+              - { label: "Descripción", name: "descripcion", widget: "text", required: false }
+              - { label: "Precio (USD)", name: "precio", widget: "number", value_type: "float", min: 1 }
+              - { label: "Archivo PDF", name: "archivo", widget: "file", media_folder: "/private/pdfs", public_folder: "private/pdfs", hint: "Se guarda en privado. Solo lo descarga quien paga." }
+              - { label: "Mostrar en la página", name: "visible", widget: "boolean", default: true }
+
+  - name: "resenas"
+    label: "Reseñas"
+    editor: { preview: false }
+    files:
+      - label: "Reseñas de clientes"
+        name: "resenas"
+        file: "site/content/resenas.json"
+        fields:
+          - label: "Reseñas"
+            name: "resenas"
+            widget: "list"
+            label_singular: "reseña"
+            summary: "{{fields.nombre}} · {{fields.estrellas}}★"
+            fields:
+              - { label: "Nombre del cliente", name: "nombre", widget: "string", hint: "Ej: María G." }
+              - { label: "Estrellas", name: "estrellas", widget: "select", options: ["5","4","3","2","1"], default: "5" }
+              - { label: "Lo que dijo", name: "texto", widget: "text" }
+
+  - name: "configuracion"
+    label: "Negocio y contacto"
+    editor: { preview: false }
+    files:
+      - label: "Negocio, redes y contacto"
+        name: "negocio"
+        file: "site/content/negocio.json"
+        fields:
+          - { label: "Nombre del negocio", name: "nombre", widget: "string" }
+          - { label: "Título grande de la portada", name: "titulo", widget: "string" }
+          - { label: "Frase debajo del título", name: "frase", widget: "text" }
+          - { label: "Foto de la portada", name: "fotoPrincipal", widget: "image", required: false }
+          - label: "Contacto y redes sociales"
+            name: "contacto"
+            widget: "object"
+            collapsed: false
+            hint: "Lo que dejes vacío no aparece en la página."
+            fields:
+              - { label: "WhatsApp", name: "whatsapp", widget: "string", required: false, hint: "Solo números con el 1 al principio. Ej: 15125551234" }
+              - { label: "Teléfono para llamadas", name: "telefono", widget: "string", required: false, hint: "Si es el mismo del WhatsApp, déjalo vacío." }
+              - { label: "Instagram", name: "instagram", widget: "string", required: false, hint: "Tu usuario (sin @) o el enlace de tu perfil." }
+              - { label: "TikTok", name: "tiktok", widget: "string", required: false, hint: "Tu usuario (sin @) o el enlace de tu perfil." }
+              - { label: "Facebook", name: "facebook", widget: "string", required: false }
+              - { label: "Enlace del mapa (Google Maps)", name: "mapa", widget: "string", required: false, hint: "En Google Maps toca Compartir y pega el enlace." }
+              - { label: "Zona", name: "zona", widget: "string", required: false }
+              - { label: "Enlace para dejar reseña (Google)", name: "enlaceResenas", widget: "string", required: false }

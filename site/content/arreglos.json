@@ -1,0 +1,35 @@
+{
+  "intro": "Arreglos florales, centros de mesa y montaje de mesas para cumpleaños de santo, tambores, coronaciones y ofrendas a los orishas. Los colores y las flores se preparan según el orisha y tu celebración.",
+  "arreglos": [
+    {
+      "tipo": "Arreglo floral",
+      "nombre": "Blanco para Obatalá",
+      "ocasion": "Cumpleaños de santo, coronaciones y ofrendas a Obatalá",
+      "descripcion": "Todo en blanco, con lirios, claveles y hojas plateadas. Paz, claridad y pureza para el padre de los orishas.",
+      "flores": "Rosas blancas, claveles, lirios, perritos, campanas de Irlanda y follaje fresco.",
+      "precio": "",
+      "foto": "/images/uploads/paz-blanca.jpg",
+      "visible": true
+    },
+    {
+      "tipo": "Arreglo floral",
+      "nombre": "Azul de Yemayá",
+      "ocasion": "Tambores, cumpleaños de santo y ofrendas a Yemayá",
+      "descripcion": "Azul y blanco, los colores de la madre del mar, con listón de lentejuelas y nube celeste que brilla como el agua.",
+      "flores": "Rosas azules, rosas blancas, claveles blancos, nube celeste, ruscus y helecho.",
+      "precio": "",
+      "foto": "/images/uploads/cielo-azul.jpg",
+      "visible": true
+    },
+    {
+      "tipo": "Arreglo floral",
+      "nombre": "Río y Mar",
+      "ocasion": "Para Oshún y Yemayá juntas",
+      "descripcion": "El amarillo de Oshún y el azul de Yemayá: girasoles y rosas amarillas con rosas blancas pintadas a mano en azul con brillo y tul turquesa.",
+      "flores": "Girasoles, rosas amarillas, rosas blancas y pintadas, tul y helecho.",
+      "precio": "",
+      "foto": "/images/uploads/luz-de-girasol.jpg",
+      "visible": true
+    }
+  ]
+}

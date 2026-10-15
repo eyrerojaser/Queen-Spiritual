@@ -1,0 +1,13 @@
+[build]
+  publish = "site"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  # Los PDFs se guardan fuera de la página pública; solo la función de descarga puede leerlos.
+  included_files = ["private/pdfs/**"]
+
+[[headers]]
+  for = "/content/*"
+  [headers.values]
+    Cache-Control = "no-cache"

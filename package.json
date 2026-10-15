@@ -1,0 +1,9 @@
+{
+  "name": "flores-cartas-y-fe",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.4",
+    "stripe": "^23.0.0"
+  }
+}

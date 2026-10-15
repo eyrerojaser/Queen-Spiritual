@@ -1,0 +1,37 @@
+:root{
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#23262D; --muted:#5E6470;
+  --blue:#24407F; --blue-soft:#E7ECF6; --leaf:#2F5B3B; --gold:#B8912A; --line:#E3E1DA;
+  --night:#1A2340; --night-2:#232E52; --night-ink:#F2EEE3; --night-muted:#B9BCCB; --night-line:#34406A;
+  --ok:#2F6B45; --warn:#9A3B2E;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13161D; --surface:#1B1F28; --ink:#ECEDEF; --muted:#A7ADB8;
+    --blue:#9DB4EA; --blue-soft:#222B40; --leaf:#8EC49C; --gold:#D9B65A; --line:#2C313C;
+    --night:#0E1326; --night-2:#18203A; --night-line:#2A3558; --ok:#8EC49C; --warn:#E59A8C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13161D; --surface:#1B1F28; --ink:#ECEDEF; --muted:#A7ADB8;
+  --blue:#9DB4EA; --blue-soft:#222B40; --leaf:#8EC49C; --gold:#D9B65A; --line:#2C313C;
+  --night:#0E1326; --night-2:#18203A; --night-line:#2A3558; --ok:#8EC49C; --warn:#E59A8C;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.6}
+img{max-width:100%;display:block}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+h1,h2,h3{font-family:"Cormorant",Georgia,"Times New Roman",serif;font-weight:600;line-height:1.1;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:.98rem;text-decoration:none;border:1.5px solid var(--blue);cursor:pointer;font-family:inherit;line-height:1.2}
+.btn-solid{background:var(--blue);color:var(--bg)}
+.btn-line{background:transparent;color:var(--blue)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.muted{color:var(--muted)}
+.note{border-radius:12px;padding:14px 16px;margin:0 0 16px;font-size:.95rem}
+.note.err{background:color-mix(in srgb,var(--warn) 12%,transparent);color:var(--warn)}
+.note.ok{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}

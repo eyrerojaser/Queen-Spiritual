@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mis reservas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/estilo.css">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<style>
+main{max-width:760px;margin:0 auto;padding:28px 18px 80px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:2.4rem}
+.day{font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;margin:28px 0 10px}
+.bk{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:10px;display:grid;gap:6px}
+.bk .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.bk b{font-size:1.1rem}
+.bk .when{font-weight:600;color:var(--blue)}
+.bk .nota{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:.95rem}
+.bk .btns .btn{padding:9px 16px;font-size:.9rem}
+.danger{border-color:var(--warn);color:var(--warn);background:transparent}
+.conf{border-color:var(--warn)}
+.small{font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Mis reservas</h1>
+    <div class="btns"><a class="btn btn-line" href="/admin/">Volver al panel</a><button class="btn btn-line" id="salir" type="button" hidden>Salir</button></div>
+  </header>
+  <div id="out"><p class="muted">Cargando…</p></div>
+</main>
+<script>
+const out = document.getElementById("out");
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const id = window.netlifyIdentity;
+async function token() { const u = id && id.currentUser(); return u ? u.jwt() : null; }
+async function api(body) {
+  const t = await token(); if (!t) throw Object.assign(new Error("login"), { login: true });
+  const r = await fetch("/api/reservas", body ? { method: "POST", headers: { authorization: "Bearer " + t, "content-type": "application/json" }, body: JSON.stringify(body) } : { headers: { authorization: "Bearer " + t } });
+  const d = await r.json().catch(() => ({})); if (r.status === 401) throw Object.assign(new Error(d.error), { login: true });
+  if (!r.ok) throw new Error(d.error || "Error"); return d;
+}
+function pedirLogin() {
+  const b = el("button", "btn btn-solid", "Iniciar sesión"); b.type = "button"; b.onclick = () => id.open("login");
+  out.replaceChildren(el("p", null, "Inicia sesión con el mismo correo del panel."), b);
+}
+function tarjeta(r, conflicto) {
+  const c = el("div", "bk" + (conflicto ? " conf" : ""));
+  const row = el("div", "row"); row.append(el("b", null, r.nombre), el("span", "when", `${r.horaBonita}${conflicto ? " · " + r.fechaBonita : ""}`));
+  c.append(row, el("span", "muted small", `${r.lectura} · $${r.precio} pagado · ${r.email}`));
+  if (r.nota) c.append(el("div", "nota", r.nota));
+  const b = el("div", "btns");
+  if (r.whatsapp) {
+    const wa = String(r.whatsapp).replace(/\D/g, ""), num = wa.length === 10 ? "1" + wa : wa;
+    const a = el("a", "btn btn-solid", "WhatsApp"); a.target = "_blank"; a.rel = "noopener";
+    a.href = `https://wa.me/${num}?text=${encodeURIComponent(conflicto
+      ? `Hola ${r.nombre}, gracias por reservar tu ${r.lectura}. Ese horario se llenó justo antes; ¿te puedo ofrecer otro día u hora?`
+      : `Hola ${r.nombre}, te escribo por tu ${r.lectura} del ${r.fechaBonita} a las ${r.horaBonita}. Este es el enlace de la videollamada: `)}`;
+    b.append(a);
+  }
+  const x = el("button", "btn danger", conflicto ? "Ya lo resolví" : "Cancelar cita"); x.type = "button";
+  x.onclick = async () => {
+    if (!conflicto && !confirm(`¿Cancelar la cita de ${r.nombre}? La hora queda libre otra vez. Si corresponde, devuelve el dinero desde Stripe.`)) return;
+    x.disabled = true; try { await api({ accion: conflicto ? "resolver" : "cancelar", clave: r.clave }); cargar(); } catch (e) { alert(e.message); x.disabled = false; }
+  };
+  b.append(x); c.append(b); return c;
+}
+async function cargar() {
+  let d; try { d = await api(); } catch (e) { if (e.login) return pedirLogin(); out.replaceChildren(el("p", "note err", e.message)); return; }
+  document.getElementById("salir").hidden = false;
+  const nodes = [];
+  if (d.conflictos.length) {
+    nodes.push(el("p", "note err", "Estas personas pagaron una hora que alguien más tomó al mismo tiempo. Escríbeles para darles otro horario o devuélveles el dinero desde Stripe."));
+    d.conflictos.forEach(r => nodes.push(tarjeta(r, true)));
+  }
+  if (!d.reservas.length) nodes.push(el("p", "muted", "No tienes citas próximas."));
+  let dia = "";
+  d.reservas.forEach(r => { if (r.fecha !== dia) { dia = r.fecha; nodes.push(el("h2", "day", r.fechaBonita[0].toUpperCase() + r.fechaBonita.slice(1))); } nodes.push(tarjeta(r)); });
+  out.replaceChildren(...nodes);
+}
+document.getElementById("salir").onclick = () => id.logout();
+if (id) { id.on("init", cargar); id.on("login", () => { id.close(); cargar(); }); id.on("logout", pedirLogin); id.init(); }
+else out.replaceChildren(el("p", "note err", "No se pudo cargar el inicio de sesión."));
+</script>
+</body>
+</html>
