@@ -114,7 +114,7 @@ export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } =
     parrafos = [`<b>${esc(r.lectura)}</b> del ${esc(cuando)}.`,
       reembolso ? `Te devolví <b>$${esc(reembolso)}</b> a tu tarjeta. Puede tardar de 5 a 10 días en verse en tu estado de cuenta.` : r.canceladaPor === "negocio" ? "Si tienes alguna duda sobre tu pago, respóndeme a este correo." : "Como la cancelación fue fuera del plazo de la política, el pago no es reembolsable.",
       "Cuando quieras, puedes reservar otra cita en mi página."];
-    boton = { texto: "Reservar otra cita", url: `${origen}/#lecturas` };
+    boton = { texto: "Reservar otra cita", url: `${origen}/lecturas.html` };
   }
   const html = plantilla({ negocio, titulo, parrafos, boton, pie: "Guarda este correo: el botón es tu acceso privado a tu cita." });
   const text = `${titulo}\n\n${parrafos.map((p) => p.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "")).join("\n\n")}\n\n${boton.texto}: ${boton.url}`;

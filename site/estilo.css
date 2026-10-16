@@ -77,3 +77,7 @@ h1,h2,h3{font-family:"Cormorant",Georgia,"Times New Roman",serif;font-weight:600
 .pie-links{display:flex;flex-wrap:wrap;gap:8px 18px}
 .pie-links a{color:var(--muted);font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
 .pie-links a:hover{color:var(--ink)}
+
+/* logo: coronita junto al nombre */
+.brand{display:inline-flex;align-items:center;gap:9px;font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;text-decoration:none;line-height:1.1}
+.brand::before{content:"";flex:none;width:1.25em;height:1.25em;border-radius:.3em;background:#1A2340 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23D4AE52'%3E%3Cpath d='M12 42 9 22l12 9 11-15 11 15 12-9-3 20z'/%3E%3Ccircle cx='9' cy='20' r='3.2'/%3E%3Ccircle cx='32' cy='14' r='3.4'/%3E%3Ccircle cx='55' cy='20' r='3.2'/%3E%3Crect x='12' y='46' width='40' height='5' rx='1'/%3E%3C/g%3E%3C/svg%3E") center/82% no-repeat;box-shadow:0 0 0 1px rgba(212,174,82,.45)}

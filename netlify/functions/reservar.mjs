@@ -38,7 +38,7 @@ export default manejar(async (req) => {
       metadata: { tipo: "reserva", clave: k, fecha, hora, lectura: lectura.nombre, nombre, email, whatsapp, nota },
       expires_at: Math.floor(deps.ahora().getTime() / 1000) + 31 * 60,
       success_url: `${o}/gracias.html?s={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${o}/?cancelado=1#lecturas`,
+      cancel_url: `${o}/lecturas.html?cancelado=1`,
     });
     await store.setJSON(k, { ...apartado, sesion: sesion.id });
     return json({ url: sesion.url, sesion: sesion.id });

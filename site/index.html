@@ -32,10 +32,15 @@
 .arch{position:relative;aspect-ratio:3/4;border-radius:999px 999px 18px 18px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .arch img{width:100%;height:100%;object-fit:cover}
 .arch::after{content:"";position:absolute;inset:10px;border-radius:999px 999px 12px 12px;border:1px solid rgba(255,255,255,.7);pointer-events:none}
-.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:8px}
-.pillars a{background:var(--surface);padding:18px 20px;text-decoration:none;color:var(--ink)}
-.pillars b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.35rem;font-weight:600}
-.pillars span{color:var(--muted);font-size:.9rem}
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
+.pillars a{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 50% 0%,#2E4F9A 0%,#1A2340 75%);border:1px solid rgba(255,217,102,.45);border-radius:14px;padding:18px 20px;text-decoration:none;color:#fff;box-shadow:0 8px 22px rgba(26,35,64,.28),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .15s,box-shadow .15s,border-color .15s}
+.pillars a::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 5s ease-in-out infinite}
+.pillars a:nth-child(2)::after{animation-delay:.6s}.pillars a:nth-child(3)::after{animation-delay:1.2s}
+@keyframes brillo{0%,55%{transform:translateX(-120%)}80%,100%{transform:translateX(120%)}}
+.pillars a:hover{transform:translateY(-2px);border-color:#FFD966;box-shadow:0 12px 28px rgba(26,35,64,.38),0 0 18px rgba(255,217,102,.25)}
+.pillars b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.45rem;font-weight:600;color:#FFD966;text-shadow:0 0 12px rgba(255,217,102,.55)}
+.pillars span{color:#E6EAF7;font-size:.9rem}
+@media (prefers-reduced-motion:reduce){.pillars a::after{animation:none;display:none}}
 section{padding:72px 0;border-top:1px solid var(--line)}
 .sec-head{max-width:600px;margin-bottom:44px}
 .sec-head h2{font-size:clamp(2rem,4vw,2.9rem)}
@@ -67,6 +72,18 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .reading p{margin:0;color:var(--night-muted)}
 .reading .price{margin:auto 0 4px;padding-top:8px}
 .reading .price small{color:var(--night-muted)}
+.banda{display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:center}
+.banda-foto{display:block;border-radius:50%;overflow:hidden;aspect-ratio:1;border:3px solid var(--gold);box-shadow:0 0 0 6px rgba(217,182,90,.15),0 14px 40px rgba(0,0,0,.4)}
+.banda-foto img{width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+.banda-tx h2{font-size:clamp(2rem,4vw,2.8rem)}
+#lecIntro{color:var(--night-muted);font-size:1.02rem;line-height:1.65;margin:12px 0 20px;max-width:60ch}
+.estado{display:inline-flex;align-items:center;gap:10px;padding:7px 15px 7px 11px;border-radius:999px;font-weight:600;font-size:.92rem;margin-top:12px}
+.estado i{width:11px;height:11px;border-radius:50%;flex:none}
+.estado.on{background:rgba(64,128,255,.16);border:1px solid #4A8BFF;color:#CFE0FF}
+.estado.on i{background:#4A8BFF;box-shadow:0 0 0 4px rgba(74,139,255,.25),0 0 14px #4A8BFF}
+.estado.off{background:rgba(229,72,72,.14);border:1px solid #E54848;color:#FFD0D0}
+.estado.off i{background:#E54848;box-shadow:0 0 10px #E54848}
+@media (max-width:640px){.banda{grid-template-columns:96px 1fr;gap:16px;align-items:start}.banda-tx{display:contents}.banda-tx .kicker,.banda-tx h2,.banda-tx .estado{grid-column:2}.banda-foto{grid-row:1/4}.banda-tx h2{font-size:1.7rem}#lecIntro,#lecBtn{grid-column:1/-1}#lecIntro{margin:2px 0 4px;font-size:.96rem}#lecBtn{justify-self:start}.estado{margin-top:4px;font-size:.85rem;justify-self:start}}
 .on-night{background:var(--night-ink);color:var(--night);border-color:var(--night-ink)}
 .how{display:flex;gap:28px;flex-wrap:wrap;margin-top:36px;color:var(--night-muted);font-size:.95rem}
 .how b{color:var(--night-ink)}
@@ -103,6 +120,23 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 .slot{padding:10px 6px;font-weight:600}
 .day[aria-pressed="true"],.slot[aria-pressed="true"]{background:var(--blue);color:var(--bg);border-color:var(--blue)}
 .day[aria-pressed="true"] small{color:inherit}
+.agenda{background:#24407F;color:#fff;border-radius:16px;padding:6px 14px 16px;margin:4px -4px 0}
+.agenda .step{color:#fff}
+.agenda .muted{color:#D9DFF0}
+.agenda .mes{background:transparent;border-color:rgba(255,255,255,.25);max-width:none}
+.agenda .mes-tit{color:#fff}
+.agenda .mes-flecha{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+.agenda .mes-dsem{color:#F2D27A}
+.agenda .mes-dia{color:#fff}
+.agenda .mes-dia.t-libre{background:rgba(255,255,255,.14);color:#FFD966;border-color:rgba(255,255,255,.3)}
+.agenda .mes-dia.t-libre:hover{border-color:#FFD966}
+.agenda .mes-dia.t-fuera,.agenda .mes-dia.t-lleno{color:#fff;opacity:.38}
+.agenda .mes-dia[aria-pressed="true"]{background:#FFD966;color:#1A2340;border-color:#FFD966}
+.agenda .mes-ley{color:#D9DFF0}
+.agenda .mes-ley i{background:rgba(255,255,255,.14);border-color:#FFD966}
+.agenda .slot{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+.agenda .slot:hover{border-color:#FFD966}
+.agenda .slot[aria-pressed="true"]{background:#FFD966;color:#1A2340;border-color:#FFD966}
 .form{display:grid;gap:12px}
 .form label{display:grid;gap:4px;font-size:.9rem;font-weight:500}
 .form input,.form textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
@@ -129,7 +163,6 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .item:nth-child(even) .photo{order:0}
   .contact{grid-template-columns:1fr}
   .top nav{display:none}
-  .pillars{grid-template-columns:1fr}
 }
 /* Menú ☰ en el celular */
 .menu-btn,.menu-m{display:none}
@@ -156,10 +189,10 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .hero{gap:22px;padding:2px 0 34px}
   .hero h1{font-size:2.2rem;line-height:1.05}
   .hero p{font-size:.98rem;line-height:1.5;margin:10px 0 16px}
-  .pillars{grid-template-columns:repeat(3,1fr);border-radius:12px;margin:0}
-  .pillars a{padding:10px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:2px}
-  .pillars b{font-size:1.05rem;line-height:1.1}
-  .pillars span{font-size:.7rem;line-height:1.2}
+  .pillars{grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
+  .pillars a{padding:12px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px;border-radius:12px}
+  .pillars b{font-size:1.2rem;line-height:1.05}
+  .pillars span{font-size:.72rem;line-height:1.2}
   section{padding:44px 0}
   .sec-head{margin-bottom:26px}
   .sec-head p{margin-top:8px}
@@ -174,7 +207,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
     <a class="brand" href="#" id="brandName"></a>
     <nav aria-label="Secciones">
       <a href="#arreglos">Arreglos y mesas</a>
-      <a href="#lecturas">Lecturas</a>
+      <a href="/lecturas.html">Lecturas</a>
       <a href="/tienda.html">Queen Shop</a>
       <a href="#resenas">Reseñas</a>
       <a href="#contacto">Contacto</a>
@@ -186,7 +219,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   <nav class="menu-m" id="menuM" aria-label="Menú" hidden>
     <a href="#arreglos">Arreglos y mesas</a>
     <a href="/personaliza.html">Personaliza tu arreglo</a>
-    <a href="#lecturas">Lecturas de cartas</a>
+    <a href="/lecturas.html">Lecturas de cartas</a>
     <a href="/tienda.html">Queen Shop</a>
     <a href="#resenas">Reseñas</a>
     <a href="#contacto">Contacto</a>
@@ -200,7 +233,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <p id="heroText"></p>
       <div class="pillars">
         <a href="/personaliza.html"><b>Arreglos</b><span>Personalízalo</span></a>
-        <a href="#lecturas"><b>Lecturas</b><span>Cartas españolas</span></a>
+        <a href="/lecturas.html"><b>Lecturas</b><span>Cartas españolas</span></a>
         <a href="/tienda.html"><b>Queen Shop</b><span>Baños y más</span></a>
       </div>
     </div>
@@ -217,13 +250,14 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 </section>
 
 <section id="lecturas">
-  <div class="wrap">
-    <div class="sec-head"><span class="kicker">Lecturas</span><h2>Mensajes de tus ancestros</h2><p id="lecIntro"></p></div>
-    <div class="readings" id="readings"></div>
-    <div class="how">
-      <span><b>1.</b> Eliges el día y la hora</span>
-      <span><b>2.</b> Pagas con tarjeta</span>
-      <span><b>3.</b> Te escribo por WhatsApp con el enlace de la videollamada</span>
+  <div class="wrap banda">
+    <a class="banda-foto" href="/lecturas.html" tabindex="-1" aria-hidden="true"><img id="lecFotoMini" src="/images/uploads/lectura-queen.jpg" alt="" width="1039" height="1514" loading="lazy"></a>
+    <div class="banda-tx">
+      <span class="kicker">Lecturas de cartas españolas</span>
+      <h2>Mensajes de tus ancestros</h2>
+      <div class="estado" id="estado" hidden></div>
+      <p id="lecIntro"></p>
+      <a class="btn on-night" href="/lecturas.html" id="lecBtn">Ver calendario y reservar</a>
     </div>
   </div>
 </section>
@@ -272,15 +306,6 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   </div>
 </dialog>
 
-<dialog id="dlg" aria-labelledby="dlgTitle">
-  <div class="dlg">
-    <div class="dlg-head">
-      <div><h3 id="dlgTitle"></h3><div class="muted" id="dlgMeta"></div></div>
-      <button class="x" type="button" id="dlgClose" aria-label="Cerrar">×</button>
-    </div>
-    <div id="dlgBody"></div>
-  </div>
-</dialog>
 
 <script>
 /* Todo el contenido se cambia desde el panel: tu-sitio/admin */
@@ -373,101 +398,14 @@ function renderArreglos(A) {
   });
 }
 
-/* ───── Lecturas y reservas ───── */
-let LECTURAS = [];
+/* ───── Lecturas (la reserva con calendario está en /lecturas.html) ───── */
+const TEXTO_LEC = "Cada lectura es un espacio de conexión espiritual, donde, a través de mi mediumnidad y las cartas, transmito los mensajes que recibo de tus guías espirituales y ancestros. Una experiencia personal, guiada con respeto, sensibilidad y dedicación.";
 function renderLecturas(L) {
-  $("#lecIntro").textContent = s(L.intro);
-  LECTURAS = (L.lecturas || []).filter(l => l && l.visible !== false && s(l.nombre) && Number(l.precio) > 0);
-  const box = $("#readings");
-  box.classList.toggle("single", LECTURAS.length === 1);
-  LECTURAS.forEach(l => {
-    const c = el("article", "reading");
-    c.append(el("h3", null, l.nombre));
-    if (s(l.duracion)) c.append(el("span", "meta", `${l.duracion} · Videollamada`));
-    if (s(l.descripcion)) c.append(el("p", null, l.descripcion));
-    const pr = el("p", "price", dinero(l.precio) + " "); pr.append(el("small", null, "USD"));
-    const b = el("button", "btn on-night", "Reservar"); b.type = "button"; b.onclick = () => abrirReserva(l);
-    c.append(pr, b); box.append(c);
-  });
-  if (!LECTURAS.length) box.append(el("p", "muted", "Muy pronto podrás reservar tu lectura aquí."));
-}
-
-const dlg = $("#dlg"), body = $("#dlgBody");
-$("#dlgClose").onclick = () => dlg.close();
-dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-
-async function abrirReserva(l) {
-  $("#dlgTitle").textContent = l.nombre;
-  $("#dlgMeta").textContent = [s(l.duracion), "Videollamada", dinero(l.precio)].filter(Boolean).join(" · ");
-  body.replaceChildren(el("p", "muted", "Buscando horarios disponibles…"));
-  dlg.showModal();
-  let d;
-  try { d = await api("/api/disponibilidad"); }
-  catch (e) { return sinCalendario("No pude cargar el calendario en este momento."); }
-  if (!d.activas) return sinCalendario("Por ahora no estoy tomando reservas en línea.");
-  if (!d.dias.length) return sinCalendario("No me quedan horarios disponibles en las próximas semanas.");
-  pintarCalendario(l, d);
-}
-function sinCalendario(msg) {
-  const w = el("button", "btn btn-solid", "Hacer una consulta"); w.type = "button"; w.onclick = () => { dlg.close(); abrirSolicitud({ tipo: "Otra consulta", detalles: "Quiero reservar una lectura de cartas." }); };
-  body.replaceChildren(el("p", null, msg + " Déjame tu consulta y buscamos un espacio."), w);
-}
-function pintarCalendario(l, d) {
-  let dia = null, hora = null;
-  const slots = el("div", "slots"), next = el("div");
-  const porFecha = new Map(d.dias.map(x => [x.fecha, x]));
-  const ley = el("div", "mes-ley"); const li = el("span"); li.append(el("i"), "Días con horarios disponibles"); ley.append(li);
-  const cal = Mes({
-    min: d.dias[0].fecha, max: d.dias[d.dias.length - 1].fecha, mesInicial: d.dias[0].fecha,
-    tipo: f => porFecha.has(f) ? "libre" : "lleno",
-    seleccion: f => !!dia && dia.fecha === f,
-    alTocar: f => { dia = porFecha.get(f); hora = null; pintarHoras(); next.replaceChildren(); setTimeout(() => slots.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50); },
-    leyenda: ley,
-  });
-  const days = cal.el;
-  function pintarHoras() {
-    slots.replaceChildren(el("p", "muted", dia.etiqueta[0].toUpperCase() + dia.etiqueta.slice(1) + ":"));
-    slots.firstChild.style.cssText = "grid-column:1/-1;margin:0";
-    dia.horas.forEach(h => {
-      const b = el("button", "slot", h.etiqueta); b.type = "button"; b.setAttribute("aria-pressed", "false");
-      b.onclick = () => { hora = h; slots.querySelectorAll(".slot").forEach(y => y.setAttribute("aria-pressed", y === b)); pintarFormulario(); };
-      slots.append(b);
-    });
-  }
-  function pintarFormulario() {
-    const f = el("form", "form"); f.noValidate = true;
-    const campo = (lab, name, type, extra = {}) => { const L = el("label", null, lab), i = el(type === "textarea" ? "textarea" : "input"); if (type !== "textarea") i.type = type; i.name = name; Object.assign(i, extra); L.append(i); f.append(L); return i; };
-    const sum = el("div", "summary"); sum.textContent = `${l.nombre} · ${dia.etiqueta}, ${hora.etiqueta} (${d.zona})`;
-    campo("Tu nombre", "nombre", "text", { autocomplete: "name", required: true });
-    campo("Tu WhatsApp (ahí te mando el enlace de la videollamada)", "whatsapp", "tel", { autocomplete: "tel", required: true, placeholder: "512 555 1234" });
-    campo("Tu correo (para el recibo)", "email", "email", { autocomplete: "email", required: true });
-    campo("¿Algo que quieras contarme antes? (opcional)", "nota", "textarea", { rows: 2, maxLength: 450 });
-    const pol = el("div", "politica"); pol.append(el("b", null, "Política de cancelación"), el("p", null, textoPolitica(HORARIO)));
-    const ver = el("a", null, "Ver todas las políticas"); ver.href = "/politicas.html#cancelaciones"; ver.target = "_blank"; ver.rel = "noopener"; pol.append(ver);
-    const acL = el("label", "acepto"), ac = el("input"); ac.type = "checkbox"; ac.name = "acepta"; acL.append(ac, el("span", null, "Leí y acepto la política de cancelación"));
-    f.append(pol, acL);
-    const err = el("p", "note err"); err.hidden = true;
-    const go = el("button", "btn btn-solid", `Pagar ${dinero(l.precio)} y reservar`); go.type = "submit";
-    f.append(err, go);
-    f.onsubmit = async ev => {
-      ev.preventDefault(); err.hidden = true; go.disabled = true; go.textContent = "Abriendo el pago…";
-      const v = Object.fromEntries(new FormData(f));
-      try {
-        if (!ac.checked) throw new Error("Para reservar, marca que aceptas la política de cancelación.");
-        const r = await api("/api/reservar", { ...v, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora });
-        try { sessionStorage.setItem("reservaPendiente", r.sesion); } catch (e) {}
-        location.href = r.url;
-      } catch (e) {
-        err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = `Pagar ${dinero(l.precio)} y reservar`;
-        if (/horario/.test(e.message)) setTimeout(() => abrirReserva(l), 1800);
-      }
-    };
-    next.replaceChildren(sum, f);
-    f.querySelector("input").focus();
-  }
-  body.replaceChildren(el("p", "step", "1. Toca el día que quieras"), days, el("p", "step", "2. Elige la hora"), slots, next,
-    el("p", "muted", `Todos los horarios son en ${d.zona}.`));
-  slots.append(el("span", "muted", "Primero toca un día en el calendario.")); slots.lastChild.style.gridColumn = "1/-1";
+  const intro = s(L.intro);
+  $("#lecIntro").textContent = !intro || /no leo las cartas de memoria/i.test(intro) ? TEXTO_LEC : intro;
+  if (s(L.foto)) $("#lecFotoMini").src = L.foto;
+  const on = L.enLinea !== false, e = $("#estado"); e.hidden = false; e.className = "estado " + (on ? "on" : "off");
+  e.replaceChildren(el("i"), el("span", null, on ? "Disponible" : "No disponible ahora"));
 }
 
 /* ───── Queen Shop (vista previa; la tienda completa está en /tienda.html) ───── */
@@ -606,20 +544,13 @@ function abrirSolicitud(pre) {
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { abrir(false); btn.focus(); } });
   const sombra = () => cab.classList.toggle("sombra", scrollY > 4); addEventListener("scroll", sombra, { passive: true }); sombra();
 })();
-let HORARIO = {};
 Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario"].map(leer)).then(([N, A, L, P, R, SL, HO]) => {
-  HORARIO = HO || {};
   if (SL && typeof SL === "object" && "activo" in SL) { SOL = SL; if (s(SL.intro)) $("#solIntro").textContent = SL.intro; if (SL.activo === false) { $("#solCta").hidden = true; } }
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
 });
 
-// Si la persona volvió sin pagar, se libera el horario que tenía apartado.
-if (new URLSearchParams(location.search).has("cancelado")) {
-  let id = null; try { id = sessionStorage.getItem("reservaPendiente"); sessionStorage.removeItem("reservaPendiente"); } catch (e) {}
-  if (id) fetch("/api/liberar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sesion: id }) }).catch(() => {});
-  toast("No se completó el pago, así que la reserva no se hizo. Puedes intentarlo de nuevo cuando quieras.");
-  history.replaceState(null, "", location.pathname + location.hash);
-}
+// Enlaces viejos (/?cancelado=1#lecturas) → la página de lecturas
+if (new URLSearchParams(location.search).has("cancelado")) location.replace("/lecturas.html" + location.search);
 </script>
 <script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 </body>

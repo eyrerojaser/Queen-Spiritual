@@ -45,6 +45,13 @@ h1{font-size:clamp(2rem,6vw,2.6rem);margin:0 0 6px}
 .pill.off{background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--warn)}
 .pill.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+.estado-card{display:flex;align-items:center;justify-content:space-between;gap:14px 18px;flex-wrap:wrap}
+.estado-card > div{flex:1;min-width:200px}
+.onoff{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:700;font-size:1rem;padding:13px 22px 13px 16px;border-radius:999px;border:0;color:#fff;cursor:pointer;min-height:50px;transition:background .2s}
+.onoff i{width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.9)}
+.onoff.on{background:#2563EB;box-shadow:0 6px 18px rgba(37,99,235,.35)}
+.onoff.off{background:#DC2626;box-shadow:0 6px 18px rgba(220,38,38,.35)}
+.onoff[disabled]{opacity:.7}
 .card h2{font-family:"Figtree",sans-serif;font-size:1.1rem;font-weight:700;margin:0 0 4px}
 .card .sub{color:var(--muted);font-size:.9rem;margin:0 0 16px}
 /* formularios */
@@ -435,7 +442,7 @@ const SECCIONES = [
 ];
 async function inicio() {
   cargando();
-  const [res, hor, tie, arr, sol, enc] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos"), api("/api/panel/solicitudes"), api("/api/panel/encargos")]);
+  const [res, hor, tie, arr, sol, enc, lec] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos"), api("/api/panel/solicitudes"), api("/api/panel/encargos"), leer("lecturas")]);
   const activos = enc.encargos.filter(a => !a.pasado && a.estado !== "cancelado" && a.estado !== "entregado");
   const semana = activos.filter(a => (new Date(a.fecha + "T12:00") - new Date(enc.hoy + "T12:00")) / 864e5 <= 7).length;
   const nuevas = sol.solicitudes.filter(x => x.estado === "nueva").length, abiertas = sol.solicitudes.filter(x => x.estado !== "terminada").length;
@@ -450,11 +457,30 @@ async function inicio() {
   };
   marco(
     h("h1", null, "Hola 👋"), h("p", { class: "lead" }, "Todo lo de tu página, en un solo lugar. Los cambios se ven al momento."),
-    tarjetaInstalar(), tarjetaAvisos(),
+    tarjetaEstado(lec), tarjetaInstalar(), tarjetaAvisos(),
     SECCIONES.map(([g, ts]) => [h("div", { class: "group" }, g), h("div", { class: "tiles" }, ts.map(([id, ic, t, d]) => {
       const x = extra[id] || {};
       return h("a", { class: "tile", href: "#/" + id }, ico(ic), h("div", null, h("b", null, t), h("span", null, x.sub || d), x.pill ? h("em", { class: "pill " + x.pill[1], style: "font-style:normal" }, x.pill[0]) : null), x.badge ? h("i", { class: "badge", "aria-label": `${x.badge} pendientes`, style: "font-style:normal" }, x.badge) : null);
     }))]));
+}
+
+// Botón ON / OFF: lo que ven tus clientes en Lecturas (azul = disponible, rojo = no disponible)
+function tarjetaEstado(lec) {
+  let on = lec.enLinea !== false;
+  const b = h("button", { type: "button", class: "onoff" });
+  const txt = h("p", { class: "sub", style: "margin:0" });
+  const pintar = () => {
+    b.className = "onoff " + (on ? "on" : "off"); b.setAttribute("aria-pressed", String(on));
+    b.replaceChildren(h("i"), h("span", null, on ? "ON · Disponible" : "OFF · No disponible"));
+    txt.textContent = on ? "Tus clientes ven el botón azul: Disponible." : "Tus clientes ven el botón rojo: No disponible ahora. Igual pueden reservar para otro día.";
+  };
+  b.onclick = async () => {
+    b.disabled = true; const antes = on; on = !on; pintar();
+    try { const d = await leer("lecturas"); await guardar("lecturas", { ...d, enLinea: on }); } catch (e) { on = antes; pintar(); fallo(e); }
+    b.disabled = false;
+  };
+  pintar();
+  return h("div", { class: "card estado-card" }, h("div", null, h("h2", null, "¿Estás disponible para lecturas?"), txt), b);
 }
 
 /* ═════════ Reservas y pedidos ═════════ */
@@ -688,8 +714,9 @@ async function vistaLista(cfg) {
     })) : h("div", { class: "empty" }, cfg.vacio || "Todavía no hay nada aquí.");
     const intro = cfg.intro ? (() => {
       const t = h("textarea", { id: "intro", rows: 3 }); t.value = doc.intro || "";
-      const b = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { b.disabled = true; try { doc = await guardar(cfg.n, { ...doc, intro: t.value }); } catch (e) { fallo(e); } b.disabled = false; } }, "Guardar texto");
-      return h("div", { class: "card" }, h("div", { class: "fld" }, h("label", { for: "intro" }, cfg.intro), t), h("div", { style: "margin-top:12px" }, b));
+      const fo = cfg.introFoto ? campo({ k: "foto", t: "foto", label: cfg.introFoto }, doc.foto) : null;
+      const b = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { b.disabled = true; try { doc = await guardar(cfg.n, { ...doc, intro: t.value, ...(fo ? { foto: fo.get() } : {}) }); } catch (e) { fallo(e); } b.disabled = false; } }, fo ? "Guardar texto y foto" : "Guardar texto");
+      return h("div", { class: "card" }, h("div", { class: "fld" }, h("label", { for: "intro" }, cfg.intro), t), fo ? fo.nodo : null, h("div", { style: "margin-top:12px" }, b));
     })() : null;
     marco(...cabeza(cfg.titulo, cfg.lead), intro, cfg.cabecera ? cfg.cabecera(doc, d => { doc = d; }) : null, lista, h("button", { class: "btn btn-solid add", type: "button", onclick: () => abrir(null) }, `+ Agregar ${cfg.singular}`), cfg.pie ? cfg.pie() : null);
   };
@@ -699,6 +726,7 @@ async function vistaLista(cfg) {
 const lecturas = () => vistaLista({
   n: "lecturas", clave: "lecturas", titulo: "Lecturas", singular: "lectura", lead: "Lo que el cliente ve y paga al reservar.",
   intro: "Texto de la sección (arriba de tus lecturas)",
+  introFoto: "Tu foto de la sección de lecturas",
   nuevo: () => ({ nombre: "", duracion: "45 minutos", descripcion: "", precio: 35, visible: true }),
   requeridos: [["nombre", "Escribe el nombre de la lectura."], ["precio", "Escribe el precio."]],
   campos: [
@@ -906,15 +934,22 @@ async function calendario() {
     { k: "avisoHoras", t: "num", label: "Aviso mínimo (horas)", min: 0, hint: "Ej: 12 = nadie puede reservar para dentro de menos de 12 horas." },
     { k: "anticipacionDias", t: "num", label: "Se puede reservar hasta (días adelante)", min: 1 },
   ], doc);
-  const hora = (v, on) => { const i = h("input", { type: "time", step: 900, value: v || "", "aria-label": "Hora" }); i.oninput = () => on(i.value); return i; };
+  const HORAS = []; for (let m = 0; m < 24 * 60; m += 30) HORAS.push(String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"));
+  const bonita = x => { let [H, M] = x.split(":").map(Number); const ap = H < 12 ? "a. m." : "p. m."; H = H % 12 || 12; return `${H}:${String(M).padStart(2, "0")} ${ap}`; };
+  const hora = (v, on) => {
+    const lista = v && !HORAS.includes(v) ? [...HORAS, v].sort() : HORAS;
+    const i = h("select", { "aria-label": "Hora", style: "width:auto;min-width:122px" }, lista.map(x => h("option", { value: x, selected: x === v }, bonita(x))));
+    i.onchange = () => on(i.value); return i;
+  };
   const semana = h("div", { class: "wk" });
   const pintarSemana = () => semana.replaceChildren(...DIAS.map(([d, nombre]) => {
     const bl = sem[d], abierto = bl.length > 0;
     const sw = h("input", { type: "checkbox", checked: abierto, role: "switch", "aria-label": `${nombre}: trabajo` });
-    sw.onchange = () => { sem[d] = sw.checked ? [{ desde: "10:00", hasta: "14:00" }] : []; pintarSemana(); };
+    sw.onchange = () => { sem[d] = sw.checked ? [{ desde: "06:00", hasta: "20:00" }] : []; pintarSemana(); };
     const lado = abierto ? h("div", null, bl.map((b, i) => h("div", { class: "blk" }, hora(b.desde, v => b.desde = v), h("span", { class: "muted" }, "a"), hora(b.hasta, v => b.hasta = v),
         bl.length > 1 ? h("button", { class: "ib", type: "button", "aria-label": "Quitar horario", onclick: () => { bl.splice(i, 1); pintarSemana(); } }, "×") : null)),
-      h("button", { class: "lnk", type: "button", style: "font-size:.85rem;padding:6px 12px", onclick: () => { bl.push({ desde: "16:00", hasta: "19:00" }); pintarSemana(); } }, "+ Otro horario ese día"))
+      h("button", { class: "lnk", type: "button", style: "font-size:.85rem;padding:6px 12px", onclick: () => { bl.push({ desde: "16:00", hasta: "19:00" }); pintarSemana(); } }, "+ Otro horario ese día"),
+      h("button", { class: "lnk", type: "button", style: "font-size:.85rem;padding:6px 12px", onclick: () => { DIAS.forEach(([o]) => { sem[o] = bl.map(x => ({ ...x })); }); pintarSemana(); toast("Listo: los 7 días tienen este horario. Toca Guardar calendario."); } }, "Usar este horario todos los días"))
       : h("div", { class: "closed" }, "No trabajo");
     return h("div", { class: "wd" }, h("label", { class: "dn sw", style: "justify-content:flex-start" }, sw, nombre), lado);
   }));

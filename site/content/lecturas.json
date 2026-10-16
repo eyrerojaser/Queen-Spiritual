@@ -1,12 +1,14 @@
 {
-  "intro": "No leo las cartas de memoria. Soy medium: las cartas abren la comunicación, y son tus espíritus y tus ancestros los que hablan. Yo te transmito los mensajes que ellos envían para ti.",
+  "intro": "Cada lectura es un espacio de conexión espiritual, donde, a través de mi mediumnidad y las cartas, transmito los mensajes que recibo de tus guías espirituales y ancestros. Una experiencia personal, guiada con respeto, sensibilidad y dedicación.",
+  "foto": "/images/uploads/lectura-queen.jpg",
   "lecturas": [
     {
       "nombre": "Lectura espiritual con cartas españolas",
       "duracion": "45 minutos",
-      "descripcion": "Tres tiradas de cartas guiadas por mi mediumnidad. Recibes los mensajes de tus espíritus y ancestros, sobre lo que ellos quieran mostrarte en ese momento.",
+      "descripcion": "Tres tiradas de cartas españolas guiadas por mi mediumnidad. Recibes los mensajes de tus guías espirituales y ancestros, sobre lo que ellos quieran mostrarte en ese momento.",
       "precio": 35,
       "visible": true
     }
-  ]
+  ],
+  "enLinea": true
 }

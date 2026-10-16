@@ -22,7 +22,7 @@ export const ESQUEMAS = {
     arreglos: lista(obj({ tipo: uno(["Arreglo floral", "Centro de mesa", "Montaje de mesa"], "Arreglo floral"), nombre: str(100), ocasion: str(160), descripcion: str(800), flores: str(500), precio: str(20), foto: foto(), visible: bool(true) }), 300, (a) => a.nombre),
   }),
   lecturas: obj({
-    intro: str(800),
+    intro: str(800), foto: foto(), enLinea: bool(true),
     lecturas: lista(obj({ nombre: str(100), duracion: str(40), descripcion: str(800), precio: num(1, 10000, 1), visible: bool(true) }), 20, (l) => l.nombre),
   }),
   horario: obj({

@@ -52,7 +52,7 @@ async function cargar(aviso) {
   c.append(el("p", "big", d.lectura), el("p", null, `${cap(d.fechaBonita)} a las ${d.horaBonita} (hora de Texas)`), el("p", "muted", `Por videollamada · $${d.precio} pagado`));
   const out = [el("h1", null, d.estado === "cancelada" ? "Tu cita fue cancelada" : `Hola, ${d.nombre}`)];
   if (aviso) out.push(el("p", "note ok", aviso));
-  if (d.estado === "cancelada") { c.prepend(el("span", "pill off", "Cancelada")); out.push(c, el("p", "muted", d.reembolso ? `Te devolví $${d.reembolso} a tu tarjeta.` : "Esta cancelación no tuvo reembolso.")); const a = el("a", "btn btn-solid", "Reservar otra cita"); a.href = "/#lecturas"; out.push(a); m.replaceChildren(...out); return; }
+  if (d.estado === "cancelada") { c.prepend(el("span", "pill off", "Cancelada")); out.push(c, el("p", "muted", d.reembolso ? `Te devolví $${d.reembolso} a tu tarjeta.` : "Esta cancelación no tuvo reembolso.")); const a = el("a", "btn btn-solid", "Reservar otra cita"); a.href = "/lecturas.html"; out.push(a); m.replaceChildren(...out); return; }
   if (!d.activa) { c.prepend(el("span", "pill", "Ya pasó")); out.push(c); m.replaceChildren(...out); return; }
   c.prepend(el("span", "pill", "Reservada"));
   out.push(c);

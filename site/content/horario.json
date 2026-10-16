@@ -5,19 +5,39 @@
   "avisoHoras": 12,
   "semana": [
     {
+      "dia": "lunes",
+      "desde": "06:00",
+      "hasta": "20:00"
+    },
+    {
       "dia": "martes",
-      "desde": "10:00",
-      "hasta": "14:00"
+      "desde": "06:00",
+      "hasta": "20:00"
+    },
+    {
+      "dia": "miercoles",
+      "desde": "06:00",
+      "hasta": "20:00"
     },
     {
       "dia": "jueves",
-      "desde": "16:00",
+      "desde": "06:00",
+      "hasta": "20:00"
+    },
+    {
+      "dia": "viernes",
+      "desde": "06:00",
       "hasta": "20:00"
     },
     {
       "dia": "sabado",
-      "desde": "10:00",
-      "hasta": "13:00"
+      "desde": "06:00",
+      "hasta": "20:00"
+    },
+    {
+      "dia": "domingo",
+      "desde": "06:00",
+      "hasta": "20:00"
     }
   ],
   "cerrados": [],
