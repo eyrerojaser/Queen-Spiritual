@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="/estilo.css">
 <script src="/mes.js"></script>
 <script src="/politicas.js"></script>
+<script src="/resenas.js"></script>
 <style>
 /* barra */
 .top{display:flex;justify-content:space-between;align-items:center;padding-top:18px;padding-bottom:18px;gap:16px}
@@ -46,6 +47,30 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .sec-head h2{font-size:clamp(2rem,4vw,2.9rem)}
 .sec-head p{color:var(--muted);margin:12px 0 0}
 .kicker{display:block;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+/* arreglos: 3 por fila */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 22px}
+.tarj{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;text-align:left;font:inherit;color:inherit;padding:0}
+.tarj:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(26,35,64,.12)}
+.tarj .ft{aspect-ratio:3/4;background:var(--blue-soft);overflow:hidden}
+.tarj .ft img{width:100%;height:100%;object-fit:cover}
+.tarj .tx{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
+.tarj .tp{align-self:flex-start;font-size:.82rem;font-weight:700;color:#1A2340;background:#FFD966;padding:3px 10px;border-radius:999px;margin-bottom:4px}
+.tarj h3{font-size:1.45rem;line-height:1.1}
+.tarj .oc{color:var(--leaf);font-weight:600;font-size:.85rem}
+.tarj .ds{color:var(--muted);font-size:.9rem;line-height:1.45;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tarj .mas{margin-top:auto;padding-top:8px;font-size:.85rem;font-weight:600;color:var(--blue)}
+.det-foto{border-radius:12px;overflow:hidden;margin:0 0 14px;background:var(--blue-soft)}
+.det-foto img{width:100%;max-height:58dvh;object-fit:cover}
+@media (max-width:640px){
+  .grid3{gap:14px 8px}
+  .tarj{border-radius:10px}
+  .tarj .tx{padding:7px 7px 9px;gap:2px}
+  .tarj .tp{font-size:.74rem;padding:2px 8px;margin-bottom:3px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .tarj h3{font-size:1.1rem}
+  .tarj .oc{font-size:.68rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tarj .ds{font-size:.7rem;line-height:1.35;-webkit-line-clamp:3}
+  .tarj .mas{font-size:.7rem;padding-top:5px}
+}
 /* arreglos */
 .item{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:48px;align-items:center;margin-bottom:72px}
 .item:last-child{margin-bottom:0}
@@ -89,11 +114,6 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .how b{color:var(--night-ink)}
 .shop-cta{margin-top:32px}
 /* reseñas */
-.reviews{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.review{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin:0}
-.stars{color:var(--gold);letter-spacing:2px}
-.review blockquote{margin:10px 0 14px;font-family:"Cormorant",Georgia,serif;font-size:1.3rem;line-height:1.35}
-.review cite{color:var(--muted);font-style:normal;font-size:.9rem}
 .empty{background:var(--blue-soft);border-radius:14px;padding:32px;max-width:640px}
 .empty p{margin:0 0 18px}
 /* contacto */
@@ -245,7 +265,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   <div class="wrap">
     <div class="sec-head"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><p style="margin-top:18px"><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></p></div>
     <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo" hidden></div>
-    <div id="catalog"></div>
+    <div id="catalog" class="grid3"></div>
   </div>
 </section>
 
@@ -272,8 +292,10 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 
 <section id="resenas">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Reseñas</span><h2>Lo que dicen mis clientes</h2></div>
+    <div class="sec-head"><span class="kicker">Reseñas</span><h2>Lo que dicen mis clientes</h2><p>De mis arreglos y de mis lecturas de cartas.</p></div>
+    <div class="chips rv-filtro" id="rvFiltro" role="group" aria-label="Filtrar reseñas" hidden></div>
     <div id="reviewList"></div>
+    <div class="rv-acciones" id="rvAcciones"></div>
   </div>
 </section>
 
@@ -369,19 +391,15 @@ function renderArreglos(A) {
   const lista = (A.arreglos || []).filter(a => a && a.visible !== false && s(a.nombre));
   lista.forEach(a => {
     const tipo = s(a.tipo) || "Arreglo floral";
-    const item = el("article", "item"), ph = el("div", "photo");
-    item.dataset.tipo = tipo;
-    if (s(a.foto)) { const im = el("img"); im.src = a.foto; im.alt = `${tipo}: ${a.nombre}`; im.loading = "lazy"; ph.append(im); }
-    const tx = el("div");
-    tx.append(el("span", "tipo", tipo), el("h3", null, a.nombre));
-    if (s(a.ocasion)) tx.append(el("p", "occasion", a.ocasion));
-    if (s(a.descripcion)) tx.append(el("p", "desc", a.descripcion));
-    if (s(a.flores)) tx.append(el("p", "flowers", a.flores));
-    let o;
-    if (tipo === "Arreglo floral" && Number(String(a.precio || "").replace(/[^\d.]/g, "")) > 0) { o = el("a", "btn btn-solid", "Personaliza tu arreglo"); o.href = `/personaliza.html?ref=${encodeURIComponent(a.nombre)}&ocasion=${encodeURIComponent(s(a.ocasion))}`; }
-    else { o = el("button", "btn btn-solid", "Solicitar"); o.type = "button"; o.onclick = () => abrirSolicitud({ tipo, referencia: a.nombre, ocasion: s(a.ocasion) }); }
-    const b = el("div", "btns"); b.append(o);
-    tx.append(b); item.append(ph, tx); cat.append(item);
+    const c = el("button", "tarj"); c.type = "button"; c.dataset.tipo = tipo; c.setAttribute("aria-label", `Ver ${a.nombre}`);
+    const ft = el("div", "ft");
+    if (s(a.foto)) { const im = el("img"); im.src = a.foto; im.alt = `${tipo}: ${a.nombre}`; im.loading = "lazy"; ft.append(im); }
+    const tx = el("div", "tx");
+    tx.append(el("span", "tp", tipo), el("h3", null, a.nombre));
+    if (s(a.ocasion)) tx.append(el("span", "oc", a.ocasion));
+    if (s(a.descripcion)) tx.append(el("p", "ds", a.descripcion));
+    tx.append(el("span", "mas", "Ver más →"));
+    c.append(ft, tx); c.onclick = () => verArreglo(a); cat.append(c);
   });
   if (!cat.children.length) { cat.append(el("p", "muted", "Muy pronto encontrarás aquí mis arreglos.")); return; }
   // Botones para filtrar, solo si hay más de un tipo
@@ -392,10 +410,27 @@ function renderArreglos(A) {
     const b = el("button", null, t); b.type = "button"; b.setAttribute("aria-pressed", i === 0);
     b.onclick = () => {
       chips.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
-      cat.querySelectorAll(".item").forEach(it => { it.hidden = i !== 0 && it.dataset.tipo !== t; });
+      cat.querySelectorAll(".tarj").forEach(it => { it.hidden = i !== 0 && it.dataset.tipo !== t; });
     };
     chips.append(b);
   });
+}
+// Detalle de un arreglo: foto grande, descripción completa y el botón para pedirlo.
+function verArreglo(a) {
+  const tipo = s(a.tipo) || "Arreglo floral";
+  $("#solTitle").textContent = a.nombre; $("#solMeta").textContent = tipo;
+  const box = el("div");
+  if (s(a.foto)) { const f = el("div", "det-foto"), im = el("img"); im.src = a.foto; im.alt = `${tipo}: ${a.nombre}`; f.append(im); box.append(f); }
+  if (s(a.ocasion)) box.append(el("p", "occasion", a.ocasion));
+  if (s(a.descripcion)) box.append(el("p", "desc", a.descripcion));
+  if (s(a.flores)) box.append(el("p", "flowers", a.flores));
+  let o;
+  if (tipo === "Arreglo floral" && Number(String(a.precio || "").replace(/[^\d.]/g, "")) > 0) { o = el("a", "btn btn-solid", "Personaliza tu arreglo"); o.href = `/personaliza.html?ref=${encodeURIComponent(a.nombre)}&ocasion=${encodeURIComponent(s(a.ocasion))}`; }
+  else { o = el("button", "btn btn-solid", "Solicitar"); o.type = "button"; o.onclick = () => abrirSolicitud({ tipo, referencia: a.nombre, ocasion: s(a.ocasion) }); }
+  const b = el("div", "btns"); b.append(o); box.append(b);
+  solBody.replaceChildren(box);
+  if (!solDlg.open) solDlg.showModal();
+  solBody.parentElement.scrollTop = 0;
 }
 
 /* ───── Lecturas (la reserva con calendario está en /lecturas.html) ───── */
@@ -432,24 +467,27 @@ function renderTienda(T) {
 }
 
 function renderResenas(R, C) {
-  const rl = $("#reviewList"), res = (R.resenas || []).filter(r => r && s(r.texto));
-  const linkRes = safeUrl(s(C.enlaceResenas));
-  if (res.length) {
-    const g = el("div", "reviews");
-    res.forEach(r => {
-      const n = Math.max(1, Math.min(5, parseInt(r.estrellas, 10) || 5));
-      const c = el("figure", "review"), st = el("div", "stars", "★".repeat(n) + "☆".repeat(5 - n));
-      st.setAttribute("aria-label", `${n} de 5 estrellas`);
-      c.append(st, el("blockquote", null, r.texto), el("cite", null, s(r.nombre))); g.append(c);
-    });
-    rl.append(g);
-    if (linkRes) { const b = el("a", "btn btn-line", "Dejar una reseña"); b.href = linkRes; b.style.marginTop = "24px"; rl.append(ext(b)); }
+  const rl = $("#reviewList"), todas = (R.resenas || []).filter(r => r && s(r.texto) && r.visible !== false);
+  const pintar = tipo => rl.replaceChildren(Resenas.tarjetas(tipo ? todas.filter(r => (r.tipo || "Arreglos") === tipo) : todas));
+  if (todas.length) {
+    pintar("");
+    const tipos = [...new Set(todas.map(r => r.tipo || "Arreglos"))];
+    if (tipos.length > 1) {
+      const f = $("#rvFiltro"); f.hidden = false;
+      [["", "Todas"], ["Arreglos", "Arreglos"], ["Lecturas", "Lecturas de cartas"]].forEach(([t, n], i) => {
+        const b = el("button", null, n); b.type = "button"; b.setAttribute("aria-pressed", String(i === 0));
+        b.onclick = () => { f.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); pintar(t); };
+        f.append(b);
+      });
+    }
   } else {
     const e = el("div", "empty");
     e.append(el("p", null, "Las reseñas de mis clientes aparecerán aquí muy pronto. Si ya recibiste un arreglo o una lectura, me encantaría saber tu opinión."));
-    if (linkRes) { const b = el("a", "btn btn-solid", "Dejar una reseña"); b.href = linkRes; e.append(ext(b)); }
     rl.append(e);
   }
+  const ac = $("#rvAcciones"), d = el("button", "btn btn-solid", "⭐ Deja tu reseña"); d.type = "button"; d.onclick = () => Resenas.abrir("Arreglos"); ac.append(d);
+  const linkRes = safeUrl(s(C.enlaceResenas));
+  if (linkRes) { const b = el("a", "btn btn-line", "Reseña en Google"); b.href = linkRes; ac.append(ext(b)); }
 }
 
 /* ───── Solicitudes (arreglos, centros de mesa, montajes y consultas) ───── */
@@ -531,7 +569,7 @@ function abrirSolicitud(pre) {
   };
   pintar();
   solBody.replaceChildren(f);
-  solDlg.showModal();
+  if (!solDlg.open) solDlg.showModal();
 }
 
 // Menú ☰ del celular

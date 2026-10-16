@@ -61,6 +61,6 @@ export const ESQUEMAS = {
     cerrados: lista(obj({ fecha: fecha(), motivo: str(120) }), 400, (c) => c.fecha),
   }),
   resenas: obj({
-    resenas: lista(obj({ nombre: str(80), estrellas: uno(["5", "4", "3", "2", "1"], "5"), texto: str(1200) }), 300, (r) => r.texto),
+    resenas: lista(obj({ nombre: str(80), estrellas: uno(["5", "4", "3", "2", "1"], "5"), texto: str(1200), tipo: uno(["Arreglos", "Lecturas"], "Arreglos"), foto: foto(), fecha: fecha(), visible: bool(true) }), 300, (r) => r.texto),
   }),
 };

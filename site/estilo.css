@@ -81,3 +81,44 @@ h1,h2,h3{font-family:"Cormorant",Georgia,"Times New Roman",serif;font-weight:600
 /* logo: coronita junto al nombre */
 .brand{display:inline-flex;align-items:center;gap:9px;font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;text-decoration:none;line-height:1.1}
 .brand::before{content:"";flex:none;width:1.25em;height:1.25em;border-radius:.3em;background:#1A2340 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23D4AE52'%3E%3Cpath d='M12 42 9 22l12 9 11-15 11 15 12-9-3 20z'/%3E%3Ccircle cx='9' cy='20' r='3.2'/%3E%3Ccircle cx='32' cy='14' r='3.4'/%3E%3Ccircle cx='55' cy='20' r='3.2'/%3E%3Crect x='12' y='46' width='40' height='5' rx='1'/%3E%3C/g%3E%3C/svg%3E") center/82% no-repeat;box-shadow:0 0 0 1px rgba(212,174,82,.45)}
+
+/* reseñas (portada y lecturas) */
+.reviews{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;align-items:start}
+.review{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;margin:0;overflow:hidden;display:flex;flex-direction:column}
+.rv-foto{display:block;width:100%;padding:0;border:0;background:var(--blue-soft);cursor:zoom-in}
+.rv-foto img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.rv-cuerpo{padding:20px 22px 22px}
+.review .stars{color:var(--gold);letter-spacing:2px}
+.review blockquote{margin:8px 0 14px;font-family:"Cormorant",Georgia,serif;font-size:1.3rem;line-height:1.35}
+.review figcaption{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.review cite{color:var(--muted);font-style:normal;font-size:.9rem;font-weight:600}
+.rv-tipo{font-size:.75rem;font-weight:600;color:var(--blue);background:var(--blue-soft);padding:3px 10px;border-radius:999px}
+.rv-filtro{margin:0 0 22px}
+.rv-acciones{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
+.rv-ver{border:0;padding:0;background:transparent;max-width:min(92vw,900px);max-height:92dvh}
+.rv-ver::backdrop{background:rgba(10,14,28,.85)}
+.rv-ver img{max-width:100%;max-height:88dvh;border-radius:12px;display:block;margin:0 auto}
+.rv-x{position:fixed;top:12px;right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:1.8rem;line-height:1;cursor:pointer}
+/* ventana "Deja tu reseña" */
+.rv-dlg{border:0;border-radius:18px;padding:0;width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.rv-dlg::backdrop{background:rgba(14,19,38,.6)}
+.rv-dlg .dlg{padding:22px 18px 22px;overflow:auto;overflow-x:hidden;max-height:calc(100dvh - 24px)}
+.rv-dlg .dlg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.rv-dlg .dlg-head h3{font-size:1.8rem}
+.rv-dlg .x{background:none;border:0;font-size:1.8rem;line-height:1;color:var(--muted);cursor:pointer;padding:4px 8px}
+.rv-form{display:grid;gap:14px}
+.rv-form label{display:grid;gap:4px;font-size:.9rem;font-weight:500}
+.rv-form input,.rv-form textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+.rv-form .lab{font-size:.9rem;font-weight:500;margin-bottom:6px}
+.rv-form .seg{display:flex;flex-wrap:wrap;gap:8px}
+.rv-form .seg button{font:inherit;font-size:.92rem;font-weight:500;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.rv-form .seg button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+.rv-estrellas{display:flex;gap:4px}
+.rv-estrellas button{font-size:2rem;line-height:1;width:46px;height:46px;border:0;background:none;color:var(--line);cursor:pointer;padding:0}
+.rv-estrellas button.llena{color:var(--gold)}
+.rv-pv img{max-height:180px;border-radius:12px;margin-bottom:10px}
+.rv-fbtns{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.lnk-q{background:none;border:0;color:var(--warn);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer}
+.rv-form .trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.rv-dlg .done{text-align:center;padding:10px 0}
+.rv-dlg .done h4{font-family:"Cormorant",Georgia,serif;font-size:2rem;margin:0 0 8px}

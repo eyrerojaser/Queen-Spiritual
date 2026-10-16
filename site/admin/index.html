@@ -45,6 +45,9 @@ h1{font-size:clamp(2rem,6vw,2.6rem);margin:0 0 6px}
 .pill.off{background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--warn)}
 .pill.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+.rv-pend{display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.rv-pend > a{flex:none}
+.rv-pend img{width:84px;height:84px;object-fit:cover;border-radius:12px}
 .estado-card{display:flex;align-items:center;justify-content:space-between;gap:14px 18px;flex-wrap:wrap}
 .estado-card > div{flex:1;min-width:200px}
 .onoff{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:700;font-size:1rem;padding:13px 22px 13px 16px;border-radius:999px;border:0;color:#fff;cursor:pointer;min-height:50px;transition:background .2s}
@@ -443,6 +446,7 @@ const SECCIONES = [
 async function inicio() {
   cargando();
   const [res, hor, tie, arr, sol, enc, lec] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos"), api("/api/panel/solicitudes"), api("/api/panel/encargos"), leer("lecturas")]);
+  const rvp = await api("/api/panel/resenas").catch(() => ({ pendientes: [] }));
   const activos = enc.encargos.filter(a => !a.pasado && a.estado !== "cancelado" && a.estado !== "entregado");
   const semana = activos.filter(a => (new Date(a.fecha + "T12:00") - new Date(enc.hoy + "T12:00")) / 864e5 <= 7).length;
   const nuevas = sol.solicitudes.filter(x => x.estado === "nueva").length, abiertas = sol.solicitudes.filter(x => x.estado !== "terminada").length;
@@ -454,6 +458,7 @@ async function inicio() {
     calendario: { pill: hor.reservasActivas === false ? ["Reservas cerradas", "off"] : ["Reservas abiertas", "ok"] },
     tienda: { sub: `${tie.productos.length} producto${tie.productos.length === 1 ? "" : "s"}` },
     arreglos: { sub: `${arr.arreglos.length} publicado${arr.arreglos.length === 1 ? "" : "s"}` },
+    resenas: rvp.pendientes.length ? { badge: rvp.pendientes.length, sub: `${rvp.pendientes.length} por aprobar` } : {},
   };
   marco(
     h("h1", null, "Hola 👋"), h("p", { class: "lead" }, "Todo lo de tu página, en un solo lugar. Los cambios se ven al momento."),
@@ -819,15 +824,41 @@ const flores = () => vistaLista({
 });
 
 const resenas = () => vistaLista({
-  n: "resenas", clave: "resenas", titulo: "Reseñas", singular: "reseña", lead: "Copia aquí lo que te dicen tus clientes. El enlace para que dejen reseña en Google va en “Negocio y contacto”.",
-  nuevo: () => ({ nombre: "", estrellas: "5", texto: "" }),
+  n: "resenas", clave: "resenas", titulo: "Reseñas", singular: "reseña", lead: "Las que te mandan tus clientes llegan primero aquí para que las apruebes. También puedes agregar las que ya tienes, con su foto.",
+  nuevo: () => ({ nombre: "", tipo: "Arreglos", estrellas: "5", texto: "", foto: "", visible: true }),
   requeridos: [["texto", "Escribe lo que dijo el cliente."]],
   campos: [
+    { k: "tipo", t: "seg", label: "¿De qué es la reseña?", ops: [["Arreglos", "Arreglo o mesa"], ["Lecturas", "Lectura de cartas"]] },
     { k: "nombre", t: "text", label: "Nombre del cliente", ph: "Ej: María G." },
     { k: "estrellas", t: "seg", label: "Estrellas", ops: [["5", "★★★★★"], ["4", "★★★★"], ["3", "★★★"]] },
     { k: "texto", t: "area", label: "Lo que dijo", rows: 4 },
+    { k: "foto", t: "foto", label: "Foto (opcional)", hint: "La foto del arreglo que te mandó el cliente, o una captura de su mensaje." },
+    { k: "visible", t: "bool", label: "Mostrar en la página" },
   ],
-  resumen: r => ({ titulo: r.nombre || "Cliente", sub: "★".repeat(+r.estrellas || 5) + " · " + s(r.texto).slice(0, 70) + (s(r.texto).length > 70 ? "…" : "") }),
+  resumen: r => ({ titulo: r.nombre || "Cliente", foto: r.foto, sub: "★".repeat(+r.estrellas || 5) + " · " + s(r.texto).slice(0, 70) + (s(r.texto).length > 70 ? "…" : ""), pills: [[r.tipo === "Lecturas" ? "Lectura" : "Arreglo"]] }),
+  cabecera: () => {
+    const box = h("div");
+    api("/api/panel/resenas").then(({ pendientes }) => {
+      if (!pendientes.length) return;
+      const accion = async (r, accion, b) => {
+        b.disabled = true;
+        try { await api("/api/panel/resenas", { method: "POST", body: { clave: r.clave, accion } }); delete cache.resenas; toast(accion === "publicar" ? "Publicada ✓ Ya sale en tu página." : "Borrada"); resenas(); }
+        catch (e) { fallo(e); b.disabled = false; }
+      };
+      box.replaceChildren(h("div", { class: "card", style: "border-color:var(--gold)" },
+        h("h2", null, `⭐ Por aprobar (${pendientes.length})`), h("p", { class: "sub" }, "Te las mandaron desde tu página. Solo salen cuando tocas Publicar."),
+        pendientes.map(r => h("div", { class: "rv-pend" },
+          r.foto ? h("a", { href: r.foto, target: "_blank", rel: "noopener" }, h("img", { src: r.foto, alt: "Foto de la reseña" })) : null,
+          h("div", null,
+            h("div", null, h("b", null, r.nombre), " ", h("span", { class: "pill" }, r.tipo === "Lecturas" ? "Lectura" : "Arreglo")),
+            h("div", { style: "color:var(--gold);letter-spacing:2px" }, "★".repeat(+r.estrellas || 5)),
+            h("p", { style: "margin:4px 0 10px;white-space:pre-wrap" }, r.texto),
+            h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+              h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: e => accion(r, "publicar", e.currentTarget) }, "Publicar"),
+              h("button", { class: "btn btn-line btn-sm", type: "button", onclick: e => { if (confirm("¿Borrar esta reseña? No se puede deshacer.")) accion(r, "borrar", e.currentTarget); } }, "Borrar")))))));
+    }).catch(fallo);
+    return box;
+  },
 });
 
 /* ═════════ Formularios sueltos ═════════ */

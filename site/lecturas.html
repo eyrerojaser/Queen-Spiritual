@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/estilo.css">
 <script src="/mes.js"></script>
 <script src="/politicas.js"></script>
+<script src="/resenas.js"></script>
 <style>
 body{background:var(--night);color:var(--night-ink)}
 .cabecera{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--night) 92%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--night-line)}
@@ -93,6 +94,10 @@ body{background:var(--night);color:var(--night-ink)}
 .politica p{margin:4px 0 6px;color:var(--muted)}
 .acepto{display:flex!important;gap:10px;align-items:flex-start;font-weight:600}
 .acepto input{width:20px;height:20px;margin-top:2px;flex:none}
+.lec-res{padding-top:8px;padding-bottom:56px}
+.lec-res h2{font-size:clamp(1.9rem,4vw,2.5rem);margin-bottom:22px}
+.on-night{background:var(--night-ink);color:var(--night);border-color:var(--night-ink)}
+.lec-res .empty{color:var(--night-muted);margin:0}
 footer{padding:28px 0 40px;border-top:1px solid var(--night-line);color:var(--night-muted);font-size:.9rem}
 footer .pie-links a{color:var(--night-muted)}
 footer .pie-links a:hover{color:var(--night-ink)}
@@ -157,6 +162,13 @@ footer .pie-links a:hover{color:var(--night-ink)}
     </div>
   </div>
 </main>
+
+<section class="wrap lec-res" id="resenas">
+  <span class="kicker">Reseñas</span>
+  <h2>Lo que dicen de mis lecturas</h2>
+  <div id="rvLec"></div>
+  <div class="rv-acciones"><button class="btn on-night" type="button" id="rvBtn">⭐ Deja tu reseña</button></div>
+</section>
 
 <footer><div class="wrap pie"><span id="footText"></span><nav class="pie-links" aria-label="Políticas"><a href="/politicas.html#cancelaciones">Cancelaciones</a><a href="/politicas.html#lecturas">Lecturas</a><a href="/politicas.html#privacidad">Privacidad</a><a href="/politicas.html">Todas las políticas</a></nav></div></footer>
 
@@ -273,6 +285,11 @@ function pintarCalendario(d) {
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { abrir(false); btn.focus(); } });
 })();
 
+$("#rvBtn").onclick = () => Resenas.abrir("Lecturas");
+leer("resenas").then(R => {
+  const l = (R.resenas || []).filter(r => r && s(r.texto) && r.visible !== false && r.tipo === "Lecturas");
+  $("#rvLec").replaceChildren(l.length ? Resenas.tarjetas(l) : el("p", "empty", "Sé la primera persona en contar cómo fue tu lectura."));
+});
 Promise.all(["negocio", "lecturas", "horario"].map(leer)).then(([N, L, HO]) => {
   HORARIO = HO || {};
   const nombre = s(N.nombre) || "Queen Spiritual";
