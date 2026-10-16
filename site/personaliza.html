@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Personaliza tu arreglo</title>
-<meta name="description" content="Elige tu arreglo, marca tus flores favoritas, la fecha de tu celebración y paga un depósito para confirmarlo.">
+<title>Personaliza tu arreglo para los orishas · Queen Spiritual</title>
+<meta name="description" content="Elige tu arreglo floral para Obatalá, Yemayá, Oshún, Elegua y más, marca tus flores favoritas y la fecha de tu celebración. Entrega o recogida en Texas.">
+<link rel="canonical" href="https://SITIO/personaliza.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Queen Spiritual">
+<meta property="og:locale" content="es_US">
+<meta property="og:title" content="Personaliza tu arreglo para los orishas · Queen Spiritual">
+<meta property="og:description" content="Elige tu arreglo floral para Obatalá, Yemayá, Oshún, Elegua y más, marca tus flores favoritas y la fecha de tu celebración. Entrega o recogida en Texas.">
+<meta property="og:url" content="https://SITIO/personaliza.html">
+<meta property="og:image" content="https://SITIO/images/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/iconos/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
@@ -361,7 +372,7 @@ function armar() {
 }
 
 Promise.all(["negocio", "flores", "solicitudes", "politicas", "arreglos"].map(leer)).then(([N, F, SO, PO, AR]) => {
-  if (s(N.nombre)) { $("#marca").textContent = N.nombre; document.title = `Personaliza tu arreglo · ${N.nombre}`; }
+  if (s(N.nombre)) { $("#marca").textContent = N.nombre; }
   CFG = F || {}; POL = PO || {};
   CERRADOS = new Set((SO.cerrados || []).map(c => String(c.fecha).slice(0, 10)));
   const dias = parseInt(CFG.anticipacionDias, 10) || 0;

@@ -3,8 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Lecturas de cartas españolas · Queen Spiritual</title>
-<meta name="description" content="Lecturas espirituales con cartas españolas por videollamada. A través de mi mediumnidad te transmito los mensajes de tus guías espirituales y ancestros. Reserva tu día y hora.">
+<title>Lecturas de cartas españolas por videollamada · Queen Spiritual</title>
+<meta name="description" content="Lectura espiritual con cartas españolas por videollamada. A través de mi mediumnidad te transmito los mensajes de tus guías espirituales y ancestros. Elige tu día y hora y reserva en línea.">
+<link rel="canonical" href="https://SITIO/lecturas.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Queen Spiritual">
+<meta property="og:locale" content="es_US">
+<meta property="og:title" content="Lecturas de cartas españolas por videollamada · Queen Spiritual">
+<meta property="og:description" content="Lectura espiritual con cartas españolas por videollamada. A través de mi mediumnidad te transmito los mensajes de tus guías espirituales y ancestros. Elige tu día y hora y reserva en línea.">
+<meta property="og:url" content="https://SITIO/lecturas.html">
+<meta property="og:image" content="https://SITIO/images/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Service", "name": "Lectura espiritual con cartas españolas", "serviceType": "Lectura de cartas españolas", "provider": {"@id": "https://SITIO/#negocio", "@type": "Florist", "name": "Queen Spiritual"}, "areaServed": "Online", "availableChannel": {"@type": "ServiceChannel", "serviceUrl": "https://SITIO/lecturas.html", "name": "Videollamada"}, "offers": {"@type": "Offer", "price": "35", "priceCurrency": "USD", "url": "https://SITIO/lecturas.html"}, "description": "Tres tiradas de cartas españolas guiadas por mediumnidad, por videollamada. Mensajes de tus guías espirituales y ancestros."}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -294,7 +306,7 @@ Promise.all(["negocio", "lecturas", "horario"].map(leer)).then(([N, L, HO]) => {
   HORARIO = HO || {};
   const nombre = s(N.nombre) || "Queen Spiritual";
   $("#brandName").textContent = nombre; $("#footText").textContent = `© ${new Date().getFullYear()} ${nombre}`;
-  document.title = `Lecturas de cartas españolas · ${nombre}`;
+
   const intro = s(L.intro);
   $("#lecIntro").textContent = !intro || /no leo las cartas de memoria/i.test(intro) ? TEXTO : intro;
   if (s(L.foto)) $("#lecFoto img").src = L.foto;

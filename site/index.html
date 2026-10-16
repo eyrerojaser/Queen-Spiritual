@@ -4,7 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Queen Spiritual · Arreglos yorubas, lecturas de cartas y baños espirituales</title>
-<meta name="description" content="Arreglos florales, centros de mesa y montaje de mesas para celebraciones yorubas: cumpleaños de santo, tambores y ofrendas a los orishas. Lecturas de cartas españolas y guías de baños espirituales.">
+<meta name="description" content="Arreglos florales, centros de mesa y montaje de mesas para celebraciones yorubas en Texas: cumpleaños de santo, tambores y ofrendas a los orishas. Lecturas de cartas españolas por videollamada y baños espirituales.">
+<link rel="canonical" href="https://SITIO/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Queen Spiritual">
+<meta property="og:locale" content="es_US">
+<meta property="og:title" content="Queen Spiritual · Arreglos yorubas, lecturas de cartas y baños espirituales">
+<meta property="og:description" content="Arreglos florales, centros de mesa y montaje de mesas para celebraciones yorubas en Texas: cumpleaños de santo, tambores y ofrendas a los orishas. Lecturas de cartas españolas por videollamada y baños espirituales.">
+<meta property="og:url" content="https://SITIO/">
+<meta property="og:image" content="https://SITIO/images/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Florist", "@id": "https://SITIO/#negocio", "name": "Queen Spiritual", "url": "https://SITIO/", "image": "https://SITIO/images/compartir.jpg", "logo": "https://SITIO/iconos/icon-512.png", "description": "Arreglos florales, centros de mesa y montaje de mesas para celebraciones yorubas: cumpleaños de santo, tambores y ofrendas a los orishas. Lecturas de cartas españolas por videollamada y baños espirituales.", "areaServed": {"@type": "State", "name": "Texas"}, "address": {"@type": "PostalAddress", "addressRegion": "TX", "addressCountry": "US"}, "inLanguage": "es", "knowsAbout": ["Arreglos florales para orishas", "Centros de mesa para cumpleaños de santo", "Montaje de mesas para tambores", "Lectura de cartas españolas", "Baños espirituales"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
@@ -207,6 +219,8 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .top{padding-top:8px;padding-bottom:8px}
   .brand{font-size:1.35rem}
   .hero{gap:22px;padding:2px 0 34px}
+  .arch{width:64%;max-width:260px;margin:0 auto}
+  .arch::after{inset:7px}
   .hero h1{font-size:2.2rem;line-height:1.05}
   .hero p{font-size:.98rem;line-height:1.5;margin:10px 0 16px}
   .pillars{grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
@@ -361,7 +375,7 @@ const ICONS = {
 function renderNegocio(N) {
   const C = N.contacto || {}, nombre = s(N.nombre) || "Mi negocio";
   WA = s(C.whatsapp).replace(/\D/g, "");
-  document.title = `${nombre} · Arreglos, lecturas de cartas y baños espirituales`;
+
   $("#brandName").textContent = nombre;
   $("#heroTitle").textContent = s(N.titulo);
   $("#heroText").textContent = s(N.frase);

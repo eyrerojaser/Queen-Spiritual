@@ -140,3 +140,28 @@ CÓMO FUNCIONA
 - Formulario de solicitudes: reemplaza los botones de WhatsApp. El cliente elige qué
   necesita, para qué orisha o celebración, la fecha y cómo prefiere que lo contactes.
 - Stripe te avisa por correo de cada pago.
+
+GOOGLE (para que tu página aparezca en las búsquedas)
+Tu página ya trae lo que Google necesita: mapa del sitio (tu-pagina/sitemap.xml),
+robots.txt, títulos y descripciones en cada página, información de tu negocio y la
+imagen que sale al compartir el enlace por WhatsApp o Facebook.
+
+1. Entra a search.google.com/search-console con tu cuenta de Google.
+2. "Agregar propiedad" > elige "Prefijo de la URL" > pega la dirección de tu página
+   (ej: https://queenspiritual.netlify.app) > Continuar.
+3. En los métodos de verificación elige "Etiqueta HTML" y copia la etiqueta completa
+   (empieza con <meta name="google-site-verification" ...).
+4. En Netlify > Site configuration > Environment variables agrega:
+      GOOGLE_VERIFICACION = (pega la etiqueta o solo el código)
+   Luego Deploys > Trigger deploy. Espera que termine.
+5. Vuelve a Search Console y toca "Verificar".
+6. En el menú de la izquierda: "Sitemaps" > escribe  sitemap.xml  > Enviar.
+7. Opcional: arriba en "Inspeccionar URL" pega tu página y toca "Solicitar indexación".
+Google tarda de unos días a algunas semanas en mostrarte. Si compras un dominio propio
+(ej: queenspiritual.com), conéctalo en Netlify > Domain management y repite estos pasos
+con el dominio nuevo.
+
+Para aparecer en Google Maps: crea tu "Perfil de Empresa" gratis en
+business.google.com (categoría sugerida: Florista). Pon el enlace de tu página,
+tus fotos y pide a tus clientes reseñas ahí. Es lo que más ayuda a salir en búsquedas
+locales como "arreglos para orishas cerca de mí".

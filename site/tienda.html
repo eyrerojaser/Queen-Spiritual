@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Queen Shop · Baños espirituales y más</title>
-<meta name="description" content="Queen Shop: baños espirituales, guías para descargar y productos espirituales sencillos.">
+<title>Queen Shop · Baños espirituales y productos espirituales</title>
+<meta name="description" content="Queen Shop: guías de baños espirituales para descargar al momento y productos espirituales. Compra segura con tarjeta.">
+<link rel="canonical" href="https://SITIO/tienda.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Queen Spiritual">
+<meta property="og:locale" content="es_US">
+<meta property="og:title" content="Queen Shop · Baños espirituales y productos espirituales">
+<meta property="og:description" content="Queen Shop: guías de baños espirituales para descargar al momento y productos espirituales. Compra segura con tarjeta.">
+<meta property="og:url" content="https://SITIO/tienda.html">
+<meta property="og:image" content="https://SITIO/images/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
@@ -287,7 +298,7 @@ function pintarCarrito() {
 }
 
 Promise.all(["negocio", "tienda", "tienda-ajustes"].map(leer)).then(([N, T, A]) => {
-  if (s(N.nombre)) { $("#brandName").textContent = N.nombre; document.title = `Queen Shop · ${N.nombre}`; }
+  if (s(N.nombre)) { $("#brandName").textContent = N.nombre; }
   pintarTienda(T, A);
   if (new URLSearchParams(location.search).has("cancelado")) { toast("No se completó el pago. Tu carrito sigue aquí."); history.replaceState(null, "", location.pathname); }
 });
