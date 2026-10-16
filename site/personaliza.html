@@ -80,6 +80,26 @@ body{padding-bottom:110px}
 .arr[aria-pressed="true"] .chk,.flor.sel .chk{display:grid}
 .flor .chk{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--bg);display:none;place-items:center;font-weight:700}
 .otros{margin-top:14px;font-size:.95rem}
+/* Paso a paso: una pantalla a la vez */
+.paso{display:none;border-top:0;margin-top:0;padding-top:20px}
+.paso.activo{display:block}
+.paso h2 .num{display:none}
+body.paso-n .head,body.paso-n .aviso{display:none}
+.progreso{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 10px;margin-top:6px;border-bottom:1px solid var(--line)}
+.progreso .rot{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.progreso .rot b{color:var(--ink);font-weight:600}
+.progreso .pista{height:4px;border-radius:999px;background:var(--line);overflow:hidden}
+.progreso .pista i{display:block;height:100%;background:var(--blue);border-radius:999px;transition:width .25s}
+.elegido{display:flex;gap:12px;align-items:center;margin-top:10px}
+.elegido img{width:44px;height:52px;border-radius:8px;object-fit:cover}
+.elegido b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.15rem;line-height:1.1}
+.elegido small{color:var(--muted)}
+.elegido button{margin-left:auto;font:inherit;font-size:.85rem;font-weight:600;color:var(--blue);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.atras{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer}
+.atras[hidden]{display:none}
+.barra .tot{flex:1;min-width:0}
+.barra .tot small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){.progreso .pista i{transition:none}}
 .cerrado{background:var(--blue-soft);border-radius:14px;padding:26px;max-width:620px;margin-top:20px}
 @media (max-width:520px){.two{grid-template-columns:1fr}.flores{grid-template-columns:1fr 1fr;gap:10px}.flor .bd{padding:10px}.arrs{grid-template-columns:1fr 1fr;gap:10px}.arr h3{font-size:1.2rem}.arr .bd{padding:10px}.arr .pz{font-size:1.35rem}}
 </style>
@@ -97,7 +117,7 @@ body{padding-bottom:110px}
   <div class="aviso" role="note"><span class="ic" aria-hidden="true">⏳</span><div><b id="avisoTit">Mínimo 5 días de anticipación</b><span id="aviso"></span></div></div>
   <main id="app"><p class="muted" style="margin-top:20px">Cargando los arreglos…</p></main>
 </div>
-<div class="barra" id="barra" hidden><div class="in"><div class="tot"><b id="bTotal">$0</b><small id="bInfo">Elige tu arreglo</small></div><button class="btn btn-solid" type="button" id="bBtn">Continuar</button></div></div>
+<div class="barra" id="barra" hidden><div class="in"><button class="atras" type="button" id="bAtras" aria-label="Paso anterior" hidden>‹</button><div class="tot"><b id="bTotal">$0</b><small id="bInfo">Elige tu arreglo</small></div><button class="btn btn-solid" type="button" id="bBtn">Continuar</button></div></div>
 
 <script src="/politicas.js"></script>
 <script>
@@ -137,7 +157,7 @@ function pintarArreglos() {
     const ft = el("div", "ft"); if (a.foto) { const im = el("img"); im.src = a.foto; im.alt = a.nombre; im.loading = "lazy"; ft.append(im); }
     const bd = el("div", "bd"); bd.append(el("h3", null, a.nombre)); if (s(a.ocasion)) bd.append(el("span", "oc", a.ocasion)); bd.append(el("span", "pz", dinero(a.precioN)));
     b.append(ft, bd, el("span", "chk", "✓"));
-    b.onclick = () => { P.arreglo = a.id; if (!s(P.ocasion) && s(a.ocasion)) { P.ocasion = ""; } guardar(); pintarArreglos(); actualizar(); setTimeout(() => $("#paso2").scrollIntoView({ behavior: "smooth", block: "start" }), 150); };
+    b.onclick = () => { P.arreglo = a.id; if (!s(P.ocasion) && s(a.ocasion)) { P.ocasion = ""; } guardar(); pintarArreglos(); actualizar(); setTimeout(() => ir(2), 180); };
     g.append(b);
   });
 }
@@ -241,15 +261,49 @@ function pintarResumen() {
     const tx = el("div"); tx.append(el("b", null, t), el("small", null, d)); L.append(i, tx); pagos.append(L);
   });
 }
+// Pantallas: cada una agrupa una o más secciones
+const PANTALLAS = [
+  { secs: ["paso1"], nombre: "Tu arreglo", falta: falta1 },
+  { secs: ["paso2"], nombre: "Flores favoritas", falta: () => "" },
+  { secs: ["paso3"], nombre: "Tu celebración", falta: () => "" },
+  { secs: ["paso4"], nombre: "Fecha del evento", falta: falta4 },
+  { secs: ["paso5", "paso6"], nombre: "Entrega y tus datos", falta: falta6 },
+  { secs: ["paso7"], nombre: "Resumen y pago", falta: () => "" },
+];
+let actual = 1;
+function ir(n, sinHistorial) {
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  // No deja saltar pasos con datos pendientes
+  for (let i = 1; i < n; i++) { const f = PANTALLAS[i - 1].falta(); if (f) { n = i; if (!sinHistorial) toast(f); break; } }
+  actual = Math.max(1, Math.min(PANTALLAS.length, n));
+  const visibles = new Set(PANTALLAS[actual - 1].secs);
+  document.querySelectorAll(".paso").forEach(sec => sec.classList.toggle("activo", visibles.has(sec.id)));
+  document.body.classList.toggle("paso-n", actual > 1);
+  $("#pRot").replaceChildren(Object.assign(document.createElement("b"), { textContent: PANTALLAS[actual - 1].nombre }), `Paso ${actual} de ${PANTALLAS.length}`);
+  $("#pBar").style.width = `${(actual / PANTALLAS.length) * 100}%`;
+  const k = calcular(), ch = $("#pEleg"); ch.replaceChildren();
+  if (actual > 1 && k.a) {
+    if (k.a.foto) { const im = el("img"); im.src = k.a.foto; im.alt = ""; ch.append(im); }
+    const t = el("div"); t.append(el("b", null, k.a.nombre), el("small", null, dinero(k.a.precioN))); ch.append(t);
+    const c = el("button", null, "Cambiar"); c.type = "button"; c.onclick = () => ir(1); ch.append(c);
+  }
+  $("#bAtras").hidden = actual === 1;
+  if (!sinHistorial) { try { history.pushState({ paso: actual }, "", "#paso-" + actual); } catch (e) {} }
+  scrollTo({ top: 0, behavior: "instant" in document.documentElement.style ? "instant" : "auto" });
+  scrollTo(0, 0);
+  actualizar();
+}
+addEventListener("popstate", e => { const n = (e.state && e.state.paso) || parseInt((location.hash.match(/paso-(\d)/) || [])[1], 10) || 1; ir(n, true); });
+
 function actualizar() {
   const k = calcular(), falta = faltante();
   $("#bTotal").textContent = k.a ? dinero(k.total) : "$0";
   $("#bInfo").textContent = k.a ? `${k.a.nombre}${P.favs.length ? ` · ${P.favs.length} flor${P.favs.length === 1 ? "" : "es"} favorita${P.favs.length === 1 ? "" : "s"}` : ""}` : "Elige tu arreglo";
-  const b = $("#bBtn");
-  if (falta) { b.textContent = "Continuar"; b.onclick = () => { document.getElementById(falta[0]).scrollIntoView({ behavior: "smooth", block: "start" }); toast(falta[1]); }; }
-  else { b.textContent = k.todo ? `Pagar ${dinero(k.cobrar)}` : `Pagar depósito ${dinero(k.cobrar)}`; b.onclick = () => document.getElementById("paso7").scrollIntoView({ behavior: "smooth", block: "start" }); }
-  PASOS.forEach(([id, f]) => { const n = document.querySelector(`#${id} .num`); if (n) n.classList.toggle("ok", !f()); });
-  const n2 = document.querySelector("#paso2 .num"); if (n2) n2.classList.toggle("ok", P.favs.length > 0);
+  const b = $("#bBtn"), pant = PANTALLAS[actual - 1];
+  if (actual < PANTALLAS.length) {
+    b.textContent = actual === 2 && !P.favs.length ? "Omitir" : "Siguiente";
+    b.onclick = () => { const f = pant.falta(); if (f) { toast(f); return; } ir(actual + 1); };
+  } else { b.textContent = k.todo ? `Pagar ${dinero(k.cobrar)}` : `Pagar depósito ${dinero(k.cobrar)}`; b.onclick = pagar; }
   pintarResumen();
   $("#pagar").textContent = k.todo ? `Pagar ${dinero(k.cobrar)} y confirmar` : `Pagar depósito de ${dinero(k.cobrar)} y confirmar`;
 }
@@ -257,7 +311,7 @@ function actualizar() {
 async function pagar() {
   const err = $("#err"); err.hidden = true;
   const falta = faltante();
-  if (falta) { err.textContent = falta[1]; err.hidden = false; document.getElementById(falta[0]).scrollIntoView({ behavior: "smooth" }); return; }
+  if (falta) { ir(PANTALLAS.findIndex(p => p.secs.includes(falta[0])) + 1); toast(falta[1]); return; }
   if (!$("#acepta").checked) { err.textContent = "Para confirmar, marca que aceptas la política de arreglos."; err.hidden = false; return; }
   const b = $("#pagar"); b.disabled = true; b.textContent = "Abriendo el pago…";
   try {
@@ -289,7 +343,8 @@ function armar() {
   const err = el("p", "note err"); err.id = "err"; err.hidden = true;
   const pb = el("button", "btn btn-solid"); pb.id = "pagar"; pb.type = "button"; pb.style.width = "100%"; pb.style.maxWidth = "560px"; pb.onclick = pagar;
   const fin = el("div"); fin.style.maxWidth = "560px"; fin.append(pagos, pol, ac, err, pb, el("p", "muted", "Pagas con tarjeta de forma segura con Stripe. Te llega la confirmación por correo."));
-  app.replaceChildren(
+  const prog = el("div", "progreso"); prog.innerHTML = '<div class="rot" id="pRot"></div><div class="pista"><i id="pBar"></i></div><div class="elegido" id="pEleg"></div>';
+  app.replaceChildren(prog,
     paso("paso1", "1", "Elige tu arreglo", "El precio es por el arreglo completo.", arrs, otros),
     paso("paso2", "2", "Tus flores favoritas", "Opcional. Toca “Añadir” en las que te gusten y las incluyo en tu arreglo, sin costo extra.", grid),
     paso("paso3", "3", "Tu celebración", null, oc),
@@ -299,7 +354,10 @@ function armar() {
     paso("paso7", "7", "Resumen y pago", null, res, fin));
   pintarArreglos(); pintarFlores(); pintarFecha(); pintarDatos(); actualizar();
   $("#barra").hidden = false;
-  if (q.get("ref") && elegido()) setTimeout(() => $("#paso2").scrollIntoView({ block: "start" }), 50);
+  $("#bAtras").onclick = () => history.state && history.state.paso > 1 ? history.back() : ir(actual - 1);
+  try { history.replaceState({ paso: 1 }, "", location.pathname + location.search); } catch (e) {}
+  ir(1, true);
+  if (q.get("ref") && elegido()) ir(2);
 }
 
 Promise.all(["negocio", "flores", "solicitudes", "politicas", "arreglos"].map(leer)).then(([N, F, SO, PO, AR]) => {
