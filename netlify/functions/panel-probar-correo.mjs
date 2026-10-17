@@ -1,5 +1,5 @@
 // Panel: manda un correo de prueba y explica en palabras sencillas por qué falla (si falla).
-import { json, manejar, Fallo } from "../lib/comun.mjs";
+import { deps, json, manejar, Fallo, texto } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
 import { avisosDeps, plantilla, nombreNegocio } from "../lib/avisos.mjs";
 
@@ -14,6 +14,7 @@ function explicar(msg) {
 
 export default manejar(async (req) => {
   await requireAdmin(req);
+  if (req.method === "GET") return json({ log: (await deps.store("panel").get("correos-log", { type: "json" })) || [] });
   if (req.method !== "POST") throw new Fallo(405, "Método no permitido.");
   const gu = process.env.GMAIL_USER || "", gp = process.env.GMAIL_APP_PASSWORD || "", rk = process.env.RESEND_API_KEY || "", aviso = process.env.AVISOS_EMAIL || "";
   const estado = {
@@ -23,7 +24,9 @@ export default manejar(async (req) => {
   if (!(gu && gp) && !rk) return json({ ok: false, estado, mensaje: !gu && !gp ? "Netlify no tiene las variables GMAIL_USER ni GMAIL_APP_PASSWORD. Agrégalas en Site configuration → Environment variables y haz Trigger deploy." : `Falta ${!gu ? "GMAIL_USER" : "GMAIL_APP_PASSWORD"} en Netlify. Agrégala y haz Trigger deploy.` });
   if (gp && gp.replace(/\s+/g, "").length !== 16) estado.aviso = "La contraseña de aplicación de Google tiene 16 letras. La que pusiste tiene otro largo: revisa que hayas copiado el código completo.";
   if (gu && !/^[^@\s]+@(gmail|googlemail)\.com$/i.test(gu.trim()) && !rk) estado.aviso = (estado.aviso ? estado.aviso + " " : "") + "GMAIL_USER debe ser una dirección @gmail.com completa.";
-  const para = aviso || gu;
+  const b = await req.json().catch(() => ({})), otro = texto(b.para, 120).toLowerCase();
+  if (otro && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(otro)) return json({ ok: false, estado, mensaje: "Escribe un correo válido para la prueba." });
+  const para = otro || aviso || gu;
   const negocio = await nombreNegocio();
   try {
     const ok = await avisosDeps.enviarCorreo({ to: para, subject: "✅ Prueba de correo de tu página", text: "¡Funciona! Tu página ya puede mandar correos.", html: plantilla({ negocio, titulo: "¡Funciona! ✅", parrafos: ["Tu página ya puede mandar correos: bienvenidas, reservas, compras, recordatorios y avisos de la comunidad."] }), nombre: negocio });

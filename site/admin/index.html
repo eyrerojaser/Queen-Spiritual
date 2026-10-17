@@ -1477,11 +1477,11 @@ const comunidad = () => vistaForm({
 
 
 async function correos() {
-  const salida = h("div");
+  const salida = h("div"), paraI = h("input", { type: "email", id: "paraPrueba", placeholder: "ejemplo@yahoo.com", autocomplete: "email" });
   const b = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
     b.disabled = true; b.textContent = "Probando…"; salida.replaceChildren();
     try {
-      const r = await api("/api/panel/probar-correo", { method: "POST", body: {} });
+      const r = await api("/api/panel/probar-correo", { method: "POST", body: { para: paraI.value.trim() } });
       const fila = (k, v) => h("div", { class: "rw", style: "margin:4px 0" }, h("b", { style: "min-width:190px" }, k), v ? h("span", { class: "pill ok" }, v) : h("span", { class: "pill off" }, "No está"));
       salida.replaceChildren(...[
         h("p", { class: "note " + (r.ok ? "ok" : "err"), style: "margin-top:16px" }, (r.ok ? "✅ " : "⚠️ ") + r.mensaje),
@@ -1489,10 +1489,24 @@ async function correos() {
         h("div", { class: "card", style: "margin-top:12px" }, h("h2", null, "Lo que tiene Netlify"), fila("GMAIL_USER", r.estado.GMAIL_USER), fila("GMAIL_APP_PASSWORD", r.estado.GMAIL_APP_PASSWORD), fila("AVISOS_EMAIL (opcional)", r.estado.AVISOS_EMAIL)),
         r.tecnico ? h("p", { class: "muted", style: "font-size:.8rem;word-break:break-word" }, "Detalle técnico: " + r.tecnico) : null].filter(Boolean));
     } catch (e) { fallo(e); }
-    b.disabled = false; b.textContent = "Probar correo";
+    b.disabled = false; b.textContent = "Probar correo"; pintarLog();
   } }, "Probar correo");
+  const bit = h("div", { class: "card" }, h("h2", null, "Últimos correos enviados"), h("p", { class: "muted", style: "margin:0" }, "Cargando…"));
+  const pintarLog = async () => {
+    try {
+      const { log } = await api("/api/panel/probar-correo");
+      bit.replaceChildren(h("h2", null, "Últimos correos enviados"), h("p", { class: "sub" }, "Si dice “Enviado”, Gmail lo aceptó: si la persona no lo ve, está en su Spam o Promociones."),
+        ...(log.length ? log.map(x => h("div", { style: "padding:10px 0;border-top:1px solid var(--line)" },
+          h("div", { class: "rw" }, x.ok ? h("span", { class: "pill ok" }, "✅ Enviado") : h("span", { class: "pill off" }, "❌ No salió"), h("b", { style: "word-break:break-all" }, x.para), h("span", { class: "muted", style: "font-size:.8rem" }, new Date(x.en).toLocaleString("es", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }))),
+          h("div", { style: "font-size:.9rem;margin-top:2px" }, x.asunto),
+          x.error ? h("div", { class: "muted", style: "font-size:.8rem;color:var(--warn);word-break:break-word" }, x.error) : null)) : [h("p", { class: "muted", style: "margin:0" }, "Todavía no hay correos registrados. Se empiezan a anotar desde esta versión.")]));
+    } catch (e) { fallo(e); }
+  };
+  pintarLog();
   marco(...cabeza("Correos", "Revisa que tu página pueda mandar correos (bienvenidas, reservas, compras y recordatorios)."),
-    h("div", { class: "card" }, h("p", { style: "margin:0 0 14px" }, "Toca el botón: tu página manda un correo de prueba y te dice si funciona o qué falta."), b, salida));
+    h("div", { class: "card" }, h("p", { style: "margin:0 0 14px" }, "Toca el botón: tu página manda un correo de prueba y te dice si funciona o qué falta."),
+      h("div", { class: "fld", style: "margin-bottom:12px" }, h("label", { for: "paraPrueba" }, "Mandar la prueba a (opcional)"), paraI, h("div", { class: "hint" }, "Déjalo vacío para mandarla a tu correo de avisos. Pon otro (por ejemplo tu Yahoo) para ver si le llega o se va a Spam.")),
+      b, salida), bit);
 }
 
 /* ═════════ Rutas ═════════ */

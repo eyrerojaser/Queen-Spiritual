@@ -12,12 +12,21 @@ import { deps, texto, fechaBonita, horaBonita } from "./comun.mjs";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+// Bitácora de los últimos correos (para la pantalla "Correos" del panel). Nunca rompe el envío.
+async function anotarCorreo({ to, bcc, subject, ok, error, respuesta }) {
+  try {
+    const st = deps.store("panel"), log = (await st.get("correos-log", { type: "json" })) || [];
+    log.unshift({ en: new Date().toISOString(), para: [to, ...(bcc && bcc.length ? [`+${bcc.length} en copia oculta`] : [])].filter(Boolean).join(" "), asunto: String(subject || "").slice(0, 120), ok, error: error ? String(error).slice(0, 300) : "", respuesta: respuesta ? String(respuesta).slice(0, 120) : "" });
+    await st.setJSON("correos-log", log.slice(0, 25));
+  } catch {}
+}
 export const avisosDeps = {
   async enviarCorreo({ to, bcc, subject, text, html, replyTo, nombre }) {
     const gu = process.env.GMAIL_USER, gp = process.env.GMAIL_APP_PASSWORD, rk = process.env.RESEND_API_KEY;
     if (gu && gp) {
       const t = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: gu.trim(), pass: gp.replace(/\s+/g, "") }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
-      await t.sendMail({ from: `"${(nombre || "Queen Spiritual").replace(/"/g, "")}" <${gu}>`, to, bcc, subject, text, html, replyTo });
+      try { const info = await t.sendMail({ from: `"${(nombre || "Queen Spiritual").replace(/"/g, "")}" <${gu}>`, to, bcc, subject, text, html, replyTo }); await anotarCorreo({ to, bcc, subject, ok: true, respuesta: info && info.response }); }
+      catch (e) { await anotarCorreo({ to, bcc, subject, ok: false, error: e && e.message }); throw e; }
       return true;
     }
     if (rk) {
