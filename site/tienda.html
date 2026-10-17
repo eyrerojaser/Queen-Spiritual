@@ -124,8 +124,15 @@ function agregar(p) {
   if (it) { if (digital) { toast(`"${p.titulo}" ya está en tu carrito.`); return; } it.cantidad = Math.min(20, it.cantidad + 1); }
   else carrito.push({ id, cantidad: 1 });
   guardar(); toast(`Agregaste "${p.titulo}" al carrito.`);
+  if (window.qsEvento) qsEvento("carrito", p.titulo);
 }
 
+// Para tus estadísticas: cuenta un producto como "visto" cuando la persona lo tiene en pantalla.
+const yaVisto = new Set();
+const vistos = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
+  const t = e.target.dataset.titulo;
+  if (e.isIntersecting && !yaVisto.has(t)) { yaVisto.add(t); if (window.qsEvento) qsEvento("producto", t); vistos.unobserve(e.target); }
+}), { threshold: .6 }) : { observe() {}, unobserve() {} };
 function tarjeta(p) {
   const c = el("article", "product"), cv = el("div", "cover");
   if (s(p.foto)) { const im = el("img"); im.src = p.foto; im.alt = p.titulo; im.loading = "lazy"; cv.append(im); } else cv.append(el("span", null, p.titulo));
@@ -135,7 +142,7 @@ function tarjeta(p) {
   const row = el("div", "row"); row.append(el("span", "cost", dinero(p.precio)));
   if (p.agotado) row.append(el("span", "soldout", "Agotado"));
   else { const b = el("button", "btn btn-solid btn-sm", "Agregar"); b.type = "button"; b.onclick = () => agregar(p); b.setAttribute("aria-label", `Agregar ${p.titulo} al carrito`); row.append(b); }
-  bd.append(row); c.append(cv, bd); c.dataset.cat = s(p.categoria); return c;
+  bd.append(row); c.append(cv, bd); c.dataset.cat = s(p.categoria); c.dataset.titulo = p.titulo; vistos.observe(c); return c;
 }
 
 function pintarTienda(T, A) {
@@ -304,5 +311,6 @@ Promise.all(["negocio", "tienda", "tienda-ajustes"].map(leer)).then(([N, T, A]) 
 });
 </script>
 <script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
+<script src="/stats.js" defer></script>
 </body>
 </html>

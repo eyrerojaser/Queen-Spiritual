@@ -165,3 +165,30 @@ Para aparecer en Google Maps: crea tu "Perfil de Empresa" gratis en
 business.google.com (categoría sugerida: Florista). Pon el enlace de tu página,
 tus fotos y pide a tus clientes reseñas ahí. Es lo que más ayuda a salir en búsquedas
 locales como "arreglos para orishas cerca de mí".
+
+COMUNIDAD QUEEN SPIRITUAL (tu-pagina/comunidad.html)
+- Es gratis. La persona se registra con nombre, apellido, correo y teléfono y entra al momento.
+- Para entrar desde otro teléfono escribe su correo y le llega un enlace (sin contraseña).
+  Si todavía no configuraste el correo (Gmail), entra con su correo + su teléfono.
+- En tu panel, grupo "Comunidad Queen Spiritual":
+  · Publicaciones: videos, fotos y enseñanzas. Para videos, súbelos a YouTube como
+    "No listado" y pega el enlace (también sirven Vimeo, Google Drive, Instagram, TikTok
+    y Facebook). Puedes avisar por correo a todos los miembros al publicar.
+  · Comentarios y preguntas: responde, oculta o borra. Al responder una pregunta,
+    le llega un correo a esa persona.
+  · Encuentros por Zoom: elige el primero y se crean solos cada 15 días. Los miembros
+    reciben un recordatorio por correo un día antes (8 am). Después del encuentro puedes
+    pegar el enlace de la grabación.
+  · Miembros: buscar, WhatsApp, correo, bloquear, borrar y descargar la lista.
+  · Página de la comunidad: títulos, foto, beneficios y correo de bienvenida.
+- Los correos a todos los miembros van en copia oculta. Gmail permite unos 500
+  destinatarios por día; si la comunidad crece mucho, conviene usar Resend.
+
+ESTADÍSTICAS (panel > Tus números > Estadísticas)
+- Visitantes, visitas, visitas por página, Queen Shop (vistas, carrito y vendidos por
+  producto), de dónde llegan (Google, Instagram, Facebook, TikTok, WhatsApp, directo),
+  celular o computadora, registros, miembros y ventas (lecturas, tienda y arreglos).
+- Se cuentan sin cookies ni datos personales. Tus visitas desde los aparatos donde
+  abres el panel no se cuentan.
+- Truco: en tus enlaces de Instagram o TikTok agrega ?utm_source=instagram (o tiktok)
+  al final, ej: tu-pagina/comunidad.html?utm_source=instagram, para saber de dónde vienen.

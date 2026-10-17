@@ -60,6 +60,10 @@ export const ESQUEMAS = {
     activo: bool(true), anticipacionDias: int(0, 90, 3), intro: str(600),
     cerrados: lista(obj({ fecha: fecha(), motivo: str(120) }), 400, (c) => c.fecha),
   }),
+  comunidad: obj({
+    registroAbierto: bool(true), titulo: str(120), frase: str(400), intro: str(1500), beneficios: str(1500), foto: foto(),
+    bienvenida: str(1200), mensajeMiembros: str(1500),
+  }),
   resenas: obj({
     resenas: lista(obj({ nombre: str(80), estrellas: uno(["5", "4", "3", "2", "1"], "5"), texto: str(1200), tipo: uno(["Arreglos", "Lecturas"], "Arreglos"), foto: foto(), fecha: fecha(), visible: bool(true) }), 300, (r) => r.texto),
   }),

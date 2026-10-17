@@ -23,7 +23,7 @@ export function leerLocal(rel) {
   return null;
 }
 
-export const NOMBRES_CONTENIDO = ["negocio", "arreglos", "lecturas", "horario", "tienda", "tienda-ajustes", "resenas", "solicitudes", "politicas", "flores"];
+export const NOMBRES_CONTENIDO = ["negocio", "arreglos", "lecturas", "horario", "tienda", "tienda-ajustes", "resenas", "solicitudes", "politicas", "flores", "comunidad"];
 const esPdfSubido = (ref) => /^pdf\/[0-9a-f-]{36}$/.test(String(ref || ""));
 const esPdfLocal = (ref) => /^private\/pdfs\/[^/]+\.pdf$/i.test(String(ref || "").replace(/^\/+/, ""));
 

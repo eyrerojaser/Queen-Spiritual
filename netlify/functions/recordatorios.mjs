@@ -3,6 +3,7 @@
 // Al cliente: 2 días antes (con su saldo pendiente, si tiene).
 import { deps, ahoraLocal, minutos, fechaBonita } from "../lib/comun.mjs";
 import { avisarme, correoArreglo } from "../lib/avisos.mjs";
+import { recordarEncuentros } from "../lib/comunidad.mjs";
 
 export async function enviarRecordatorios() {
   const st = deps.store("reservas"), hoy = ahoraLocal().fecha, hechos = [];
@@ -30,5 +31,9 @@ export async function enviarRecordatorios() {
   return hechos;
 }
 
-export default async () => { const h = await enviarRecordatorios(); console.log("recordatorios:", h.length ? h.join(", ") : "ninguno"); };
+export default async () => {
+  const h = await enviarRecordatorios();
+  try { h.push(...(await recordarEncuentros())); } catch (e) { console.error("encuentros", e.message); }
+  console.log("recordatorios:", h.length ? h.join(", ") : "ninguno");
+};
 export const config = { schedule: "0 13 * * *" }; // 13:00 UTC = 8:00 am en Texas (horario de verano)

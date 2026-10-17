@@ -17,4 +17,4 @@ export default async (req, context) => {
   return new Response(ajustarHtml(html, new URL(req.url).origin, v), { status: res.status, headers: h });
 };
 
-export const config = { path: ["/", "/index.html", "/lecturas.html", "/personaliza.html", "/tienda.html", "/politicas.html"] };
+export const config = { path: ["/", "/index.html", "/lecturas.html", "/personaliza.html", "/tienda.html", "/politicas.html", "/comunidad.html"] };

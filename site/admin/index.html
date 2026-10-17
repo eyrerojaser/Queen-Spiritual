@@ -16,6 +16,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Panel Queen">
 <link rel="stylesheet" href="/estilo.css">
+<script src="/mes.js"></script>
 <style>
 body{font-size:16px}
 [hidden]{display:none!important}
@@ -55,6 +56,46 @@ h1{font-size:clamp(2rem,6vw,2.6rem);margin:0 0 6px}
 .onoff.on{background:#2563EB;box-shadow:0 6px 18px rgba(37,99,235,.35)}
 .onoff.off{background:#DC2626;box-shadow:0 6px 18px rgba(220,38,38,.35)}
 .onoff[disabled]{opacity:.7}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi span{font-size:.82rem;font-weight:600;color:var(--muted)}
+.kpi b{font-size:1.9rem;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi small{font-size:.78rem;color:var(--muted)}
+.kpi .pill{align-self:flex-start;margin:4px 0 0}
+.ch{position:relative;display:grid;grid-template-columns:auto 1fr;gap:8px;height:190px}
+.ch-y{display:flex;flex-direction:column;justify-content:space-between;font-size:.72rem;color:var(--muted);text-align:right;padding-bottom:1px}
+.ch-area{position:relative;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),color-mix(in srgb,var(--line) 70%,transparent) calc(25% - 1px),color-mix(in srgb,var(--line) 70%,transparent) 25%)}
+.ch-cols{position:absolute;inset:0;display:flex;align-items:flex-end}
+.ch-col{flex:1;height:100%;display:flex;align-items:flex-end;padding:0;border:0;background:none;cursor:pointer;min-width:0}
+.ch-col i{display:block;width:100%;background:var(--blue);border-radius:4px 4px 0 0;transition:opacity .15s}
+.ch-col:hover i,.ch-col:focus i{opacity:.75}
+.ch-tip{position:absolute;top:0;right:0;background:var(--ink);color:var(--bg);border-radius:10px;padding:7px 11px;font-size:.82rem;display:flex;flex-direction:column;pointer-events:none}
+.ch-x{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin:4px 0 0 calc(2ch + 8px)}
+.hb{display:grid;gap:12px}
+.hb-t{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;margin-bottom:4px}
+.hb-t b{font-variant-numeric:tabular-nums}
+.hb-b{height:8px;border-radius:4px;background:var(--blue-soft);overflow:hidden}
+.hb-b i{display:block;height:100%;background:var(--blue);border-radius:4px}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dos > .card{margin-bottom:16px}
+.tabla-w{overflow-x:auto;margin:0 -4px}
+.tabla{width:100%;border-collapse:collapse;font-size:.9rem}
+.tabla th{text-align:left;font-size:.78rem;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tabla td{padding:9px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tabla td:first-child{font-weight:600;min-width:140px}
+.fotos-ed{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.fe{position:relative;width:84px;height:84px;border-radius:12px;overflow:hidden;background:var(--blue-soft)}
+.fe img{width:100%;height:100%;object-fit:cover}
+.fe .ib{position:absolute;top:4px;right:4px;width:26px;height:26px;min-width:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:0;font-size:1rem;line-height:1;padding:0}
+.card.pend{border-color:var(--gold)}
+.card.hid{opacity:.65}
+.rw{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap}
+.rw .pill{margin:0}
+.sec-t{font-family:"Figtree",sans-serif;font-size:1.05rem;font-weight:700;margin:22px 0 12px}
+.enc-g{display:grid;grid-template-columns:auto auto 1fr;gap:8px;margin-top:10px}
+.enc-g input[type=url]{grid-column:1/-1}
+.card.mb{margin-bottom:0}
+@media (max-width:720px){.dos{grid-template-columns:1fr;gap:0}.enc-g{grid-template-columns:1fr 1fr}.enc-g input[type=text]{grid-column:1/-1}.kpi b{font-size:1.6rem}}
 .card h2{font-family:"Figtree",sans-serif;font-size:1.1rem;font-weight:700;margin:0 0 4px}
 .card .sub{color:var(--muted);font-size:.9rem;margin:0 0 16px}
 /* formularios */
@@ -62,7 +103,7 @@ h1{font-size:clamp(2rem,6vw,2.6rem);margin:0 0 6px}
 .fld{display:grid;gap:6px}
 .fld>label,.fld>.lab{font-weight:600;font-size:.92rem}
 .hint{color:var(--muted);font-size:.84rem;margin-top:-2px}
-input[type=text],input[type=number],input[type=password],input[type=date],input[type=time],input[type=tel],input[type=url],select,textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+input[type=text],input[type=number],input[type=password],input[type=date],input[type=time],input[type=tel],input[type=url],input[type=search],select,textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
 textarea{min-height:96px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)}
 .money{position:relative}.money::before{content:"$";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
@@ -161,6 +202,7 @@ dialog::backdrop{background:rgba(14,19,38,.55)}
 <div id="app"></div>
 <dialog id="dlg"><div class="dl" id="dlgIn"></div></dialog>
 
+<script>try { localStorage.setItem("qsNoContar", "1"); } catch (e) {}</script>
 <script>
 /* ═════════ Utilidades ═════════ */
 const $ = s => document.querySelector(s);
@@ -182,6 +224,11 @@ const dinero = n => "$" + (Number(n) % 1 ? Number(n).toFixed(2) : Number(n || 0)
 const clon = o => JSON.parse(JSON.stringify(o));
 function toast(m, tipo) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = h("div", { class: "toast", role: "status" }, m); if (tipo === "err") t.style.background = "var(--warn)"; document.body.append(t); setTimeout(() => t.remove(), 3500); }
 const ICON = {
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V7M17 16v-8"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0.5a2 2 0 0 1-2-2z"/><path d="M8.5 9.5h7M8.5 12.5h4.5" stroke-linecap="round"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 10.5l5-3v9l-5-3z"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.8 14.2c2.3.2 4 1.8 4.6 4.3"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 13l2.5-7.5h11L20 13v5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/><path d="M4 13h4.5l1 2h5l1-2H20"/></svg>',
   clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
@@ -440,6 +487,8 @@ function pantallaEntrar(msg) {
 /* ═════════ Inicio ═════════ */
 const SECCIONES = [
   ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
+  ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
+  ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro y bienvenida"]]],
   ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
   ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"]]],
 ];
@@ -447,6 +496,7 @@ async function inicio() {
   cargando();
   const [res, hor, tie, arr, sol, enc, lec] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos"), api("/api/panel/solicitudes"), api("/api/panel/encargos"), leer("lecturas")]);
   const rvp = await api("/api/panel/resenas").catch(() => ({ pendientes: [] }));
+  const com = await api("/api/panel/comunidad?vista=resumen").catch(() => null);
   const activos = enc.encargos.filter(a => !a.pasado && a.estado !== "cancelado" && a.estado !== "entregado");
   const semana = activos.filter(a => (new Date(a.fecha + "T12:00") - new Date(enc.hoy + "T12:00")) / 864e5 <= 7).length;
   const nuevas = sol.solicitudes.filter(x => x.estado === "nueva").length, abiertas = sol.solicitudes.filter(x => x.estado !== "terminada").length;
@@ -458,6 +508,12 @@ async function inicio() {
     calendario: { pill: hor.reservasActivas === false ? ["Reservas cerradas", "off"] : ["Reservas abiertas", "ok"] },
     tienda: { sub: `${tie.productos.length} producto${tie.productos.length === 1 ? "" : "s"}` },
     arreglos: { sub: `${arr.arreglos.length} publicado${arr.arreglos.length === 1 ? "" : "s"}` },
+    ...(com ? {
+      publicaciones: { sub: com.publicaciones ? `${com.publicaciones} publicada${com.publicaciones === 1 ? "" : "s"}` : "Publica tu primer video" },
+      interaccion: { badge: com.comentariosNuevos + com.preguntasPendientes, sub: com.preguntasPendientes ? `${com.preguntasPendientes} pregunta${com.preguntasPendientes === 1 ? "" : "s"} sin responder` : com.comentariosNuevos ? `${com.comentariosNuevos} comentario${com.comentariosNuevos === 1 ? "" : "s"} nuevo${com.comentariosNuevos === 1 ? "" : "s"}` : "Nada pendiente" },
+      encuentros: { sub: com.proximo ? "Próximo: " + com.proximo.etiqueta : "Sin encuentros próximos" },
+      miembros: { sub: `${com.miembros} miembro${com.miembros === 1 ? "" : "s"}${com.nuevos ? ` · ${com.nuevos} nuevo${com.nuevos === 1 ? "" : "s"} esta semana` : ""}` },
+    } : {}),
     resenas: rvp.pendientes.length ? { badge: rvp.pendientes.length, sub: `${rvp.pendientes.length} por aprobar` } : {},
   };
   marco(
@@ -1063,8 +1119,284 @@ function clave() {
     h("p", { class: "muted" }, "¿La olvidaste? En Netlify cambia la variable ADMIN_PASSWORD; esa vuelve a ser tu contraseña."));
 }
 
+/* ═════════ Estadísticas ═════════ */
+let rangoEst = 30;
+const numero = n => Number(n || 0).toLocaleString("es-US");
+function cambio(actual, antes) {
+  if (!antes && !actual) return null;
+  if (!antes) return { t: "nuevo", c: "ok" };
+  const p = Math.round((actual - antes) / antes * 100);
+  return { t: `${p > 0 ? "▲" : p < 0 ? "▼" : "="} ${Math.abs(p)}% vs. período anterior`, c: p > 0 ? "ok" : p < 0 ? "off" : "" };
+}
+function kpi(t, v, sub, ch) {
+  return h("div", { class: "kpi" }, h("span", null, t), h("b", null, v), sub ? h("small", null, sub) : null, ch ? h("em", { class: "pill " + ch.c, style: "font-style:normal" }, ch.t) : null);
+}
+// Barras por día (una sola serie: no necesita leyenda). Cada barra muestra su número al pasar el dedo o el mouse.
+function barrasDia(datos) {
+  const max = Math.max(1, ...datos.map(d => d.visitas));
+  const tip = h("div", { class: "ch-tip", hidden: true });
+  const cols = datos.map(d => {
+    const f = new Date(d.fecha + "T12:00"), et = f.toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short" });
+    const b = h("button", { type: "button", class: "ch-col", "aria-label": `${et}: ${d.visitas} visitas, ${d.visitantes} visitantes` },
+      h("i", { style: `height:${d.visitas ? Math.max(3, d.visitas / max * 100) : 0}%` }));
+    const ver = () => { tip.hidden = false; tip.replaceChildren(h("b", null, et), h("span", null, `${numero(d.visitas)} visitas · ${numero(d.visitantes)} visitantes`)); };
+    b.onmouseenter = ver; b.onfocus = ver; b.onclick = ver;
+    return b;
+  });
+  const marcas = datos.length > 1 ? [datos[0], datos[datos.length - 1]].map(d => new Date(d.fecha + "T12:00").toLocaleDateString("es", { day: "numeric", month: "short" })) : [];
+  const caja = h("div", { class: "ch" }, h("div", { class: "ch-y" }, h("span", null, numero(max)), h("span", null, "0")), h("div", { class: "ch-area", onmouseleave: () => tip.hidden = true }, h("div", { class: "ch-cols", style: `gap:${datos.length > 60 ? 1 : 2}px` }, cols)), tip);
+  return h("div", null, caja, marcas.length ? h("div", { class: "ch-x" }, h("span", null, marcas[0]), h("span", null, marcas[1])) : null);
+}
+function listaBarras(filas, vacio) {
+  if (!filas.length) return h("p", { class: "muted", style: "margin:0" }, vacio);
+  const max = Math.max(1, ...filas.map(f => f.v));
+  return h("div", { class: "hb" }, filas.map(f => h("div", { class: "hb-f" }, h("div", { class: "hb-t" }, h("span", null, f.k), h("b", null, f.etq || numero(f.v))), h("div", { class: "hb-b" }, h("i", { style: `width:${Math.max(2, f.v / max * 100)}%` })))));
+}
+async function estadisticas() {
+  cargando();
+  const d = await api(`/api/panel/estadisticas?dias=${rangoEst}`);
+  const T = d.totales, V = d.ventas;
+  const rango = h("div", { class: "seg", role: "group", "aria-label": "Período", style: "margin-bottom:18px;flex-wrap:wrap;width:fit-content" },
+    [[1, "Hoy"], [7, "7 días"], [30, "30 días"], [90, "90 días"], [365, "1 año"]].map(([n, t]) => h("button", { type: "button", "aria-pressed": String(rangoEst === n), onclick: () => { rangoEst = n; estadisticas(); } }, t)));
+  const kpis = h("div", { class: "kpis" },
+    kpi("Visitantes", numero(T.visitantes), "personas distintas"),
+    kpi("Visitas", numero(T.visitas), "páginas vistas", cambio(T.visitas, T.visitasAntes)),
+    kpi("Visitas a Queen Shop", numero(T.tienda)),
+    kpi("Ventas", dinero(T.ventas), `${V.nLecturas} lecturas · ${V.nOrdenes} pedidos · ${V.nArreglos} arreglos`, cambio(T.ventas, T.ventasAntes)),
+    kpi("Registros nuevos", numero(T.registros), "en la comunidad", cambio(T.registros, T.registrosAntes)),
+    kpi("Miembros", numero(T.miembros), "en total"));
+  const prods = d.productos.length ? h("div", { class: "tabla-w" }, h("table", { class: "tabla" },
+    h("thead", null, h("tr", null, h("th", null, "Producto"), h("th", null, "Vistas"), h("th", null, "Al carrito"), h("th", null, "Vendidos"), h("th", null, "Ingresos"))),
+    h("tbody", null, d.productos.map(p => h("tr", null, h("td", null, p.titulo), h("td", null, numero(p.vistas)), h("td", null, numero(p.carrito)), h("td", null, numero(p.vendidos)), h("td", null, dinero(p.ingresos))))))) : h("p", { class: "muted", style: "margin:0" }, "Todavía no hay visitas a productos en este período.");
+  const ventas = listaBarras([["Lecturas", V.lecturas], ["Queen Shop", V.tienda], ["Arreglos personalizados", V.arreglos]].map(([k, v]) => ({ k, v, etq: dinero(v) })).filter(f => f.v > 0), "Todavía no hay ventas en este período.");
+  const total = T.visitas;
+  marco(...cabeza("Estadísticas", `Toda tu página, del ${new Date(d.desde + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })} al ${new Date(d.hasta + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })}. Hora de Texas.`),
+    rango, kpis,
+    h("div", { class: "card" }, h("h2", null, "Visitas por día"), h("p", { class: "sub" }, "Toca una barra para ver el número de ese día."), total ? barrasDia(d.porDia) : h("p", { class: "muted", style: "margin:0" }, "Todavía no hay visitas en este período. Se empiezan a contar desde que subes esta versión.")),
+    h("div", { class: "dos" },
+      h("div", { class: "card" }, h("h2", null, "Visitas por página"), h("p", { class: "sub" }, "Qué miran más en tu página."), listaBarras(d.paginas.map(p => ({ k: p.nombre, v: p.visitas })), "Sin visitas todavía.")),
+      h("div", { class: "card" }, h("h2", null, "Ventas"), h("p", { class: "sub" }, `Total: ${dinero(V.total)} (ya descontadas las devoluciones).`), ventas)),
+    h("div", { class: "card" }, h("h2", null, "Queen Shop: tus productos"), h("p", { class: "sub" }, "Vistas = cuántas veces lo tuvieron en pantalla. Al carrito = cuántas veces lo agregaron."), prods),
+    h("div", { class: "dos" },
+      h("div", { class: "card" }, h("h2", null, "De dónde llegan"), h("p", { class: "sub" }, "Directo = escribieron tu dirección o tocaron un enlace guardado."), listaBarras(d.fuentes.map(f => ({ k: f.k, v: f.v })), "Sin datos todavía.")),
+      h("div", { class: "card" }, h("h2", null, "Desde qué aparato"), h("p", { class: "sub" }, "Visitas desde celular o computadora."), listaBarras(d.dispositivos.map(f => ({ k: f.k, v: f.v })), "Sin datos todavía."))),
+    h("p", { class: "muted", style: "font-size:.85rem" }, "Las visitas se cuentan sin cookies y sin datos personales. Tus propias visitas desde el teléfono o la computadora donde abres este panel no se cuentan."));
+}
+
+/* ═════════ Comunidad ═════════ */
+const fechaCorta = iso => iso ? new Date(iso).toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" }) : "";
+const TIPOS_POST = [["video", "🎬 Video"], ["fotos", "📷 Fotos"], ["ensenanza", "📖 Enseñanza"]];
+
+// Varias fotos para una publicación.
+function campoFotos(valor) {
+  let v = Array.isArray(valor) ? [...valor] : [];
+  const g = h("div", { class: "fotos-ed" }), inp = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true });
+  const add = h("button", { type: "button", class: "btn btn-solid btn-sm", onclick: () => inp.click() });
+  const pintar = () => {
+    g.replaceChildren(...v.map((src, i) => h("div", { class: "fe" }, h("img", { src, alt: "" }), h("button", { type: "button", class: "ib", "aria-label": "Quitar foto", onclick: () => { v.splice(i, 1); pintar(); } }, "×"))));
+    add.textContent = v.length ? "+ Agregar más fotos" : "Subir fotos"; add.hidden = v.length >= 12;
+  };
+  inp.onchange = async () => {
+    const fs = [...inp.files].slice(0, 12 - v.length); inp.value = "";
+    add.disabled = true;
+    for (let i = 0; i < fs.length; i++) { add.textContent = `Subiendo ${i + 1} de ${fs.length}…`; try { v.push(await subirFoto(fs[i])); } catch (e) { fallo(e); } }
+    add.disabled = false; pintar();
+  };
+  pintar();
+  return { nodo: h("div", { class: "fld" }, h("div", { class: "lab" }, "Fotos"), g, h("div", null, add), inp, h("div", { class: "hint" }, "Hasta 12 fotos. Las de tu teléfono se achican solas.")), get: () => v };
+}
+
+function editarPost(p, alGuardar) {
+  const nuevo = !p;
+  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", fotos: [], fijado: false, visible: true };
+  const fm = formulario([
+    { k: "tipo", t: "seg", label: "¿Qué vas a publicar?", ops: TIPOS_POST },
+    { k: "titulo", t: "text", label: "Título", ph: "Ej: Cómo preparar un baño de limpieza" },
+    { k: "video", t: "text", label: "Enlace del video", ph: "https://youtube.com/…", hint: "Sube el video a YouTube como “No listado” y pega aquí el enlace: así solo lo ven tus miembros. También sirven Vimeo, Google Drive, Instagram, TikTok o Facebook.", si: v => v.tipo === "video" },
+    { k: "texto", t: "area", label: "Texto", rows: 6, hint: "La enseñanza, la explicación del video o lo que quieras contar." },
+    { k: "fijado", t: "bool", label: "Fijar arriba", hint: "Sale primero en la comunidad." },
+    { k: "visible", t: "bool", label: "Publicado", hint: "Apágalo para guardarlo como borrador." },
+    ...(nuevo ? [{ k: "avisar", t: "bool", label: "Avisar a los miembros por correo" }] : []),
+  ], p);
+  const fotos = campoFotos(p.fotos);
+  fm.nodo.insertBefore(fotos.nodo, fm.nodo.children[3]);
+  const err = h("p", { class: "note err", hidden: true });
+  const ok = h("button", { type: "button", class: "btn btn-solid" }, nuevo ? "Publicar" : "Guardar");
+  ok.onclick = async () => {
+    const v = { ...fm.valores(), fotos: fotos.get(), id: p.id };
+    ok.disabled = true; ok.textContent = "Guardando…"; err.hidden = true;
+    try { const r = await api("/api/panel/comunidad", { method: "POST", body: { accion: "post-guardar", post: v, avisar: !!v.avisar } }); dlg.close(); toast(r.avisados ? `Publicado ✓ Avisé a ${r.avisados} miembros.` : "Publicado ✓"); alGuardar(); }
+    catch (e) { ok.disabled = false; ok.textContent = nuevo ? "Publicar" : "Guardar"; if (!(e instanceof Salir)) { err.textContent = e.message; err.hidden = false; } }
+  };
+  const del = !nuevo ? h("button", { type: "button", class: "btn danger", onclick: async () => {
+    if (!confirm("¿Borrar esta publicación y sus comentarios? No se puede deshacer.")) return;
+    try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "post-borrar", id: p.id } }); dlg.close(); toast("Borrada"); alGuardar(); } catch (e) { fallo(e); }
+  } }, "Borrar") : h("span");
+  dlgIn.replaceChildren(
+    h("header", null, h("h2", null, nuevo ? "Nueva publicación" : "Editar publicación"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, err, fm.nodo),
+    h("footer", null, del, h("div", { class: "r" }, h("button", { type: "button", class: "btn btn-line", onclick: () => dlg.close() }, "Cancelar"), ok)));
+  dlg.showModal();
+}
+
+async function publicaciones() {
+  cargando();
+  const d = await api("/api/panel/comunidad?vista=publicaciones");
+  const lista = d.lista.length ? h("div", { class: "items" }, d.lista.map(p => h("div", { class: "item" + (p.visible === false ? " hid" : "") },
+    h("div", { class: "th" }, p.fotos && p.fotos[0] ? h("img", { src: p.fotos[0], alt: "" }) : ({ video: "🎬", fotos: "📷", ensenanza: "📖" }[p.tipo])),
+    h("button", { class: "open", type: "button", onclick: () => editarPost(p, publicaciones) },
+      h("div", { class: "nm" }, p.titulo || "(sin título)"),
+      h("div", { class: "ds" }, `${({ video: "Video", fotos: `${p.fotos.length} foto${p.fotos.length === 1 ? "" : "s"}`, ensenanza: "Enseñanza" })[p.tipo]} · ${fechaCorta(p.creado)} · ${p.nComentarios} comentario${p.nComentarios === 1 ? "" : "s"}`),
+      h("div", null, p.fijado ? h("span", { class: "pill" }, "📌 Fijado") : null, p.visible === false ? h("span", { class: "pill off" }, "Borrador") : null)),
+    h("div", { class: "ia" })))) : h("div", { class: "empty" }, "Todavía no has publicado nada. Empieza con un video de bienvenida 🌙");
+  marco(...cabeza("Publicaciones", "Videos, fotos y enseñanzas que solo ven tus miembros."),
+    h("button", { class: "btn btn-solid add", type: "button", style: "margin:0 0 16px", onclick: () => editarPost(null, publicaciones) }, "+ Nueva publicación"), lista,
+    h("p", { class: "muted", style: "margin-top:18px;font-size:.9rem" }, "Así se ve para tus miembros: ", h("a", { href: "/comunidad.html", target: "_blank", rel: "noopener" }, "abrir la comunidad"), " (entra con tu correo de miembro)."));
+}
+
+let tabInter = "preguntas";
+async function interaccion() {
+  cargando();
+  const d = await api("/api/panel/comunidad?vista=interaccion");
+  const pend = d.preguntas.filter(q => !q.respuesta).length;
+  const tabs = h("div", { class: "seg", role: "group", style: "margin-bottom:16px;width:fit-content" },
+    [["preguntas", `Preguntas (${pend} sin responder)`], ["comentarios", `Comentarios (${d.comentarios.length})`]].map(([k, t]) => h("button", { type: "button", "aria-pressed": String(tabInter === k), onclick: () => { tabInter = k; interaccion(); } }, t)));
+  const accion = async (body, msg) => { try { await api("/api/panel/comunidad", { method: "POST", body }); toast(msg || "Guardado ✓"); interaccion(); } catch (e) { fallo(e); } };
+  let cuerpo;
+  if (tabInter === "preguntas") {
+    cuerpo = d.preguntas.length ? d.preguntas.map(q => {
+      const ta = h("textarea", { rows: 3, placeholder: "Escribe tu respuesta…", "aria-label": "Respuesta" }); ta.value = q.respuesta || "";
+      const pub = h("input", { type: "checkbox", checked: q.publica !== false, role: "switch" });
+      return h("div", { class: "card" + (q.respuesta ? "" : " pend") },
+        h("div", { class: "rw" }, h("b", null, q.autor), h("span", { class: "muted", style: "font-size:.85rem" }, fechaCorta(q.creada)), q.respuesta ? h("span", { class: "pill ok" }, "Respondida") : h("span", { class: "pill off" }, "Sin responder")),
+        h("p", { style: "white-space:pre-wrap;margin:8px 0 12px;font-weight:600" }, q.texto),
+        ta,
+        h("label", { class: "sw", style: "margin-top:8px" }, h("span", null, "Mostrarla a toda la comunidad", h("small", null, "Sin el apellido de quien preguntó.")), pub),
+        h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" },
+          h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => accion({ accion: "preg-responder", clave: q.clave, respuesta: ta.value, publica: pub.checked }, q.respuesta ? "Respuesta guardada ✓" : "Respondida ✓ Le avisé por correo.") }, q.respuesta ? "Guardar respuesta" : "Responder"),
+          h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm("¿Borrar esta pregunta?")) accion({ accion: "preg-borrar", clave: q.clave }, "Borrada"); } }, "Borrar")));
+    }) : h("div", { class: "empty" }, "Todavía no te han hecho preguntas.");
+  } else {
+    cuerpo = d.comentarios.length ? d.comentarios.map(c => {
+      const resp = h("div", { hidden: true, style: "margin-top:10px" });
+      const ta = h("textarea", { rows: 2, placeholder: "Tu respuesta (sale como “Queen”)…", "aria-label": "Respuesta" });
+      resp.append(ta, h("div", { style: "margin-top:8px" }, h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => accion({ accion: "com-responder", post: c.post, texto: ta.value }, "Respuesta publicada ✓") }, "Publicar respuesta")));
+      return h("div", { class: "card" + (c.oculto ? " hid" : "") },
+        h("div", { class: "rw" }, h("b", null, c.queen ? "👑 Tú" : c.autor), h("span", { class: "muted", style: "font-size:.85rem" }, `${fechaCorta(c.creado)} · en “${c.postTitulo}”`), c.oculto ? h("span", { class: "pill off" }, "Oculto") : null),
+        h("p", { style: "white-space:pre-wrap;margin:8px 0 10px" }, c.texto),
+        h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+          c.queen ? null : h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => { resp.hidden = !resp.hidden; if (!resp.hidden) ta.focus(); } }, "Responder"),
+          h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "com-ocultar", clave: c.clave, oculto: !c.oculto }, c.oculto ? "Visible otra vez" : "Ocultado") }, c.oculto ? "Mostrar" : "Ocultar"),
+          h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm("¿Borrar este comentario?")) accion({ accion: "com-borrar", clave: c.clave }, "Borrado"); } }, "Borrar")),
+        resp);
+    }) : h("div", { class: "empty" }, "Todavía no hay comentarios.");
+  }
+  marco(...cabeza("Comentarios y preguntas", "Lo que tus miembros te escriben en la comunidad."), tabs, cuerpo);
+}
+
+const HORAS_E = []; for (let m = 6 * 60; m <= 22 * 60; m += 30) HORAS_E.push(String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"));
+const horaBon = x => { let [H, M] = x.split(":").map(Number); const ap = H < 12 ? "a. m." : "p. m."; H = H % 12 || 12; return `${H}:${String(M).padStart(2, "0")} ${ap}`; };
+const selHora = (v, on) => { const i = h("select", { "aria-label": "Hora", style: "width:auto" }, (HORAS_E.includes(v) || !v ? HORAS_E : [...HORAS_E, v].sort()).map(x => h("option", { value: x, selected: x === v }, horaBon(x)))); i.onchange = () => on(i.value); return i; };
+async function encuentros() {
+  cargando();
+  const d = await api("/api/panel/comunidad?vista=encuentros");
+  let lista = d.lista, recordar = d.recordar;
+  const guardarTodo = async (msg) => { try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-guardar", recordar, lista } }); toast(msg || "Guardado ✓"); encuentros(); } catch (e) { fallo(e); } };
+  // Crear varios cada 15 días
+  const hoy = new Date(); hoy.setDate(hoy.getDate() + 1);
+  const ser = { desde: "", hora: "19:00", tema: "", zoom: "", clave: "", cantidad: 6, cada: 15 };
+  const elegida = h("p", { class: "muted", style: "margin:6px 0 0" }, "Toca el día del primer encuentro.");
+  const cal = Mes({ min: `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`, max: `${hoy.getFullYear() + 1}-12-31`, tipo: () => "libre", seleccion: f => ser.desde === f, alTocar: f => { ser.desde = f; elegida.textContent = "Primer encuentro: " + new Date(f + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" }); } });
+  const inp = (k, ph, type = "text") => { const i = h("input", { type, placeholder: ph }); i.value = ser[k]; i.oninput = () => ser[k] = i.value; return i; };
+  const crear = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
+    if (!ser.desde) { toast("Toca el día del primer encuentro.", "err"); return; }
+    crear.disabled = true;
+    try { const r = await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-serie", ...ser } }); toast(`Listo ✓ ${r.creados.length} encuentros creados.`); encuentros(); } catch (e) { fallo(e); crear.disabled = false; }
+  } }, "Crear encuentros");
+  const serie = h("div", { class: "card" }, h("h2", null, "Crear encuentros cada 15 días"), h("p", { class: "sub" }, "Eliges el primero y se crean los siguientes solos. Después puedes cambiar cualquiera."),
+    h("div", { class: "f" },
+      h("div", { class: "fld" }, h("div", { class: "lab" }, "Primer encuentro"), cal.el, elegida),
+      h("div", { class: "fld" }, h("div", { class: "lab" }, "Hora (Texas)"), selHora(ser.hora, v => ser.hora = v)),
+      h("div", { class: "fld" }, h("label", null, "Enlace de Zoom"), inp("zoom", "https://us02web.zoom.us/j/…", "url"), h("div", { class: "hint" }, "Si usas la misma reunión de Zoom siempre, pégala aquí y sirve para todos.")),
+      h("div", { class: "fld" }, h("label", null, "Código de acceso de Zoom (opcional)"), inp("clave", "Ej: 123456")),
+      h("div", { class: "fld" }, h("label", null, "Tema (opcional)"), inp("tema", "Ej: Encuentro de la comunidad")),
+      h("div", { class: "fld" }, h("label", null, "¿Cuántos encuentros crear?"), (() => { const i = h("input", { type: "number", min: 1, max: 26 }); i.value = ser.cantidad; i.oninput = () => ser.cantidad = i.value; return i; })(), h("div", { class: "hint" }, "6 encuentros = unos 3 meses."))),
+    h("div", { style: "margin-top:16px" }, crear));
+  const fila = (e, i) => {
+    const pasado = e.estado === "pasado";
+    const z = h("input", { type: "url", placeholder: "Enlace de Zoom", "aria-label": "Enlace de Zoom" }); z.value = e.zoom || ""; z.oninput = () => e.zoom = z.value;
+    const t = h("input", { type: "text", placeholder: "Tema", "aria-label": "Tema" }); t.value = e.tema || ""; t.oninput = () => e.tema = t.value;
+    const g = h("input", { type: "url", placeholder: "Enlace de la grabación (opcional)", "aria-label": "Grabación" }); g.value = e.grabacion || ""; g.oninput = () => e.grabacion = g.value;
+    const f = h("input", { type: "date", "aria-label": "Fecha" }); f.value = e.fecha; f.onchange = () => e.fecha = f.value;
+    return h("div", { class: "card enc" + (pasado ? " hid" : "") },
+      h("div", { class: "rw" }, h("b", null, e.etiqueta || "Nuevo encuentro"), e.estado === "envivo" ? h("span", { class: "pill ok" }, "En vivo ahora") : pasado ? h("span", { class: "pill" }, "Pasado") : null, e.recordado ? h("span", { class: "pill" }, "Recordatorio enviado") : null),
+      h("div", { class: "enc-g" }, f, selHora(e.hora, v => e.hora = v), t, z, pasado ? g : null),
+      h("div", { style: "display:flex;gap:8px;margin-top:10px" },
+        h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => guardarTodo() }, "Guardar"),
+        h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm("¿Borrar este encuentro?")) { lista.splice(i, 1); guardarTodo("Borrado"); } } }, "Borrar")));
+  };
+  const prox = lista.filter(e => e.estado !== "pasado"), pas = lista.filter(e => e.estado === "pasado").reverse();
+  const sw = h("input", { type: "checkbox", checked: recordar, role: "switch" }); sw.onchange = () => { recordar = sw.checked; guardarTodo(sw.checked ? "Recordatorios activados ✓" : "Recordatorios apagados"); };
+  marco(...cabeza("Encuentros por Zoom", "Tus encuentros con la comunidad. Los miembros ven el enlace en su área y pueden agregarlo a su calendario."),
+    h("div", { class: "card" }, h("label", { class: "sw" }, h("span", null, "Recordatorio por correo un día antes", h("small", null, "Se manda a todos los miembros a las 8 de la mañana.")), sw)),
+    h("h2", { class: "sec-t" }, `Próximos (${prox.length})`), prox.length ? prox.map(e => fila(e, lista.indexOf(e))) : h("div", { class: "empty", style: "margin-bottom:16px" }, "No tienes encuentros próximos. Créalos abajo."),
+    serie,
+    pas.length ? [h("h2", { class: "sec-t" }, "Anteriores"), h("p", { class: "muted", style: "margin:-6px 0 12px;font-size:.9rem" }, "Pega el enlace de la grabación y tus miembros podrán verla."), pas.map(e => fila(e, lista.indexOf(e)))] : null);
+}
+
+let buscarM = "";
+async function miembros() {
+  cargando();
+  const d = await api("/api/panel/comunidad?vista=miembros");
+  const accion = async (body, msg) => { try { await api("/api/panel/comunidad", { method: "POST", body }); toast(msg); miembros(); } catch (e) { fallo(e); } };
+  const caja = h("div");
+  const pintar = () => {
+    const q = buscarM.toLowerCase(), l = d.miembros.filter(m => !q || `${m.nombre} ${m.apellido} ${m.email} ${m.telefono}`.toLowerCase().includes(q));
+    caja.replaceChildren(l.length ? h("div", { class: "items" }, l.map(m => {
+      const tel = String(m.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
+      return h("div", { class: "card mb" + (m.bloqueado ? " hid" : "") },
+        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
+        h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 8px" }, `${m.email} · ${m.telefono} · se unió el ${fechaCorta(m.creado)}${m.ultimo ? " · última vez " + fechaCorta(m.ultimo) : ""}`),
+        h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+          t1 ? h("a", { class: "btn btn-line btn-sm", href: `https://wa.me/${t1}`, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
+          h("a", { class: "btn btn-line btn-sm", href: `mailto:${m.email}` }, "Correo"),
+          h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "miembro-bloquear", clave: m.clave, bloqueado: !m.bloqueado }, m.bloqueado ? "Desbloqueado" : "Bloqueado: ya no puede entrar") }, m.bloqueado ? "Desbloquear" : "Bloquear"),
+          h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm(`¿Borrar a ${m.nombre} de la comunidad? Podrá registrarse de nuevo.`)) accion({ accion: "miembro-borrar", clave: m.clave }, "Borrado"); } }, "Borrar")));
+    })) : h("div", { class: "empty" }, d.miembros.length ? "Nadie coincide con tu búsqueda." : "Todavía no hay miembros. Comparte el enlace de tu comunidad en tus redes."));
+  };
+  const busca = h("input", { type: "search", placeholder: "Buscar por nombre, correo o teléfono", "aria-label": "Buscar miembros", style: "margin-bottom:14px" }); busca.value = buscarM; busca.oninput = () => { buscarM = busca.value; pintar(); };
+  const csv = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => {
+    const q = v => `"${String(v || "").replace(/"/g, '""')}"`;
+    const txt = "﻿Nombre,Apellido,Correo,Teléfono,Se unió,Última vez,Recibe correos,Bloqueado\n" + d.miembros.map(m => [m.nombre, m.apellido, m.email, m.telefono, fechaCorta(m.creado), fechaCorta(m.ultimo), m.avisos ? "Sí" : "No", m.bloqueado ? "Sí" : "No"].map(q).join(",")).join("\n");
+    const a = h("a", { href: URL.createObjectURL(new Blob([txt], { type: "text/csv" })), download: "miembros-comunidad.csv" }); a.click();
+  } }, "Descargar lista (Excel)");
+  const enlace = location.origin + "/comunidad.html";
+  const copiar = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => { try { await navigator.clipboard.writeText(enlace); toast("Enlace copiado ✓ Pégalo en tus redes."); } catch (e) { prompt("Copia este enlace:", enlace); } } }, "Copiar enlace para invitar");
+  const nm = d.miembros.filter(m => !m.bloqueado).length;
+  marco(...cabeza("Miembros", `${nm} miembro${nm === 1 ? "" : "s"} en tu comunidad.`), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" }, copiar, csv), busca, caja);
+  pintar();
+}
+
+const comunidad = () => vistaForm({
+  n: "comunidad", titulo: "Página de la comunidad", lead: "Lo que ven las personas antes de registrarse, y el mensaje para tus miembros.",
+  secciones: [
+    ["Registro", null, [{ k: "registroAbierto", t: "bool", label: "Registro abierto", hint: "Apágalo si por un tiempo no quieres miembros nuevos." }]],
+    ["Página de bienvenida", null, [
+      { k: "titulo", t: "text", label: "Título" },
+      { k: "frase", t: "area", label: "Frase debajo del título", rows: 2 },
+      { k: "foto", t: "foto", label: "Tu foto" },
+      { k: "beneficios", t: "area", label: "Lo que reciben (uno por línea)", rows: 5 },
+      { k: "intro", t: "area", label: "Texto de presentación", rows: 4 },
+    ]],
+    ["Para tus miembros", null, [
+      { k: "bienvenida", t: "area", label: "Correo de bienvenida", rows: 3, hint: "Lo reciben apenas se registran." },
+      { k: "mensajeMiembros", t: "area", label: "Mensaje arriba del área de miembros", rows: 3 },
+    ]],
+  ],
+});
+
 /* ═════════ Rutas ═════════ */
-const RUTAS = { "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave };
+const RUTAS = { "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

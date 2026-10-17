@@ -10,20 +10,20 @@ import webpush from "web-push";
 import nodemailer from "nodemailer";
 import { deps, texto, fechaBonita, horaBonita } from "./comun.mjs";
 
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 export const avisosDeps = {
-  async enviarCorreo({ to, subject, text, html, replyTo, nombre }) {
+  async enviarCorreo({ to, bcc, subject, text, html, replyTo, nombre }) {
     const gu = process.env.GMAIL_USER, gp = process.env.GMAIL_APP_PASSWORD, rk = process.env.RESEND_API_KEY;
     if (gu && gp) {
       const t = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: gu, pass: gp.replace(/\s+/g, "") } });
-      await t.sendMail({ from: `"${(nombre || "Queen Spiritual").replace(/"/g, "")}" <${gu}>`, to, subject, text, html, replyTo });
+      await t.sendMail({ from: `"${(nombre || "Queen Spiritual").replace(/"/g, "")}" <${gu}>`, to, bcc, subject, text, html, replyTo });
       return true;
     }
     if (rk) {
       const r = await fetch("https://api.resend.com/emails", {
         method: "POST", headers: { authorization: `Bearer ${rk}`, "content-type": "application/json" },
-        body: JSON.stringify({ from: process.env.CORREO_DESDE || process.env.AVISOS_DESDE || `${nombre || "Queen Spiritual"} <onboarding@resend.dev>`, to: [to], subject, text, html, reply_to: replyTo }),
+        body: JSON.stringify({ from: process.env.CORREO_DESDE || process.env.AVISOS_DESDE || `${nombre || "Queen Spiritual"} <onboarding@resend.dev>`, to: [to], ...(bcc && bcc.length ? { bcc } : {}), subject, text, html, reply_to: replyTo }),
         signal: AbortSignal.timeout(8000),
       });
       return r.ok;
@@ -63,7 +63,7 @@ async function pushATodos(datos) {
   return n;
 }
 
-async function nombreNegocio() {
+export async function nombreNegocio() {
   try { return texto((await deps.contenido("", "negocio")).nombre, 80) || "Queen Spiritual"; } catch { return "Queen Spiritual"; }
 }
 
@@ -77,7 +77,7 @@ export async function avisarme({ titulo, cuerpo, url = "/admin/" , origen = "" }
   }
 }
 
-function plantilla({ negocio, titulo, parrafos, boton, pie }) {
+export function plantilla({ negocio, titulo, parrafos, boton, pie }) {
   return `<!doctype html><html><body style="margin:0;background:#f4f2ec;font-family:Helvetica,Arial,sans-serif;color:#23262d">
 <div style="max-width:520px;margin:0 auto;padding:28px 18px">
 <p style="font-family:Georgia,serif;font-size:22px;font-weight:bold;margin:0 0 18px;color:#1a2340">${esc(negocio)}</p>

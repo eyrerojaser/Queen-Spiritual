@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comunidad Queen Spiritual · Gratis para miembros</title>
+<meta name="description" content="Únete gratis a la Comunidad Queen Spiritual: videos y enseñanzas espirituales exclusivas, encuentros por Zoom cada 15 días y preguntas y respuestas.">
+<link rel="canonical" href="https://SITIO/comunidad.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Queen Spiritual">
+<meta property="og:locale" content="es_US">
+<meta property="og:title" content="Comunidad Queen Spiritual · Gratis para miembros">
+<meta property="og:description" content="Videos y enseñanzas espirituales exclusivas, encuentros por Zoom cada 15 días y preguntas y respuestas. Regístrate gratis.">
+<meta property="og:url" content="https://SITIO/comunidad.html">
+<meta property="og:image" content="https://SITIO/images/compartir.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/iconos/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
+<meta name="theme-color" content="#1A2340">
+<link rel="stylesheet" href="/estilo.css">
+<style>
+[hidden]{display:none!important}
+.cabecera{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--night) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--night-line)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:12px;padding-bottom:12px}
+.cabecera .brand{color:var(--night-ink)}
+.top nav{display:flex;gap:20px;flex-wrap:wrap}
+.top nav a{color:var(--night-muted);text-decoration:none;font-size:.95rem}
+.top nav a:hover,.top nav a[aria-current]{color:#FFD966}
+.menu-btn{display:none;place-items:center;width:44px;height:44px;margin-right:-8px;border:0;border-radius:12px;background:none;color:var(--night-ink);cursor:pointer}
+.menu-btn svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+.menu-m{display:none}
+.menu-m:not([hidden]){display:flex;flex-direction:column;padding:6px 22px 16px;border-top:1px solid var(--night-line);max-height:calc(100dvh - 64px);overflow:auto;background:var(--night)}
+.menu-m a{font-family:"Cormorant",Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--night-ink);text-decoration:none;padding:11px 2px;border-bottom:1px solid var(--night-line)}
+.menu-m a:last-child{border-bottom:0}
+.menu-m a.sec{font-family:"Figtree",sans-serif;font-size:.95rem;font-weight:500;color:var(--night-muted)}
+.kicker{display:block;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+
+/* ── Bienvenida (no miembros) ── */
+.hero-c{background:radial-gradient(120% 90% at 80% 0%,#2E4F9A 0%,var(--night) 60%);color:var(--night-ink)}
+.hero-in{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:48px;align-items:center;padding-top:48px;padding-bottom:56px}
+.hero-c h1{font-size:clamp(2.4rem,5.6vw,4rem);line-height:1.02}
+.hero-c h1 em{font-style:normal;color:#FFD966}
+.frase{color:var(--night-muted);font-size:1.12rem;line-height:1.6;margin:16px 0 22px;max-width:46ch}
+.gratis{display:inline-flex;gap:8px;align-items:center;background:rgba(255,217,102,.14);border:1px solid rgba(255,217,102,.5);color:#FFD966;border-radius:999px;padding:6px 14px;font-weight:600;font-size:.85rem;margin-bottom:16px}
+.foto-c{position:relative;justify-self:center;width:min(100%,340px)}
+.foto-c img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 25%;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 0 10px rgba(217,182,90,.12),0 24px 60px rgba(0,0,0,.45)}
+.prox-t{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.07);border:1px solid var(--night-line);border-radius:14px;padding:12px 16px;margin-top:6px;max-width:460px}
+.prox-t b{color:#FFD966;display:block;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+.prox-t span{color:var(--night-ink);font-size:.98rem}
+.ben{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;padding:44px 0 6px}
+.ben div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 18px 54px;position:relative;font-weight:600;line-height:1.35}
+.ben div::before{content:"";position:absolute;left:16px;top:16px;width:26px;height:26px;border-radius:50%;background:#FFD966 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231A2340' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/62% no-repeat}
+.intro-c{max-width:62ch;color:var(--muted);font-size:1.05rem;line-height:1.7;margin:26px 0 0}
+.registro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;padding:44px 0 70px}
+.caja{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px 22px;box-shadow:0 14px 40px rgba(26,35,64,.08)}
+.caja h2{font-size:2rem;margin-bottom:4px}
+.form{display:grid;gap:12px;margin-top:16px}
+.form label{display:grid;gap:4px;font-size:.9rem;font-weight:500}
+.form input,.form textarea{font:inherit;font-size:16px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.acepto{display:flex!important;gap:10px;align-items:flex-start;font-weight:500!important;font-size:.88rem!important;color:var(--muted)}
+.acepto input{width:20px;height:20px;margin-top:1px;flex:none}
+.trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--blue);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.lado h2{font-size:clamp(1.9rem,4vw,2.5rem)}
+.pasos{display:grid;gap:14px;margin-top:18px;counter-reset:p}
+.pasos div{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;color:var(--muted)}
+.pasos div::before{counter-increment:p;content:counter(p);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--night);color:#FFD966;font-family:"Cormorant",Georgia,serif;font-size:1.3rem;font-weight:600}
+.pasos b{color:var(--ink);display:block}
+
+/* ── Área de miembros ── */
+.hola{background:var(--night);color:var(--night-ink);padding:26px 0 30px}
+.hola h1{font-size:clamp(2rem,5vw,2.8rem)}
+.hola p{color:var(--night-muted);margin:8px 0 0;max-width:62ch}
+.encuentro{margin-top:20px;background:linear-gradient(135deg,#24407F,#1A2340);border:1px solid rgba(255,217,102,.4);border-radius:18px;padding:18px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.encuentro .dia{width:74px;text-align:center;background:#FFD966;color:var(--night);border-radius:14px;padding:8px 4px;line-height:1.05}
+.encuentro .dia b{display:block;font-family:"Cormorant",Georgia,serif;font-size:2.1rem}
+.encuentro .dia small{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.encuentro .et{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FFD966}
+.encuentro h2{font-size:1.5rem;margin:2px 0}
+.encuentro .cuando{color:#D9DFF0;font-size:.95rem}
+.encuentro .acc{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn-oro{background:#FFD966;color:var(--night);border-color:#FFD966}
+.btn-claro{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+.vivo{display:inline-flex;gap:8px;align-items:center;color:#fff;font-weight:700}
+.vivo i{width:10px;height:10px;border-radius:50%;background:#FF5A5A;box-shadow:0 0 10px #FF5A5A;animation:pulso 1.4s infinite}
+@keyframes pulso{50%{opacity:.35}}
+.zoomdatos{font-size:.85rem;color:#D9DFF0}
+.tabs{position:sticky;top:65px;z-index:30;background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+.tabs button{font:inherit;font-weight:600;font-size:.95rem;padding:14px 14px 12px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs .n{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:10px;background:var(--blue);color:#fff;font-size:.72rem;margin-left:6px;padding:0 6px}
+.panel-m{padding:22px 0 60px}
+.filtro{margin-bottom:18px}
+.feed{display:grid;gap:22px;max-width:720px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.post .cab{padding:16px 18px 0;display:flex;gap:10px;align-items:center}
+.post .av{width:40px;height:40px;border-radius:50%;background:var(--night) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23D4AE52'%3E%3Cpath d='M12 42 9 22l12 9 11-15 11 15 12-9-3 20z'/%3E%3Crect x='12' y='46' width='40' height='5' rx='1'/%3E%3C/g%3E%3C/svg%3E") center/62% no-repeat;flex:none}
+.post .quien b{display:block;font-size:.95rem}
+.post .quien span{font-size:.8rem;color:var(--muted)}
+.post .tipo{margin-left:auto;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+.post .fijo{font-size:.72rem;font-weight:700;color:var(--gold)}
+.post h3{font-size:1.65rem;padding:12px 18px 0}
+.post .tx{padding:8px 18px 0;white-space:pre-line;line-height:1.65}
+.post .tx a{word-break:break-all}
+.video{position:relative;aspect-ratio:16/9;background:#000;margin-top:14px}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video.vertical{aspect-ratio:9/16;max-height:78vh;margin-left:auto;margin-right:auto;width:min(100%,440px)}
+.enlace-video{margin:14px 18px 0}
+.fotos{display:grid;gap:3px;margin-top:14px}
+.fotos.n1{grid-template-columns:1fr}.fotos.n2{grid-template-columns:1fr 1fr}.fotos.n3,.fotos.nmas{grid-template-columns:1fr 1fr 1fr}
+.fotos button{padding:0;border:0;background:var(--blue-soft);cursor:zoom-in;aspect-ratio:1;overflow:hidden}
+.fotos.n1 button{aspect-ratio:auto;max-height:620px}
+.fotos img{width:100%;height:100%;object-fit:cover}
+.coms{padding:14px 18px 16px;border-top:1px solid var(--line);margin-top:16px;display:grid;gap:10px}
+.com{background:var(--bg);border-radius:14px;padding:9px 13px;font-size:.93rem;line-height:1.5}
+.com b{font-size:.85rem;margin-right:6px}
+.com.queen{background:color-mix(in srgb,#FFD966 22%,var(--surface));border:1px solid color-mix(in srgb,#FFD966 55%,transparent)}
+.com small{display:block;color:var(--muted);font-size:.75rem;margin-top:2px}
+.escribir{display:flex;gap:8px;align-items:flex-end}
+.escribir textarea{flex:1;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);resize:none;min-height:44px}
+.escribir button{flex:none}
+.vacio{background:var(--blue-soft);border-radius:16px;padding:22px;color:var(--ink);max-width:720px}
+.lista-e{display:grid;gap:12px;max-width:720px}
+.e-item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:62px 1fr;gap:14px;align-items:center}
+.e-item .dia{text-align:center;background:var(--night);color:#FFD966;border-radius:12px;padding:6px 2px;line-height:1.05}
+.e-item .dia b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.7rem}
+.e-item .dia small{font-size:.66rem;font-weight:700;text-transform:uppercase}
+.e-item h4{margin:0;font-size:1.02rem}
+.e-item p{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+.e-item .acc{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.sub-t{font-size:1.5rem;margin:26px 0 12px}
+.preg-form{max-width:720px;margin-bottom:22px}
+.preg{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;max-width:720px}
+.preg + .preg{margin-top:12px}
+.preg .q{font-weight:600;white-space:pre-line}
+.preg .q small{display:block;font-weight:400;color:var(--muted);font-size:.8rem;margin-top:2px}
+.preg .r{margin-top:10px;background:color-mix(in srgb,#FFD966 18%,var(--surface));border-left:3px solid var(--gold);border-radius:10px;padding:10px 12px;white-space:pre-line;line-height:1.6}
+.preg .r b{display:block;font-size:.8rem;color:var(--gold);letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px}
+.preg .esp{margin-top:8px;color:var(--muted);font-size:.88rem;font-style:italic}
+.cuenta{display:flex;gap:14px 24px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);margin-top:34px;padding-top:18px;color:var(--muted);font-size:.92rem;max-width:720px}
+.sw{display:inline-flex;gap:10px;align-items:center;cursor:pointer}
+.sw input{width:20px;height:20px}
+.ver{border:0;padding:0;background:transparent;max-width:min(94vw,1000px);max-height:94dvh}
+.ver::backdrop{background:rgba(10,14,28,.88)}
+.ver img{max-width:100%;max-height:90dvh;border-radius:10px;display:block;margin:0 auto}
+.ver-x{position:fixed;top:12px;right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:1.8rem;line-height:1;cursor:pointer}
+footer{padding:28px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+@media (max-width:820px){
+  .top nav{display:none}
+  .menu-btn{display:grid}
+  .hero-in{grid-template-columns:1fr;gap:22px;padding-top:22px;padding-bottom:34px}
+  .foto-c{order:-1;width:170px}
+  .frase{font-size:1.02rem;margin:12px 0 16px}
+  .registro{grid-template-columns:1fr;gap:26px;padding:28px 0 50px}
+  .ben{padding-top:28px}
+  .tabs{top:61px}
+}
+@media (max-width:520px){
+  .two{grid-template-columns:1fr}
+  .caja{padding:22px 16px;border-radius:18px}
+  .ben div{padding:14px 14px 14px 50px;font-size:.95rem}
+  .post h3{font-size:1.45rem}
+  .encuentro{grid-template-columns:auto 1fr;padding:14px;gap:12px}
+  .encuentro .dia{width:62px}
+  .encuentro .dia b{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+<header class="cabecera">
+  <div class="wrap top">
+    <a class="brand" href="/" id="brandName">Queen Spiritual</a>
+    <nav aria-label="Secciones">
+      <a href="/#arreglos">Arreglos y mesas</a>
+      <a href="/lecturas.html">Lecturas</a>
+      <a href="/tienda.html">Queen Shop</a>
+      <a href="/comunidad.html" aria-current="page">Comunidad</a>
+    </nav>
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuM">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+    </button>
+  </div>
+  <nav class="menu-m" id="menuM" aria-label="Menú" hidden>
+    <a href="/">Inicio</a>
+    <a href="/#arreglos">Arreglos y mesas</a>
+    <a href="/personaliza.html">Personaliza tu arreglo</a>
+    <a href="/lecturas.html">Lecturas de cartas</a>
+    <a href="/tienda.html">Queen Shop</a>
+    <a href="/comunidad.html">Comunidad</a>
+    <a href="/politicas.html" class="sec">Políticas</a>
+  </nav>
+</header>
+
+<main id="app"><p class="wrap muted" style="padding:40px 22px">Cargando…</p></main>
+
+<footer><div class="wrap pie"><span id="footText"></span><nav class="pie-links" aria-label="Políticas"><a href="/politicas.html#privacidad">Privacidad</a><a href="/politicas.html">Todas las políticas</a></nav></div></footer>
+
+<script>
+const $ = q => document.querySelector(q);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const s = v => (typeof v === "string" ? v.trim() : (v == null ? "" : String(v)));
+const app = $("#app");
+function toast(msg) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = el("div", "toast", msg); t.setAttribute("role", "status"); document.body.append(t); setTimeout(() => t.remove(), 5000); }
+const api = async (path, opts = {}) => {
+  const o = { method: opts.method || (opts.body ? "POST" : "GET"), headers: { "x-comunidad": "1" }, credentials: "same-origin", cache: "no-store" };
+  if (opts.body) { o.headers["content-type"] = "application/json"; o.body = JSON.stringify(opts.body); }
+  let r; try { r = await fetch(path, o); } catch (e) { throw new Error("No hay conexión. Revisa tu internet e intenta de nuevo."); }
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(d.error || "Algo salió mal. Intenta de nuevo."); e.status = r.status; throw e; }
+  return d;
+};
+const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const DIAS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+const fechaObj = f => new Date(f + "T12:00");
+const hace = iso => {
+  const m = Math.round((Date.now() - Date.parse(iso)) / 60000);
+  if (m < 1) return "ahora"; if (m < 60) return `hace ${m} min`; const h = Math.round(m / 60); if (h < 24) return `hace ${h} h`;
+  const d = Math.round(h / 24); if (d < 7) return `hace ${d} día${d === 1 ? "" : "s"}`;
+  const x = new Date(iso); return `${x.getDate()} de ${["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][x.getMonth()]}`;
+};
+// Texto con saltos de línea y enlaces que se pueden tocar.
+function conEnlaces(t) {
+  const f = document.createDocumentFragment(), re = /(https?:\/\/[^\s<]+)/g; let i = 0, m;
+  while ((m = re.exec(t))) { f.append(t.slice(i, m.index)); const a = el("a", null, m[1]); a.href = m[1]; a.target = "_blank"; a.rel = "noopener"; f.append(a); i = m.index + m[1].length; }
+  f.append(t.slice(i)); return f;
+}
+function verFoto(src) {
+  const d = el("dialog", "ver"), im = el("img"); im.src = src; im.alt = "Foto";
+  const x = el("button", "ver-x", "×"); x.type = "button"; x.setAttribute("aria-label", "Cerrar"); x.onclick = () => d.close();
+  d.append(x, im); d.addEventListener("click", e => { if (e.target !== x) d.close(); }); d.addEventListener("close", () => d.remove());
+  document.body.append(d); d.showModal();
+}
+// YouTube, Vimeo y Google Drive se ven aquí mismo; Instagram, TikTok y Facebook abren en su app.
+function video(url) {
+  let m, src = "", vertical = false;
+  if ((m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{11})/))) { src = `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0`; vertical = /shorts\//.test(url); }
+  else if ((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))) src = `https://player.vimeo.com/video/${m[1]}`;
+  else if ((m = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/))) src = `https://drive.google.com/file/d/${m[1]}/preview`;
+  if (src) {
+    const box = el("div", "video" + (vertical ? " vertical" : "")), f = el("iframe");
+    f.src = src; f.loading = "lazy"; f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"; f.allowFullscreen = true; f.title = "Video";
+    box.append(f); return box;
+  }
+  const red = /instagram/.test(url) ? "Instagram" : /tiktok/.test(url) ? "TikTok" : /facebook|fb\.watch/.test(url) ? "Facebook" : "";
+  const p = el("p", "enlace-video"), a = el("a", "btn btn-solid", `▶ Ver el video${red ? " en " + red : ""}`); a.href = url; a.target = "_blank"; a.rel = "noopener"; p.append(a); return p;
+}
+function ics(e) {
+  const [y, mo, d] = e.fecha.split("-"), [h, mi] = e.hora.split(":");
+  const ini = `${y}${mo}${d}T${h}${mi}00`, finD = new Date(+y, mo - 1, +d, +h, +mi + 90);
+  const fin = `${finD.getFullYear()}${String(finD.getMonth() + 1).padStart(2, "0")}${String(finD.getDate()).padStart(2, "0")}T${String(finD.getHours()).padStart(2, "0")}${String(finD.getMinutes()).padStart(2, "0")}00`;
+  const txt = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Queen Spiritual//Comunidad//ES", "BEGIN:VEVENT", `UID:${e.id}@queenspiritual`, `DTSTART;TZID=America/Chicago:${ini}`, `DTEND;TZID=America/Chicago:${fin}`,
+    `SUMMARY:Comunidad Queen Spiritual${e.tema ? " · " + e.tema.replace(/[,;\n]/g, " ") : ""}`, `DESCRIPTION:Encuentro por Zoom. Entra desde ${location.origin}/comunidad.html`, `URL:${location.origin}/comunidad.html`,
+    "BEGIN:VALARM", "TRIGGER:-PT30M", "ACTION:DISPLAY", "DESCRIPTION:Encuentro de la Comunidad en 30 minutos", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  const a = el("a"); a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(txt); a.download = `encuentro-${e.fecha}.ics`; a.click();
+}
+
+let CFG = {};
+/* ═════════ Bienvenida y registro ═════════ */
+function bienvenida(prox) {
+  const titulo = s(CFG.titulo) || "Comunidad Queen Spiritual";
+  const hero = el("section", "hero-c"), hin = el("div", "wrap hero-in"), tx = el("div");
+  tx.append(el("span", "gratis", "✦ Gratis · Solo para miembros"));
+  const h1 = el("h1"); const partes = titulo.split(" "); h1.append(partes.slice(0, -2).join(" ") + " "); h1.append(el("em", null, partes.slice(-2).join(" "))); tx.append(h1);
+  tx.append(el("p", "frase", s(CFG.frase)));
+  const go = el("a", "btn btn-oro", "Unirme gratis"); go.href = "#registro";
+  const ya = el("button", "btn btn-claro", "Ya soy miembro"); ya.type = "button"; ya.onclick = () => { modo("entrar"); $("#registro").scrollIntoView({ behavior: "smooth" }); };
+  const bt = el("div", "btns"); bt.append(go, ya); tx.append(bt);
+  if (prox) { const p = el("div", "prox-t"); p.style.marginTop = "22px"; const t = el("div"); t.append(el("b", null, "Próximo encuentro por Zoom"), el("span", null, prox.etiqueta + (prox.tema ? " · " + prox.tema : ""))); p.append(el("span", null, "🌙"), t); tx.append(p); }
+  const fc = el("div", "foto-c"), im = el("img"); im.src = s(CFG.foto) || "/images/uploads/lectura-queen.jpg"; im.alt = "Queen"; fc.append(im);
+  hin.append(tx, fc); hero.append(hin);
+
+  const cuerpo = el("div", "wrap");
+  const ben = el("div", "ben"); s(CFG.beneficios).split("\n").map(s).filter(Boolean).forEach(b => ben.append(el("div", null, b))); cuerpo.append(ben);
+  if (s(CFG.intro)) cuerpo.append(el("p", "intro-c", CFG.intro));
+
+  const reg = el("section", "registro"); reg.id = "registro";
+  const lado = el("div", "lado"); lado.append(el("span", "kicker", "Cómo funciona"), el("h2", null, "Únete en un minuto"));
+  const pasos = el("div", "pasos");
+  [["Te registras gratis", "Solo tu nombre, apellido, correo y teléfono."], ["Entras al momento", "Ves los videos, fotos y enseñanzas exclusivas."], ["Nos vemos por Zoom", "Cada 15 días, con recordatorio a tu correo."]].forEach(([b, t]) => { const d = el("div"); const x = el("span"); x.append(el("b", null, b), t); d.append(x); pasos.append(d); });
+  lado.append(pasos);
+  const caja = el("div", "caja"); caja.id = "caja";
+  reg.append(caja, lado); cuerpo.append(reg);
+  app.replaceChildren(hero, cuerpo);
+  modo(new URLSearchParams(location.search).get("enlace") === "vencido" ? "entrar" : "registro");
+  if (new URLSearchParams(location.search).get("enlace") === "vencido") toast("Ese enlace ya venció o ya se usó. Pide uno nuevo con tu correo.");
+}
+
+function modo(cual) {
+  const caja = $("#caja"); if (!caja) return;
+  const err = el("p", "note err"); err.hidden = true;
+  const f = el("form", "form"); f.noValidate = true;
+  const campo = (lab, name, type, extra = {}) => { const L = el("label", null, lab), i = el("input"); i.type = type; i.name = name; Object.assign(i, extra); L.append(i); return L; };
+  if (cual === "registro") {
+    if (CFG.registroAbierto === false) { caja.replaceChildren(el("h2", null, "Registro cerrado"), el("p", "muted", "Por ahora no estoy recibiendo miembros nuevos. Vuelve pronto.")); return; }
+    const n = el("div", "two"); n.append(campo("Nombre", "nombre", "text", { autocomplete: "given-name", required: true }), campo("Apellido", "apellido", "text", { autocomplete: "family-name", required: true }));
+    const acL = el("label", "acepto"), ac = el("input"); ac.type = "checkbox"; ac.name = "acepta";
+    const t = el("span"); t.append("Acepto recibir los correos de la comunidad (encuentros y novedades). Puedo dejar de recibirlos cuando quiera. ");
+    const pol = el("a", null, "Privacidad"); pol.href = "/politicas.html#privacidad"; pol.target = "_blank"; t.append(pol); acL.append(ac, t);
+    const tr = el("label", "trampa", "No llenes esto"); const ti = el("input"); ti.name = "web"; ti.tabIndex = -1; ti.autocomplete = "off"; tr.append(ti);
+    const go = el("button", "btn btn-solid", "Unirme gratis"); go.type = "submit";
+    f.append(n, campo("Correo electrónico", "email", "email", { autocomplete: "email", required: true }), campo("Teléfono", "telefono", "tel", { autocomplete: "tel", placeholder: "512 555 1234", required: true }), acL, tr, err, go);
+    const otro = el("p", "muted"); otro.style.margin = "14px 0 0"; otro.append("¿Ya eres miembro? "); const l = el("button", "lnk", "Entrar"); l.type = "button"; l.onclick = () => modo("entrar"); otro.append(l);
+    f.onsubmit = async ev => {
+      ev.preventDefault(); err.hidden = true;
+      const v = Object.fromEntries(new FormData(f)); v.acepta = ac.checked;
+      if (!s(v.nombre) || !s(v.apellido)) { err.textContent = "Escribe tu nombre y apellido."; err.hidden = false; return; }
+      if (!ac.checked) { err.textContent = "Para unirte, marca que aceptas recibir los correos de la comunidad."; err.hidden = false; return; }
+      go.disabled = true; go.textContent = "Creando tu cuenta…";
+      try { await api("/api/comunidad/registro", { body: v }); if (window.qsEvento) qsEvento("registro"); history.replaceState(null, "", location.pathname); await iniciar(true); }
+      catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = "Unirme gratis"; }
+    };
+    caja.replaceChildren(el("h2", null, "Únete gratis"), el("p", "muted", "Exclusivo para miembros registrados."), f, otro);
+    return;
+  }
+  // Entrar
+  const go = el("button", "btn btn-solid", "Mandarme el enlace"); go.type = "submit";
+  const telL = campo("Tu teléfono (el de tu registro)", "telefono", "tel", { autocomplete: "tel" }); telL.hidden = true;
+  f.append(campo("Tu correo", "email", "email", { autocomplete: "email", required: true }), telL, err, go);
+  const otro = el("p", "muted"); otro.style.margin = "14px 0 0"; otro.append("¿Todavía no eres miembro? "); const l = el("button", "lnk", "Regístrate gratis"); l.type = "button"; l.onclick = () => modo("registro"); otro.append(l);
+  f.onsubmit = async ev => {
+    ev.preventDefault(); err.hidden = true; go.disabled = true;
+    const v = Object.fromEntries(new FormData(f));
+    try {
+      const r = await api("/api/comunidad/entrar", { body: v });
+      if (r.enviado) { caja.replaceChildren(el("h2", null, "Revisa tu correo 💌"), el("p", null, `Te mandé un enlace a ${v.email}. Tócalo para entrar (dura 30 minutos).`), el("p", "muted", "Si no lo ves, busca en Promociones o Spam.")); return; }
+      if (r.pedirTelefono) { telL.hidden = false; telL.querySelector("input").focus(); go.textContent = "Entrar"; go.disabled = false; return; }
+      await iniciar(true);
+    } catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; }
+  };
+  caja.replaceChildren(el("h2", null, "Entrar"), el("p", "muted", "Escribe el correo con el que te registraste y te mando un enlace para entrar, sin contraseña."), f, otro);
+  f.querySelector("input").focus();
+}
+
+/* ═════════ Área de miembros ═════════ */
+let D = null, TAB = "publicaciones", FILTRO = "";
+function area() {
+  const m = D.miembro;
+  const hola = el("section", "hola"), w = el("div", "wrap");
+  w.append(el("span", "kicker", "Comunidad Queen Spiritual"), el("h1", null, `Hola, ${m.nombre} 🌙`));
+  if (s(D.mensaje)) w.append(el("p", null, D.mensaje));
+  const prox = D.encuentros.proximos[0];
+  if (prox) w.append(tarjetaEncuentro(prox));
+  hola.append(w);
+  const tabs = el("nav", "tabs"), tw = el("div", "wrap"); tw.setAttribute("role", "tablist");
+  const misResp = D.preguntas.filter(q => q.mia && q.respuesta).length;
+  [["publicaciones", "Publicaciones", D.posts.length], ["encuentros", "Encuentros", D.encuentros.proximos.length], ["preguntas", "Preguntas", misResp]].forEach(([id, t, n]) => {
+    const b = el("button", null, t); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(TAB === id));
+    if (n && id !== "publicaciones") b.append(el("span", "n", String(n)));
+    b.onclick = () => { TAB = id; history.replaceState(null, "", "#" + id); area(); window.scrollTo({ top: hola.offsetHeight, behavior: "smooth" }); };
+    tw.append(b);
+  });
+  tabs.append(tw);
+  const cont = el("section", "panel-m"), cw = el("div", "wrap"); cont.append(cw);
+  if (TAB === "publicaciones") publicaciones(cw); else if (TAB === "encuentros") encuentros(cw); else preguntas(cw);
+  // cuenta
+  const cu = el("div", "cuenta"), swL = el("label", "sw"), sw = el("input"); sw.type = "checkbox"; sw.checked = m.avisos;
+  sw.onchange = async () => { try { await api("/api/comunidad", { body: { accion: "avisos", avisos: sw.checked } }); D.miembro.avisos = sw.checked; toast(sw.checked ? "Listo: te avisaré por correo." : "Listo: ya no te mandaré correos de la comunidad."); } catch (e) { sw.checked = !sw.checked; toast(e.message); } };
+  swL.append(sw, "Recibir avisos por correo");
+  const out = el("button", "lnk", "Salir"); out.type = "button"; out.onclick = async () => { try { await api("/api/comunidad/entrar", { method: "DELETE" }); } catch (e) {} location.href = "/comunidad.html"; };
+  cu.append(el("span", null, `Entraste como ${m.email}`), swL, out); cw.append(cu);
+  app.replaceChildren(hola, tabs, cont);
+}
+
+function tarjetaEncuentro(e, compacta) {
+  const c = el("div", compacta ? "e-item" : "encuentro"), f = fechaObj(e.fecha);
+  const dia = el("div", "dia"); dia.append(el("small", null, DIAS[f.getDay()]), el("b", null, String(f.getDate())), el("small", null, MESES[f.getMonth()]));
+  const tx = el("div");
+  if (compacta) { tx.append(el("h4", null, e.tema || "Encuentro de la comunidad"), el("p", null, `${e.etiqueta} · hora de Texas`)); }
+  else {
+    tx.append(el("span", "et", e.estado === "envivo" ? "En vivo ahora" : "Próximo encuentro por Zoom"), el("h2", null, e.tema || "Encuentro de la comunidad"), el("span", "cuando", `${e.etiqueta} · hora de Texas`));
+  }
+  const acc = el("div", "acc");
+  if (e.zoom) { const z = el("a", "btn " + (compacta ? "btn-solid btn-sm" : "btn-oro"), e.estado === "envivo" ? "Entrar ahora a Zoom" : "Entrar a Zoom"); z.href = e.zoom; z.target = "_blank"; z.rel = "noopener"; if (e.estado === "envivo" && !compacta) { const v = el("span", "vivo"); v.append(el("i"), "En vivo"); acc.append(v); } acc.append(z); }
+  else acc.append(el("span", compacta ? "muted" : "zoomdatos", "El enlace de Zoom aparecerá aquí antes del encuentro."));
+  if (e.grabacion) { const g = el("a", "btn btn-line btn-sm", "▶ Ver grabación"); g.href = e.grabacion; g.target = "_blank"; g.rel = "noopener"; acc.append(g); }
+  if (e.estado !== "pasado") { const cal = el("button", "btn " + (compacta ? "btn-line btn-sm" : "btn-claro btn-sm"), "📅 A mi calendario"); cal.type = "button"; cal.onclick = () => ics(e); acc.append(cal); }
+  if (e.clave && !compacta) acc.append(el("span", "zoomdatos", `Código de acceso: ${e.clave}`));
+  if (e.notas && !compacta) tx.append(el("p", "zoomdatos", e.notas));
+  c.append(dia, tx, acc); return c;
+}
+
+function publicaciones(w) {
+  const posts = D.posts.filter(p => !FILTRO || p.tipo === FILTRO);
+  const tipos = [...new Set(D.posts.map(p => p.tipo))];
+  if (tipos.length > 1) {
+    const ch = el("div", "chips filtro"); ch.setAttribute("role", "group"); ch.setAttribute("aria-label", "Filtrar");
+    [["", "Todo"], ["video", "Videos"], ["fotos", "Fotos"], ["ensenanza", "Enseñanzas"]].filter(([t]) => !t || tipos.includes(t)).forEach(([t, n]) => { const b = el("button", null, n); b.type = "button"; b.setAttribute("aria-pressed", String(FILTRO === t)); b.onclick = () => { FILTRO = t; area(); }; ch.append(b); });
+    w.append(ch);
+  }
+  if (!posts.length) { w.append(el("div", "vacio", "Muy pronto voy a compartir aquí videos, fotos y enseñanzas para ti. 🌙")); return; }
+  const feed = el("div", "feed"); posts.forEach(p => feed.append(tarjetaPost(p))); w.append(feed);
+}
+
+function tarjetaPost(p) {
+  const c = el("article", "post"), cab = el("div", "cab"), q = el("div", "quien");
+  q.append(el("b", null, "Queen"), el("span", null, hace(p.creado)));
+  cab.append(el("span", "av"), q);
+  if (p.fijado) cab.append(el("span", "fijo", "📌 Fijado"));
+  cab.append(el("span", "tipo", { video: "Video", fotos: "Fotos", ensenanza: "Enseñanza" }[p.tipo] || "Enseñanza"));
+  c.append(cab);
+  if (s(p.titulo)) c.append(el("h3", null, p.titulo));
+  if (s(p.texto)) { const t = el("div", "tx"); t.append(conEnlaces(p.texto)); c.append(t); }
+  if (p.video) c.append(video(p.video));
+  if ((p.fotos || []).length) {
+    const n = p.fotos.length, g = el("div", "fotos " + (n === 1 ? "n1" : n === 2 ? "n2" : n === 3 ? "n3" : "nmas"));
+    p.fotos.forEach(src => { const b = el("button"), im = el("img"); b.type = "button"; b.setAttribute("aria-label", "Ver foto"); im.src = src; im.alt = p.titulo || "Foto"; im.loading = "lazy"; b.append(im); b.onclick = () => verFoto(src); g.append(b); });
+    c.append(g);
+  }
+  // comentarios
+  const cs = el("div", "coms"), lista = el("div"); lista.style.cssText = "display:grid;gap:8px";
+  let todos = false;
+  const pintar = () => {
+    const arr = p.comentarios || [], ver = todos ? arr : arr.slice(-3);
+    lista.replaceChildren();
+    if (arr.length > ver.length) { const m = el("button", "lnk", `Ver los ${arr.length} comentarios`); m.type = "button"; m.style.justifySelf = "start"; m.style.fontSize = ".9rem"; m.onclick = () => { todos = true; pintar(); }; lista.append(m); }
+    ver.forEach(x => { const d = el("div", "com" + (x.queen ? " queen" : "")); d.append(el("b", null, x.queen ? "👑 Queen" : x.autor)); d.append(conEnlaces(x.texto)); d.append(el("small", null, hace(x.creado))); lista.append(d); });
+  };
+  pintar();
+  const fe = el("form", "escribir"), ta = el("textarea"); ta.rows = 1; ta.placeholder = "Escribe un comentario…"; ta.maxLength = 1500; ta.setAttribute("aria-label", "Escribe un comentario");
+  ta.oninput = () => { ta.style.height = "auto"; ta.style.height = Math.min(160, ta.scrollHeight) + "px"; };
+  const env = el("button", "btn btn-solid btn-sm", "Enviar"); env.type = "submit";
+  fe.append(ta, env);
+  fe.onsubmit = async ev => {
+    ev.preventDefault(); const t = s(ta.value); if (t.length < 2) return;
+    env.disabled = true;
+    try { const r = await api("/api/comunidad", { body: { accion: "comentar", post: p.id, texto: t } }); (p.comentarios ||= []).push(r.comentario); ta.value = ""; ta.style.height = "auto"; todos = true; pintar(); }
+    catch (e) { toast(e.message); }
+    env.disabled = false;
+  };
+  cs.append(lista, fe); c.append(cs);
+  return c;
+}
+
+function encuentros(w) {
+  const { proximos, pasados } = D.encuentros;
+  w.append(el("h2", "sub-t", "Próximos encuentros"));
+  if (proximos.length) { const l = el("div", "lista-e"); proximos.forEach(e => l.append(tarjetaEncuentro(e, true))); w.append(l); }
+  else w.append(el("div", "vacio", "Muy pronto anuncio el próximo encuentro por Zoom. Te aviso por correo. 🌙"));
+  if (pasados.length) { w.append(el("h2", "sub-t", "Encuentros anteriores")); const l = el("div", "lista-e"); pasados.forEach(e => l.append(tarjetaEncuentro(e, true))); w.append(l); }
+}
+
+function preguntas(w) {
+  const f = el("form", "form preg-form caja"); f.noValidate = true;
+  const ta = el("textarea"); ta.rows = 3; ta.maxLength = 2000; ta.placeholder = "Escribe aquí tu pregunta…"; ta.name = "texto";
+  const L = el("label", null, "Hazme una pregunta"); L.append(ta);
+  const err = el("p", "note err"); err.hidden = true;
+  const go = el("button", "btn btn-solid", "Enviar pregunta"); go.type = "submit";
+  f.append(L, el("p", "muted", "Te respondo aquí y te aviso por correo. Las respuestas que puedan ayudar a otros las comparto con la comunidad (sin tu apellido)."), err, go);
+  f.querySelector("p.muted").style.cssText = "margin:-4px 0 0;font-size:.88rem";
+  f.onsubmit = async ev => {
+    ev.preventDefault(); err.hidden = true; const t = s(ta.value);
+    if (t.length < 5) { err.textContent = "Escribe tu pregunta."; err.hidden = false; return; }
+    go.disabled = true;
+    try { await api("/api/comunidad", { body: { accion: "preguntar", texto: t } }); D.preguntas.unshift({ texto: t, autor: "Tú", creada: new Date().toISOString(), respuesta: "", mia: true }); toast("¡Recibí tu pregunta! Te aviso cuando la responda."); area(); }
+    catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; }
+  };
+  w.append(f);
+  if (!D.preguntas.length) { w.append(el("div", "vacio", "Todavía no hay preguntas respondidas. ¡Sé la primera en preguntar!")); return; }
+  D.preguntas.forEach(q => {
+    const c = el("div", "preg"), t = el("div", "q"); t.append(q.texto, el("small", null, `${q.mia ? "Tu pregunta" : q.autor} · ${hace(q.creada)}`)); c.append(t);
+    if (q.respuesta) { const r = el("div", "r"); r.append(el("b", null, "👑 Respuesta de Queen")); r.append(conEnlaces(q.respuesta)); c.append(r); }
+    else c.append(el("p", "esp", "Esperando respuesta… te aviso por correo."));
+    w.append(c);
+  });
+}
+
+/* ═════════ Inicio ═════════ */
+async function iniciar(recienEntro) {
+  try {
+    D = await api("/api/comunidad");
+    const h = location.hash.replace("#", ""); if (["publicaciones", "encuentros", "preguntas"].includes(h)) TAB = h;
+    area(); if (recienEntro) window.scrollTo(0, 0);
+  } catch (e) {
+    if (e.status === 401) { let pub = {}; try { pub = await api("/api/comunidad?publico=1"); } catch (x) {} bienvenida(pub.proximo); }
+    else app.replaceChildren(el("p", "wrap note err", e.message));
+  }
+}
+(() => {
+  const btn = $("#menuBtn"), menu = $("#menuM");
+  btn.onclick = () => { const si = menu.hidden; menu.hidden = !si; btn.setAttribute("aria-expanded", String(si)); };
+})();
+fetch("/api/contenido?n=negocio").then(r => r.json()).then(N => { const n = s(N.nombre) || "Queen Spiritual"; $("#brandName").textContent = n; $("#footText").textContent = `© ${new Date().getFullYear()} ${n}`; }).catch(() => {});
+fetch("/api/contenido?n=comunidad", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(c => { CFG = c || {}; iniciar(); });
+</script>
+<script src="/stats.js" defer></script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
+</body>
+</html>
