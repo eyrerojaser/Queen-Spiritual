@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Comunidad Queen Spiritual · Gratis para miembros</title>
-<meta name="description" content="Únete gratis a la Comunidad Queen Spiritual: videos y enseñanzas espirituales exclusivas, encuentros por Zoom cada 15 días y preguntas y respuestas.">
+<meta name="description" content="Únete gratis a la Comunidad Queen Spiritual: un espacio para compartir, aprender y conectar. Conversaciones entre miembros, enseñanzas, encuentros por Zoom cada 15 días y preguntas y respuestas.">
 <link rel="canonical" href="https://SITIO/comunidad.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Queen Spiritual">
 <meta property="og:locale" content="es_US">
 <meta property="og:title" content="Comunidad Queen Spiritual · Gratis para miembros">
-<meta property="og:description" content="Videos y enseñanzas espirituales exclusivas, encuentros por Zoom cada 15 días y preguntas y respuestas. Regístrate gratis.">
+<meta property="og:description" content="Un espacio para compartir, aprender y conectar. Aquí cada voz tiene su lugar. Regístrate gratis.">
 <meta property="og:url" content="https://SITIO/comunidad.html">
 <meta property="og:image" content="https://SITIO/images/compartir.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -320,7 +320,7 @@ function bienvenida(prox) {
   const reg = el("section", "registro"); reg.id = "registro";
   const lado = el("div", "lado"); lado.append(el("span", "kicker", "Cómo funciona"), el("h2", null, "Únete en un minuto"));
   const pasos = el("div", "pasos");
-  [["Te registras gratis", "Solo tu nombre, apellido, correo y teléfono."], ["Entras al momento", "Ves los videos, fotos y enseñanzas exclusivas."], ["Nos vemos por Zoom", "Cada 15 días, con recordatorio a tu correo."]].forEach(([b, t]) => { const d = el("div"); const x = el("span"); x.append(el("b", null, b), t); d.append(x); pasos.append(d); });
+  [["Te registras gratis", "Solo tu nombre, apellido, correo y teléfono."], ["Entras al momento", "Conversas, compartes lo que sabes y aprendes de los demás."], ["Nos vemos por Zoom", "Cada 15 días, con recordatorio a tu correo."]].forEach(([b, t]) => { const d = el("div"); const x = el("span"); x.append(el("b", null, b), t); d.append(x); pasos.append(d); });
   lado.append(pasos);
   const caja = el("div", "caja"); caja.id = "caja";
   reg.append(caja, lado); cuerpo.append(reg);

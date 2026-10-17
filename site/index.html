@@ -286,7 +286,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
         <a href="/personaliza.html"><b>Arreglos</b><span>Personalízalo</span></a>
         <a href="/lecturas.html"><b>Lecturas</b><span>Cartas españolas</span></a>
         <a href="/tienda.html"><b>Queen Shop</b><span>Baños y más</span></a>
-        <a href="/comunidad.html" class="p-com"><b>✦ Comunidad Queen Spiritual</b><span id="comPill">Únete gratis · videos, enseñanzas y Zoom cada 15 días</span></a>
+        <a href="/comunidad.html" class="p-com"><b>✦ Comunidad Queen Spiritual</b><span id="comPill">Únete gratis · comparte, aprende y conecta</span></a>
       </div>
     </div>
     <div class="arch" id="heroArch"><img id="heroImg" alt=""></div>
@@ -319,8 +319,8 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
     <div>
       <span class="kicker" style="color:#8A6A12" id="comKick">Gratis · Solo para miembros</span>
       <h2>Comunidad Queen Spiritual</h2>
-      <p>Un espacio para crecer espiritualmente, aprender y compartir conmigo y con personas que caminan como tú.</p>
-      <ul class="lista"><li>Videos y enseñanzas</li><li>Zoom cada 15 días</li><li>Preguntas y respuestas</li></ul>
+      <p id="comFrase">Un espacio para compartir, aprender y conectar. Aquí cada voz tiene su lugar.</p>
+      <ul class="lista"><li>Conversa y comparte</li><li>Aprende de otros</li><li>Zoom cada 15 días</li></ul>
     </div>
     <a class="btn" href="/comunidad.html" id="comBtn">Unirme gratis</a>
   </div>
@@ -631,6 +631,8 @@ Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitude
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
 });
 
+// Comunidad: la frase que escribes en tu panel ("Página de la comunidad")
+leer("comunidad").then(c => { if (c && s(c.frase)) $("#comFrase").textContent = c.frase + " Aquí cada voz tiene su lugar."; });
 // Comunidad: lugares de miembro fundador que quedan
 fetch("/api/comunidad?publico=1", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(c => {
   if (!c || !c.limite || !(c.quedan > 0)) return;
