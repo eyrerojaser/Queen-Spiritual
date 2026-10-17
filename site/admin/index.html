@@ -495,7 +495,7 @@ const SECCIONES = [
   ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
   ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
   ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
-  ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"]]],
+  ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]]],
 ];
 async function inicio() {
   cargando();
@@ -1475,8 +1475,28 @@ const comunidad = () => vistaForm({
   ],
 });
 
+
+async function correos() {
+  const salida = h("div");
+  const b = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
+    b.disabled = true; b.textContent = "Probando…"; salida.replaceChildren();
+    try {
+      const r = await api("/api/panel/probar-correo", { method: "POST", body: {} });
+      const fila = (k, v) => h("div", { class: "rw", style: "margin:4px 0" }, h("b", { style: "min-width:190px" }, k), v ? h("span", { class: "pill ok" }, v) : h("span", { class: "pill off" }, "No está"));
+      salida.replaceChildren(
+        h("p", { class: "note " + (r.ok ? "ok" : "err"), style: "margin-top:16px" }, (r.ok ? "✅ " : "⚠️ ") + r.mensaje),
+        r.estado.aviso ? h("p", { class: "note err" }, r.estado.aviso) : null,
+        h("div", { class: "card", style: "margin-top:12px" }, h("h2", null, "Lo que tiene Netlify"), fila("GMAIL_USER", r.estado.GMAIL_USER), fila("GMAIL_APP_PASSWORD", r.estado.GMAIL_APP_PASSWORD), fila("AVISOS_EMAIL (opcional)", r.estado.AVISOS_EMAIL)),
+        r.tecnico ? h("p", { class: "muted", style: "font-size:.8rem;word-break:break-word" }, "Detalle técnico: " + r.tecnico) : null);
+    } catch (e) { fallo(e); }
+    b.disabled = false; b.textContent = "Probar correo";
+  } }, "Probar correo");
+  marco(...cabeza("Correos", "Revisa que tu página pueda mandar correos (bienvenidas, reservas, compras y recordatorios)."),
+    h("div", { class: "card" }, h("p", { style: "margin:0 0 14px" }, "Toca el botón: tu página manda un correo de prueba y te dice si funciona o qué falta."), b, salida));
+}
+
 /* ═════════ Rutas ═════════ */
-const RUTAS = { conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

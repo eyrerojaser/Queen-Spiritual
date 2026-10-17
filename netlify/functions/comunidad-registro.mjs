@@ -42,6 +42,16 @@ export default manejar(async (req, ctx) => {
     await avisarme({ titulo: "🌙 Alguien se está uniendo a la Comunidad", cuerpo: `${m.nombre} ${m.apellido} · ${m.email} · pasando al pago de la membresía`, url: "/admin/#/miembros", origen: o });
     return new Response(JSON.stringify({ ok: true, pagar: url }), { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "set-cookie": await cookieMiembro(clave) } });
   }
+  if (!antes.abierta && antes.apertura) {
+    const f = new Date(antes.apertura + "T12:00").toLocaleDateString("es-US", { weekday: "long", day: "numeric", month: "long" });
+    await correoMiembro(m, {
+      asunto: "🌙 ¡Tu lugar en la Comunidad Queen Spiritual está reservado!", titulo: `¡Ya tienes tu lugar, ${m.nombre}!`,
+      parrafos: [...(m.fundador ? ["👑 Eres <b>miembro fundador</b>: tu lugar es gratis para siempre."] : []), `La comunidad abre el <b>${f}</b>. Ese día te mando otro correo para que entres.`, "Mientras tanto, si conoces a alguien a quien le pueda gustar, compártele el enlace. 💛"],
+      boton: { texto: "Ver la comunidad", url: `${o}/comunidad.html` },
+    });
+    await avisarme({ titulo: `🌙 Nuevo miembro${m.fundador ? " fundador" : ""} en la lista de espera`, cuerpo: `${m.nombre} ${m.apellido} · ${m.email} · ${m.telefono}${m.fundador ? `\nQuedan ${antes.quedan - 1} lugares de miembro fundador.` : ""}`, url: "/admin/#/miembros", origen: o });
+    return new Response(JSON.stringify({ ok: true, miembro: publico(m) }), { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "set-cookie": await cookieMiembro(clave) } });
+  }
   await correoMiembro(m, {
     asunto: "¡Bienvenida a la Comunidad Queen Spiritual! 🌙", titulo: `¡Bienvenida, ${m.nombre}!`,
     parrafos: [...(m.fundador ? ["👑 Eres <b>miembro fundador</b>: tu lugar en la comunidad es gratis para siempre."] : []), texto(cfg.bienvenida, 1200) || "Gracias por unirte. Aquí vas a encontrar videos, fotos y enseñanzas, y nos vemos en los encuentros por Zoom cada 15 días.", "Para entrar desde otro teléfono o computadora, solo escribe tu correo en la página de la comunidad y te llega un enlace."],

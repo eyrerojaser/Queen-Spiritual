@@ -16,7 +16,7 @@ export const avisosDeps = {
   async enviarCorreo({ to, bcc, subject, text, html, replyTo, nombre }) {
     const gu = process.env.GMAIL_USER, gp = process.env.GMAIL_APP_PASSWORD, rk = process.env.RESEND_API_KEY;
     if (gu && gp) {
-      const t = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: gu, pass: gp.replace(/\s+/g, "") } });
+      const t = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: gu.trim(), pass: gp.replace(/\s+/g, "") }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
       await t.sendMail({ from: `"${(nombre || "Queen Spiritual").replace(/"/g, "")}" <${gu}>`, to, bcc, subject, text, html, replyTo });
       return true;
     }

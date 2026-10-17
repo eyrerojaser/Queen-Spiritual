@@ -216,3 +216,7 @@ APERTURA, FUNDADORES Y MEMBRESÍA (panel > Página de la comunidad)
 - IMPORTANTE (una sola vez): en Stripe > Developers > Webhooks, abre tu webhook y en
   "Events" agrega también: customer.subscription.created, customer.subscription.updated
   y customer.subscription.deleted. Así la página se entera si alguien cancela o no paga.
+
+¿NO LLEGAN LOS CORREOS?
+- En tu panel > Tu cuenta > Correos, toca "Probar correo". Te dice si faltan variables
+  en Netlify o si Google no aceptó la contraseña de aplicación, y qué hacer.
