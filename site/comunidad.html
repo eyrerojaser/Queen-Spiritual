@@ -125,6 +125,40 @@
 .escribir{display:flex;gap:8px;align-items:flex-end}
 .escribir textarea{flex:1;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);resize:none;min-height:44px}
 .escribir button{flex:none}
+.normas-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;max-height:220px;overflow:auto;font-size:.88rem}
+.normas-l{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;line-height:1.45;color:var(--ink)}
+.acepto.fuerte{color:var(--ink)!important;font-weight:600!important}
+.normas-c{max-width:720px;margin-bottom:20px;border-color:var(--gold)}
+.normas-c h2{font-size:1.7rem}
+.normas-c .btn{margin-top:14px}
+details.normas summary{cursor:pointer;color:var(--blue);font-weight:600}
+.nueva-c{max-width:720px;margin-bottom:20px;padding:14px 16px}
+.nc-cab{display:flex;gap:12px;align-items:center;cursor:text;padding:4px 0}
+.nc-cab .av{width:40px;height:40px;border-radius:50%;flex:none}
+.coms{min-width:0}.coms > *{min-width:0}
+.escribir textarea{min-width:0;width:100%}
+.post{min-width:0}
+.nc-cab .muted{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-size:.95rem}
+.nc-cuerpo{display:grid;gap:10px}
+.nc-cuerpo input,.nc-cuerpo textarea,.nc-cuerpo select{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);width:100%}
+.nc-fila{display:flex;gap:8px;align-items:center}
+.nc-fila select{flex:1;min-width:0;width:auto}
+.nc-pv{display:flex;gap:10px;align-items:flex-end}
+.nc-pv img{max-height:160px;border-radius:12px}
+.normas{font-size:.82rem;color:var(--muted);margin:2px 0 0;line-height:1.5}
+.av.yo{display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:700;font-size:1rem;background-image:none}
+.nom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fund{font-size:.66rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#7A5B0E;background:color-mix(in srgb,#FFD966 40%,transparent);padding:2px 7px;border-radius:999px}
+.fund.guia{background:var(--night);color:#FFD966}
+.tema.de-queen{border-color:color-mix(in srgb,#FFD966 60%,var(--line))}
+.pend-m{margin:10px 18px 0;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,#FFD966 22%,var(--surface));font-size:.88rem}
+.acc-t{display:flex;align-items:center;gap:12px;padding:12px 18px 0;flex-wrap:wrap}
+.gracias{font:inherit;font-size:.9rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer}
+.gracias.si{background:color-mix(in srgb,#FFD966 35%,var(--surface));border-color:#E9B949}
+.n-resp{font-size:.88rem}
+.q-gracias{font-size:.8rem;font-weight:700;color:#7A5B0E;background:color-mix(in srgb,#FFD966 35%,transparent);padding:4px 10px;border-radius:999px}
+.mas-acc{margin-left:auto}
+.mas-acc .lnk,.lnk.mini{font-size:.82rem;font-weight:500;color:var(--muted)}
 .vacio{background:var(--blue-soft);border-radius:16px;padding:22px;color:var(--ink);max-width:720px}
 .lista-e{display:grid;gap:12px;max-width:720px}
 .e-item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:62px 1fr;gap:14px;align-items:center}
@@ -261,6 +295,8 @@ function ics(e) {
 }
 
 let CFG = {};
+// Normas de la comunidad como lista (una por línea).
+function listaNormas(txt) { const ol = el("ol", "normas-l"); s(txt).split("\n").map(s).filter(Boolean).forEach(n => ol.append(el("li", null, n))); return ol; }
 /* ═════════ Bienvenida y registro ═════════ */
 let LUG = { quedan: 0, limite: 0 };
 const hayLugares = () => LUG.limite > 0 && LUG.quedan > 0;
@@ -301,17 +337,20 @@ function modo(cual) {
   if (cual === "registro") {
     if (CFG.registroAbierto === false) { caja.replaceChildren(el("h2", null, "Registro cerrado"), el("p", "muted", "Por ahora no estoy recibiendo miembros nuevos. Vuelve pronto.")); return; }
     const n = el("div", "two"); n.append(campo("Nombre", "nombre", "text", { autocomplete: "given-name", required: true }), campo("Apellido", "apellido", "text", { autocomplete: "family-name", required: true }));
+    const nBox = el("div", "normas-box"); nBox.append(el("b", null, "Normas de la comunidad"), listaNormas(CFG.normas));
+    const nL = el("label", "acepto fuerte"), nc = el("input"); nc.type = "checkbox"; nc.name = "normas"; nL.append(nc, el("span", null, "He leído y acepto las normas de la comunidad"));
     const acL = el("label", "acepto"), ac = el("input"); ac.type = "checkbox"; ac.name = "acepta";
     const t = el("span"); t.append("Acepto recibir los correos de la comunidad (encuentros y novedades). Puedo dejar de recibirlos cuando quiera. ");
     const pol = el("a", null, "Privacidad"); pol.href = "/politicas.html#privacidad"; pol.target = "_blank"; t.append(pol); acL.append(ac, t);
     const tr = el("label", "trampa", "No llenes esto"); const ti = el("input"); ti.name = "web"; ti.tabIndex = -1; ti.autocomplete = "off"; tr.append(ti);
     const textoBtn = hayLugares() ? "Quiero mi lugar de fundador" : "Unirme gratis";
     const go = el("button", "btn btn-solid", textoBtn); go.type = "submit";
-    f.append(n, campo("Correo electrónico", "email", "email", { autocomplete: "email", required: true }), campo("Teléfono", "telefono", "tel", { autocomplete: "tel", placeholder: "512 555 1234", required: true }), acL, tr, err, go);
+    f.append(n, campo("Correo electrónico", "email", "email", { autocomplete: "email", required: true }), campo("Teléfono", "telefono", "tel", { autocomplete: "tel", placeholder: "512 555 1234", required: true }), ...(s(CFG.normas) ? [nBox, nL] : []), acL, tr, err, go);
     const otro = el("p", "muted"); otro.style.margin = "14px 0 0"; otro.append("¿Ya eres miembro? "); const l = el("button", "lnk", "Entrar"); l.type = "button"; l.onclick = () => modo("entrar"); otro.append(l);
     f.onsubmit = async ev => {
       ev.preventDefault(); err.hidden = true;
-      const v = Object.fromEntries(new FormData(f)); v.acepta = ac.checked;
+      const v = Object.fromEntries(new FormData(f)); v.acepta = ac.checked; v.normas = s(CFG.normas) ? nc.checked : true;
+      if (!v.normas) { err.textContent = "Para unirte, lee y acepta las normas de la comunidad."; err.hidden = false; return; }
       if (!s(v.nombre) || !s(v.apellido)) { err.textContent = "Escribe tu nombre y apellido."; err.hidden = false; return; }
       if (!ac.checked) { err.textContent = "Para unirte, marca que aceptas recibir los correos de la comunidad."; err.hidden = false; return; }
       go.disabled = true; go.textContent = "Creando tu cuenta…";
@@ -342,7 +381,7 @@ function modo(cual) {
 }
 
 /* ═════════ Área de miembros ═════════ */
-let D = null, TAB = "publicaciones", FILTRO = "";
+let D = null, TAB = "conversaciones", FILTRO = "", CAT = "";
 function area() {
   const m = D.miembro;
   const hola = el("section", "hola"), w = el("div", "wrap");
@@ -353,7 +392,7 @@ function area() {
   hola.append(w);
   const tabs = el("nav", "tabs"), tw = el("div", "wrap"); tw.setAttribute("role", "tablist");
   const misResp = D.preguntas.filter(q => q.mia && q.respuesta).length;
-  [["publicaciones", "Publicaciones", D.posts.length], ["encuentros", "Encuentros", D.encuentros.proximos.length], ["preguntas", "Preguntas", misResp]].forEach(([id, t, n]) => {
+  [["conversaciones", "Conversaciones", 0], ["publicaciones", "De Queen", 0], ["encuentros", "Encuentros", D.encuentros.proximos.length], ["preguntas", "Preguntas", misResp]].forEach(([id, t, n]) => {
     const b = el("button", null, t); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(TAB === id));
     if (n && id !== "publicaciones") b.append(el("span", "n", String(n)));
     b.onclick = () => { TAB = id; history.replaceState(null, "", "#" + id); area(); window.scrollTo({ top: hola.offsetHeight, behavior: "smooth" }); };
@@ -361,7 +400,7 @@ function area() {
   });
   tabs.append(tw);
   const cont = el("section", "panel-m"), cw = el("div", "wrap"); cont.append(cw);
-  if (TAB === "publicaciones") publicaciones(cw); else if (TAB === "encuentros") encuentros(cw); else preguntas(cw);
+  if (TAB === "conversaciones") conversaciones(cw); else if (TAB === "publicaciones") publicaciones(cw); else if (TAB === "encuentros") encuentros(cw); else preguntas(cw);
   // cuenta
   const cu = el("div", "cuenta"), swL = el("label", "sw"), sw = el("input"); sw.type = "checkbox"; sw.checked = m.avisos;
   sw.onchange = async () => { try { await api("/api/comunidad", { body: { accion: "avisos", avisos: sw.checked } }); D.miembro.avisos = sw.checked; toast(sw.checked ? "Listo: te avisaré por correo." : "Listo: ya no te mandaré correos de la comunidad."); } catch (e) { sw.checked = !sw.checked; toast(e.message); } };
@@ -449,6 +488,119 @@ function encuentros(w) {
   if (pasados.length) { w.append(el("h2", "sub-t", "Encuentros anteriores")); const l = el("div", "lista-e"); pasados.forEach(e => l.append(tarjetaEncuentro(e, true))); w.append(l); }
 }
 
+/* ── Conversaciones entre miembros ── */
+async function achicarFoto(file) {
+  if (!/^image\//.test(file.type)) throw new Error("Elige una foto (JPG o PNG).");
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Esa foto no se pudo abrir. Prueba con otra.")); i.src = url; });
+    const k = Math.min(1, 1400 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", .82);
+  } finally { URL.revokeObjectURL(url); }
+}
+const nombreAutor = (x) => { const f = el("b", null, x.queen ? "👑 Queen" : x.autor); return f; };
+function etiquetas(x) { const f = document.createDocumentFragment(); if (x.fundador && !x.queen) f.append(el("span", "fund", "Fundador")); if (x.queen) f.append(el("span", "fund guia", "Guía")); return f; }
+
+function aceptarNormas(w) {
+  const c = el("div", "caja normas-c"); c.append(el("h2", null, "Antes de participar 🌙"), el("p", "muted", "Para que este sea un espacio seguro y respetuoso, lee y acepta las normas de la comunidad."), listaNormas(D.normas));
+  const b = el("button", "btn btn-solid", "He leído y acepto las normas"); b.type = "button";
+  b.onclick = async () => { b.disabled = true; try { await api("/api/comunidad", { body: { accion: "aceptar-normas" } }); D.miembro.normas = true; toast("¡Gracias! Ya puedes participar."); area(); } catch (e) { toast(e.message); b.disabled = false; } };
+  c.append(b); w.append(c);
+}
+function conversaciones(w) {
+  if (!D.miembro.normas && s(D.normas)) aceptarNormas(w);
+  // Escribir
+  const caja = el("form", "caja nueva-c"); caja.noValidate = true;
+  const cab = el("div", "nc-cab"); cab.append(el("span", "av yo", (D.miembro.nombre[0] || "?").toUpperCase()), el("span", "muted", "Comparte algo con la comunidad…"));
+  const cuerpo = el("div", "nc-cuerpo"); cuerpo.hidden = true;
+  const selC = el("select"); selC.setAttribute("aria-label", "Tema"); (D.categorias || []).forEach(c => selC.append(new Option(c, c)));
+  const tit = el("input"); tit.type = "text"; tit.maxLength = 140; tit.placeholder = "Título (opcional)"; tit.setAttribute("aria-label", "Título");
+  const ta = el("textarea"); ta.rows = 4; ta.maxLength = 4000; ta.placeholder = "Una experiencia, algo que sabes, una duda para la comunidad…"; ta.setAttribute("aria-label", "Lo que quieres compartir");
+  let foto = ""; const pv = el("div", "nc-pv"), inp = el("input"); inp.type = "file"; inp.accept = "image/*"; inp.hidden = true;
+  const bf = el("button", "btn btn-line btn-sm", "📷 Foto"); bf.type = "button"; bf.onclick = () => inp.click();
+  const pintarFoto = () => { pv.replaceChildren(); if (foto) { const im = el("img"); im.src = foto; im.alt = "Tu foto"; const q = el("button", "lnk", "Quitar"); q.type = "button"; q.onclick = () => { foto = ""; pintarFoto(); }; pv.append(im, q); } };
+  inp.onchange = async () => { const f = inp.files[0]; inp.value = ""; if (!f) return; bf.disabled = true; try { foto = await achicarFoto(f); } catch (e) { toast(e.message); } bf.disabled = false; pintarFoto(); };
+  const err = el("p", "note err"); err.hidden = true;
+  const go = el("button", "btn btn-solid btn-sm", "Publicar"); go.type = "submit";
+  const fila = el("div", "nc-fila"); fila.append(selC, ...(D.fotosMiembros ? [bf] : []), go);
+  cuerpo.append(tit, ta, pv, inp, err, fila);
+  if (D.normas) { const n = el("details", "normas"); n.append(el("summary", null, "Ver las normas de la comunidad"), listaNormas(D.normas)); cuerpo.append(n); }
+  cab.onclick = () => { cuerpo.hidden = false; cab.hidden = true; ta.focus(); };
+  caja.append(cab, cuerpo);
+  caja.onsubmit = async ev => {
+    ev.preventDefault(); err.hidden = true;
+    if (s(ta.value).length < 3) { err.textContent = "Escribe lo que quieres compartir."; err.hidden = false; return; }
+    go.disabled = true; go.textContent = "Publicando…";
+    try { const r = await api("/api/comunidad", { body: { accion: "tema-crear", categoria: selC.value, titulo: tit.value, texto: ta.value, foto } }); toast(r.pendiente ? "¡Gracias! Queen la revisa y sale muy pronto." : "¡Publicado! 🌙"); await recargar(); }
+    catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = "Publicar"; }
+  };
+  if (D.miembro.normas || !s(D.normas)) w.append(caja);
+  // Filtro por tema
+  const usadas = [...new Set(D.temas.map(t => t.categoria))];
+  if (usadas.length > 1) {
+    const ch = el("div", "chips filtro"); ch.setAttribute("role", "group"); ch.setAttribute("aria-label", "Filtrar por tema");
+    ["", ...D.categorias.filter(c => usadas.includes(c))].forEach(c => { const b = el("button", null, c || "Todo"); b.type = "button"; b.setAttribute("aria-pressed", String(CAT === c)); b.onclick = () => { CAT = c; area(); }; ch.append(b); });
+    w.append(ch);
+  }
+  const lista = D.temas.filter(t => !CAT || t.categoria === CAT);
+  if (!lista.length) { w.append(el("div", "vacio", "Todavía no hay conversaciones. ¡Empieza tú! Cuenta una experiencia o haz una pregunta a la comunidad. 🌙")); return; }
+  const feed = el("div", "feed"); lista.forEach(t => feed.append(tarjetaTema(t))); w.append(feed);
+}
+
+function tarjetaTema(t) {
+  const c = el("article", "post tema" + (t.queen ? " de-queen" : "")), cab = el("div", "cab"), q = el("div", "quien");
+  const nom = el("div", "nom"); nom.append(nombreAutor(t), etiquetas(t)); q.append(nom, el("span", null, hace(t.creado)));
+  cab.append(el("span", t.queen ? "av" : "av yo", t.queen ? "" : (t.autor[0] || "?").toUpperCase()), q);
+  if (t.fijado) cab.append(el("span", "fijo", "📌"));
+  cab.append(el("span", "tipo", t.categoria));
+  c.append(cab);
+  if (t.pendiente) c.append(el("p", "pend-m", "⏳ Queen la está revisando. Solo tú la ves por ahora."));
+  if (s(t.titulo)) c.append(el("h3", null, t.titulo));
+  const tx = el("div", "tx"); tx.append(conEnlaces(t.texto)); c.append(tx);
+  if (t.foto) { const g = el("div", "fotos n1"), b = el("button"), im = el("img"); b.type = "button"; b.setAttribute("aria-label", "Ver foto"); im.src = t.foto; im.alt = t.titulo || "Foto"; im.loading = "lazy"; b.append(im); b.onclick = () => verFoto(t.foto); g.append(b); c.append(g); }
+  // acciones
+  const acc = el("div", "acc-t");
+  const gr = el("button", "gracias" + (t.diGracias ? " si" : "")); gr.type = "button";
+  const pintarG = () => { gr.className = "gracias" + (t.diGracias ? " si" : ""); gr.textContent = `🙏 ${t.gracias ? t.gracias + " " : ""}${t.gracias === 1 ? "gracias" : "gracias"}`; gr.setAttribute("aria-pressed", String(t.diGracias)); };
+  gr.onclick = async () => { try { const r = await api("/api/comunidad", { body: { accion: "tema-gracias", tema: t.id } }); t.diGracias = r.dado; t.gracias += r.dado ? 1 : -1; pintarG(); } catch (e) { toast(e.message); } };
+  pintarG(); acc.append(gr);
+  if (t.queenGracias && !t.queen) acc.append(el("span", "q-gracias", "👑 Queen agradeció esto"));
+  acc.append(el("span", "muted n-resp", `${t.respuestas.length} respuesta${t.respuestas.length === 1 ? "" : "s"}`));
+  const mas = el("span", "mas-acc");
+  if (t.mio) { const bb = el("button", "lnk", "Borrar"); bb.type = "button"; bb.onclick = async () => { if (!confirm("¿Borrar lo que publicaste?")) return; try { await api("/api/comunidad", { body: { accion: "tema-borrar", tema: t.id } }); await recargar(); } catch (e) { toast(e.message); } }; mas.append(bb); }
+  else if (!t.queen) { const rp = el("button", "lnk", "Reportar"); rp.type = "button"; rp.onclick = async () => { if (!confirm("¿Reportar esta publicación a Queen? Solo ella lo verá.")) return; try { await api("/api/comunidad", { body: { accion: "reportar", clave: t.clave } }); toast("Gracias por avisar. Queen lo va a revisar."); } catch (e) { toast(e.message); } }; mas.append(rp); }
+  acc.append(mas); c.append(acc);
+  // respuestas
+  const cs = el("div", "coms"), lista = el("div"); lista.style.cssText = "display:grid;gap:8px";
+  let todos = false;
+  const pintar = () => {
+    const arr = t.respuestas, ver = todos ? arr : arr.slice(-2);
+    lista.replaceChildren();
+    if (arr.length > ver.length) { const m = el("button", "lnk", `Ver las ${arr.length} respuestas`); m.type = "button"; m.style.justifySelf = "start"; m.style.fontSize = ".9rem"; m.onclick = () => { todos = true; pintar(); }; lista.append(m); }
+    ver.forEach(x => {
+      const d = el("div", "com" + (x.queen ? " queen" : "")), cab2 = el("div", "nom"); cab2.append(nombreAutor(x), etiquetas(x)); d.append(cab2, conEnlaces(x.texto));
+      const pie = el("small"); pie.append(hace(x.creado));
+      if (x.mia) { const bb = el("button", "lnk mini", "Borrar"); bb.type = "button"; bb.onclick = async () => { try { await api("/api/comunidad", { body: { accion: "resp-borrar", clave: x.clave } }); t.respuestas = t.respuestas.filter(y => y !== x); pintar(); } catch (e) { toast(e.message); } }; pie.append(" · ", bb); }
+      else if (!x.queen) { const rp = el("button", "lnk mini", "Reportar"); rp.type = "button"; rp.onclick = async () => { if (!confirm("¿Reportar esta respuesta a Queen?")) return; try { await api("/api/comunidad", { body: { accion: "reportar", clave: x.clave } }); toast("Gracias por avisar."); } catch (e) { toast(e.message); } }; pie.append(" · ", rp); }
+      d.append(pie); lista.append(d);
+    });
+  };
+  pintar();
+  const fe = el("form", "escribir"), ta = el("textarea"); ta.rows = 1; ta.placeholder = "Responder…"; ta.maxLength = 2000; ta.setAttribute("aria-label", "Responder");
+  ta.oninput = () => { ta.style.height = "auto"; ta.style.height = Math.min(160, ta.scrollHeight) + "px"; };
+  const env = el("button", "btn btn-solid btn-sm", "Enviar"); env.type = "submit"; fe.append(ta, env);
+  fe.onsubmit = async ev => {
+    ev.preventDefault(); const tx2 = s(ta.value); if (tx2.length < 2) return; env.disabled = true;
+    try { const r = await api("/api/comunidad", { body: { accion: "tema-responder", tema: t.id, texto: tx2 } }); t.respuestas.push(r.respuesta); ta.value = ""; ta.style.height = "auto"; todos = true; pintar(); c.querySelector(".n-resp").textContent = `${t.respuestas.length} respuesta${t.respuestas.length === 1 ? "" : "s"}`; }
+    catch (e) { toast(e.message); }
+    env.disabled = false;
+  };
+  if (!t.pendiente) cs.append(lista, fe); else cs.append(lista);
+  c.append(cs); return c;
+}
+async function recargar() { const y = scrollY; D = await api("/api/comunidad"); area(); window.scrollTo(0, y); }
+
 function preguntas(w) {
   const f = el("form", "form preg-form caja"); f.noValidate = true;
   const ta = el("textarea"); ta.rows = 3; ta.maxLength = 2000; ta.placeholder = "Escribe aquí tu pregunta…"; ta.name = "texto";
@@ -478,7 +630,7 @@ function preguntas(w) {
 async function iniciar(recienEntro) {
   try {
     D = await api("/api/comunidad");
-    const h = location.hash.replace("#", ""); if (["publicaciones", "encuentros", "preguntas"].includes(h)) TAB = h;
+    const h = location.hash.replace("#", ""); if (["conversaciones", "publicaciones", "encuentros", "preguntas"].includes(h)) TAB = h;
     area(); if (recienEntro) window.scrollTo(0, 0);
   } catch (e) {
     if (e.status === 401) { let pub = {}; try { pub = await api("/api/comunidad?publico=1"); } catch (x) {} LUG = { quedan: pub.quedan || 0, limite: pub.limite || 0 }; bienvenida(pub.proximo); }

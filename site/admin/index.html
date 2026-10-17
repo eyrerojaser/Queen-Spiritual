@@ -88,6 +88,10 @@ h1{font-size:clamp(2rem,6vw,2.6rem);margin:0 0 6px}
 .fe img{width:100%;height:100%;object-fit:cover}
 .fe .ib{position:absolute;top:4px;right:4px;width:26px;height:26px;min-width:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:0;font-size:1rem;line-height:1;padding:0}
 .card.pend{border-color:var(--gold)}
+.resps{display:grid;gap:8px;margin-top:12px;border-left:3px solid var(--line);padding-left:12px}
+.resp.rep{background:color-mix(in srgb,var(--warn) 8%,transparent);border-radius:8px;padding:6px 8px}
+.resp.hid{opacity:.6}
+.pill.prog{background:color-mix(in srgb,var(--gold) 22%,transparent);color:#7A5B0E}
 .card.hid{opacity:.65}
 .rw{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap}
 .rw .pill{margin:0}
@@ -350,6 +354,7 @@ function campo(def, valor, todo) {
   const hint = def.hint ? h("div", { class: "hint" }, def.hint) : null;
   if (def.t === "bool") {
     const i = h("input", { type: "checkbox", id, checked: !!valor, role: "switch" });
+    i.addEventListener("change", () => todo && todo());
     nodo = h("label", { class: "sw", for: id }, h("span", null, def.label, def.hint ? h("small", null, def.hint) : null), i);
     get = () => i.checked;
     return { nodo, get, def };
@@ -488,7 +493,7 @@ function pantallaEntrar(msg) {
 const SECCIONES = [
   ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
   ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
-  ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro y bienvenida"]]],
+  ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
   ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
   ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"]]],
 ];
@@ -511,6 +516,7 @@ async function inicio() {
     ...(com ? {
       publicaciones: { sub: com.publicaciones ? `${com.publicaciones} publicada${com.publicaciones === 1 ? "" : "s"}` : "Publica tu primer video" },
       interaccion: { badge: com.comentariosNuevos + com.preguntasPendientes, sub: com.preguntasPendientes ? `${com.preguntasPendientes} pregunta${com.preguntasPendientes === 1 ? "" : "s"} sin responder` : com.comentariosNuevos ? `${com.comentariosNuevos} comentario${com.comentariosNuevos === 1 ? "" : "s"} nuevo${com.comentariosNuevos === 1 ? "" : "s"}` : "Nada pendiente" },
+      conversaciones: { badge: com.pendientes + com.reportados + com.temasNuevos, sub: com.pendientes ? `${com.pendientes} por aprobar` : com.reportados ? `${com.reportados} reportada${com.reportados === 1 ? "" : "s"}` : com.temasNuevos ? `${com.temasNuevos} nueva${com.temasNuevos === 1 ? "" : "s"}` : "Nada pendiente" },
       encuentros: { sub: com.proximo ? "Próximo: " + com.proximo.etiqueta : "Sin encuentros próximos" },
       miembros: { sub: `${com.miembros} miembro${com.miembros === 1 ? "" : "s"}${com.nuevos ? ` · ${com.nuevos} nuevo${com.nuevos === 1 ? "" : "s"} esta semana` : ""}` },
     } : {}),
@@ -1210,7 +1216,10 @@ function campoFotos(valor) {
 
 function editarPost(p, alGuardar) {
   const nuevo = !p;
-  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", fotos: [], fijado: false, visible: true };
+  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", fotos: [], fijado: false, visible: true, avisar: true };
+  const yaSalio = !nuevo && p.salio !== false;
+  p.programar = !!p.programado; p.pfecha = p.programado ? p.programado.fecha : ""; p.phora = p.programado ? p.programado.hora : "09:00";
+  const manana = new Date(Date.now() + 864e5), hoyIso = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, "0")}-${String(manana.getDate()).padStart(2, "0")}`;
   const fm = formulario([
     { k: "tipo", t: "seg", label: "¿Qué vas a publicar?", ops: TIPOS_POST },
     { k: "titulo", t: "text", label: "Título", ph: "Ej: Cómo preparar un baño de limpieza" },
@@ -1218,7 +1227,12 @@ function editarPost(p, alGuardar) {
     { k: "texto", t: "area", label: "Texto", rows: 6, hint: "La enseñanza, la explicación del video o lo que quieras contar." },
     { k: "fijado", t: "bool", label: "Fijar arriba", hint: "Sale primero en la comunidad." },
     { k: "visible", t: "bool", label: "Publicado", hint: "Apágalo para guardarlo como borrador." },
-    ...(nuevo ? [{ k: "avisar", t: "bool", label: "Avisar a los miembros por correo" }] : []),
+    ...(yaSalio && p.programado ? [] : yaSalio ? [] : [
+      { k: "programar", t: "bool", label: "🕒 Programar para otro día", hint: "Déjala lista hoy y sale sola el día y la hora que elijas." },
+      { k: "pfecha", t: "date", label: "Día en que sale", min: hoyIso, si: v => v.programar },
+      { k: "phora", t: "select", label: "Hora (Texas)", ops: HORAS_E.map(x => [x, horaBon(x)]), si: v => v.programar },
+    ]),
+    ...(p.avisado ? [] : [{ k: "avisar", t: "bool", label: "Avisar a los miembros por correo", hint: "Si la programas, el aviso sale cuando se publique." }]),
   ], p);
   const fotos = campoFotos(p.fotos);
   fm.nodo.insertBefore(fotos.nodo, fm.nodo.children[3]);
@@ -1226,8 +1240,15 @@ function editarPost(p, alGuardar) {
   const ok = h("button", { type: "button", class: "btn btn-solid" }, nuevo ? "Publicar" : "Guardar");
   ok.onclick = async () => {
     const v = { ...fm.valores(), fotos: fotos.get(), id: p.id };
+    if (v.programar && !v.pfecha) { err.textContent = "Elige el día en que sale la publicación."; err.hidden = false; return; }
+    if ("programar" in v) v.programado = v.programar ? { fecha: v.pfecha, hora: v.phora } : null; else v.programado = p.programado || null;
+    if (!("avisar" in v)) v.avisar = !!p.avisar;
     ok.disabled = true; ok.textContent = "Guardando…"; err.hidden = true;
-    try { const r = await api("/api/panel/comunidad", { method: "POST", body: { accion: "post-guardar", post: v, avisar: !!v.avisar } }); dlg.close(); toast(r.avisados ? `Publicado ✓ Avisé a ${r.avisados} miembros.` : "Publicado ✓"); alGuardar(); }
+    try {
+      const r = await api("/api/panel/comunidad", { method: "POST", body: { accion: "post-guardar", post: v } }); dlg.close();
+      toast(r.programada ? `Programada ✓ Sale el ${new Date(v.programado.fecha + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })} a las ${horaBon(v.programado.hora)}` : r.avisados ? `Publicado ✓ Avisé a ${r.avisados} miembros.` : nuevo && v.visible !== false ? "Publicado ✓" : "Guardado ✓");
+      alGuardar();
+    }
     catch (e) { ok.disabled = false; ok.textContent = nuevo ? "Publicar" : "Guardar"; if (!(e instanceof Salir)) { err.textContent = e.message; err.hidden = false; } }
   };
   const del = !nuevo ? h("button", { type: "button", class: "btn danger", onclick: async () => {
@@ -1248,8 +1269,8 @@ async function publicaciones() {
     h("div", { class: "th" }, p.fotos && p.fotos[0] ? h("img", { src: p.fotos[0], alt: "" }) : ({ video: "🎬", fotos: "📷", ensenanza: "📖" }[p.tipo])),
     h("button", { class: "open", type: "button", onclick: () => editarPost(p, publicaciones) },
       h("div", { class: "nm" }, p.titulo || "(sin título)"),
-      h("div", { class: "ds" }, `${({ video: "Video", fotos: `${p.fotos.length} foto${p.fotos.length === 1 ? "" : "s"}`, ensenanza: "Enseñanza" })[p.tipo]} · ${fechaCorta(p.creado)} · ${p.nComentarios} comentario${p.nComentarios === 1 ? "" : "s"}`),
-      h("div", null, p.fijado ? h("span", { class: "pill" }, "📌 Fijado") : null, p.visible === false ? h("span", { class: "pill off" }, "Borrador") : null)),
+      h("div", { class: "ds" }, `${({ video: "Video", fotos: `${p.fotos.length} foto${p.fotos.length === 1 ? "" : "s"}`, ensenanza: "Enseñanza" })[p.tipo]} · ${p.salio ? fechaCorta(p.publicada) + " · " + p.nComentarios + " comentario" + (p.nComentarios === 1 ? "" : "s") : "todavía no sale"}`),
+      h("div", null, !p.salio ? h("span", { class: "pill prog" }, `🕒 Sale el ${p.etiquetaProgramada}`) : null, p.fijado ? h("span", { class: "pill" }, "📌 Fijado") : null, p.visible === false ? h("span", { class: "pill off" }, "Borrador") : null, !p.salio && p.avisar ? h("span", { class: "pill" }, "✉️ Con aviso") : null)),
     h("div", { class: "ia" })))) : h("div", { class: "empty" }, "Todavía no has publicado nada. Empieza con un video de bienvenida 🌙");
   marco(...cabeza("Publicaciones", "Videos, fotos y enseñanzas que solo ven tus miembros."),
     h("button", { class: "btn btn-solid add", type: "button", style: "margin:0 0 16px", onclick: () => editarPost(null, publicaciones) }, "+ Nueva publicación"), lista,
@@ -1357,7 +1378,7 @@ async function miembros() {
     caja.replaceChildren(l.length ? h("div", { class: "items" }, l.map(m => {
       const tel = String(m.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
       return h("div", { class: "card mb" + (m.bloqueado ? " hid" : "") },
-        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.fundador ? h("span", { class: "pill" }, "👑 Fundador") : null, m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
+        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.fundador ? h("span", { class: "pill" }, "👑 Fundador") : null, m.normas ? h("span", { class: "pill ok" }, "Aceptó las normas") : h("span", { class: "pill" }, "Falta aceptar normas"), m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
         h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 8px" }, `${m.email} · ${m.telefono} · se unió el ${fechaCorta(m.creado)}${m.ultimo ? " · última vez " + fechaCorta(m.ultimo) : ""}`),
         h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
           t1 ? h("a", { class: "btn btn-line btn-sm", href: `https://wa.me/${t1}`, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
@@ -1379,6 +1400,55 @@ async function miembros() {
   pintar();
 }
 
+
+let filtroConv = "todo";
+async function conversacionesPanel() {
+  cargando();
+  const d = await api("/api/panel/comunidad?vista=conversaciones");
+  const accion = async (body, msg) => { try { await api("/api/panel/comunidad", { method: "POST", body }); toast(msg || "Guardado ✓"); conversacionesPanel(); } catch (e) { fallo(e); } };
+  const marcado = x => x.reportes && !x.revisado && !x.oculto;
+  const cuenta = { pend: d.lista.filter(t => t.pendiente && !t.oculto).length, rep: d.lista.filter(t => marcado(t) || t.respuestas.some(marcado)).length };
+  const tabs = h("div", { class: "seg", role: "group", style: "margin-bottom:16px;flex-wrap:wrap;width:fit-content" },
+    [["todo", `Todas (${d.lista.length})`], ["pend", `Por aprobar (${cuenta.pend})`], ["rep", `Reportadas (${cuenta.rep})`]].map(([k, t]) => h("button", { type: "button", "aria-pressed": String(filtroConv === k), onclick: () => { filtroConv = k; conversacionesPanel(); } }, t)));
+  const lista = d.lista.filter(t => filtroConv === "todo" || (filtroConv === "pend" ? t.pendiente && !t.oculto : marcado(t) || t.respuestas.some(marcado)));
+  // Iniciar conversación como Queen
+  const nueva = (() => {
+    const sel = h("select", { "aria-label": "Tema" }, d.categorias.map(c => h("option", { value: c }, c)));
+    const tit = h("input", { type: "text", placeholder: "Título (opcional)", "aria-label": "Título" });
+    const ta = h("textarea", { rows: 3, placeholder: "Ej: ¿Qué ofrenda le ponen ustedes a Elegua los lunes?", "aria-label": "Mensaje" });
+    const fij = h("input", { type: "checkbox", role: "switch" });
+    return h("details", { class: "card" }, h("summary", { style: "cursor:pointer;font-weight:700" }, "＋ Empezar una conversación (como Queen)"),
+      h("div", { class: "f", style: "margin-top:12px" }, h("p", { class: "sub", style: "margin:0" }, "Una buena pregunta anima a los miembros a participar."), sel, tit, ta, h("label", { class: "sw" }, h("span", null, "Fijar arriba"), fij),
+        h("div", null, h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => accion({ accion: "tema-queen", categoria: sel.value, titulo: tit.value, texto: ta.value, fijado: fij.checked }, "Publicada ✓") }, "Publicar"))));
+  })();
+  const tarjeta = t => {
+    const resp = h("textarea", { rows: 2, placeholder: "Responder como Queen…", "aria-label": "Responder" });
+    return h("div", { class: "card" + (t.oculto ? " hid" : "") + (t.pendiente || marcado(t) ? " pend" : "") },
+      h("div", { class: "rw" }, h("b", null, t.queen ? "👑 Tú" : t.autor), h("span", { class: "pill" }, t.categoria), t.pendiente ? h("span", { class: "pill off" }, "Por aprobar") : null, t.fijado ? h("span", { class: "pill" }, "📌 Fijada") : null, t.oculto ? h("span", { class: "pill off" }, "Oculta") : null, marcado(t) ? h("span", { class: "pill off" }, `⚠️ Reportada ${t.reportes}`) : null,
+        h("span", { class: "muted", style: "font-size:.82rem" }, `${fechaCorta(t.creado)} · 🙏 ${t.gracias}`)),
+      t.titulo ? h("p", { style: "font-weight:700;margin:8px 0 0" }, t.titulo) : null,
+      h("p", { style: "white-space:pre-wrap;margin:6px 0 10px" }, t.texto),
+      t.foto ? h("a", { href: t.foto, target: "_blank", rel: "noopener" }, h("img", { src: t.foto, alt: "", style: "max-height:160px;border-radius:10px;margin-bottom:10px" })) : null,
+      h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+        t.pendiente ? h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => accion({ accion: "tema-mod", clave: t.clave, aprobar: true }, "Aprobada ✓ Ya la ven todos.") }, "Aprobar") : null,
+        marcado(t) ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "tema-mod", clave: t.clave, revisado: true }, "Marcada como revisada") }, "Está bien") : null,
+        t.queen || t.pendiente ? null : h("button", { class: "btn btn-sm " + (t.queenGracias ? "btn-solid" : "btn-line"), type: "button", onclick: () => accion({ accion: "tema-mod", clave: t.clave, gracias: !t.queenGracias }, t.queenGracias ? "Quitado" : "🙏 Le diste las gracias. Lo va a ver.") }, t.queenGracias ? "🙏 Agradecido" : "🙏 Dar gracias"),
+        h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "tema-mod", clave: t.clave, fijado: !t.fijado }, t.fijado ? "Desfijada" : "Fijada arriba ✓") }, t.fijado ? "Desfijar" : "Fijar"),
+        h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "tema-mod", clave: t.clave, oculto: !t.oculto }, t.oculto ? "Visible otra vez" : "Ocultada") }, t.oculto ? "Mostrar" : "Ocultar"),
+        h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm("¿Borrar esta conversación y sus respuestas?")) accion({ accion: "tema-mod", clave: t.clave, borrar: true }, "Borrada"); } }, "Borrar")),
+      t.respuestas.length ? h("div", { class: "resps" }, t.respuestas.map(r => h("div", { class: "resp" + (r.oculto ? " hid" : "") + (marcado(r) ? " rep" : "") },
+        h("div", { class: "rw" }, h("b", null, r.queen ? "👑 Tú" : r.autor), h("span", { class: "muted", style: "font-size:.8rem" }, fechaCorta(r.creado)), r.oculto ? h("span", { class: "pill off" }, "Oculta") : null, marcado(r) ? h("span", { class: "pill off" }, `⚠️ Reportada ${r.reportes}`) : null),
+        h("p", { style: "white-space:pre-wrap;margin:4px 0 6px" }, r.texto),
+        h("div", { style: "display:flex;gap:10px" },
+          marcado(r) ? h("button", { class: "lnk", type: "button", style: "font-size:.85rem", onclick: () => accion({ accion: "tema-mod", clave: r.clave, revisado: true }, "Revisada") }, "Está bien") : null,
+          h("button", { class: "lnk", type: "button", style: "font-size:.85rem", onclick: () => accion({ accion: "tema-mod", clave: r.clave, oculto: !r.oculto }, r.oculto ? "Visible" : "Ocultada") }, r.oculto ? "Mostrar" : "Ocultar"),
+          h("button", { class: "lnk", type: "button", style: "font-size:.85rem", onclick: () => { if (confirm("¿Borrar esta respuesta?")) accion({ accion: "tema-mod", clave: r.clave, borrar: true }, "Borrada"); } }, "Borrar"))))) : null,
+      t.pendiente ? null : h("div", { style: "margin-top:10px" }, resp, h("div", { style: "margin-top:6px" }, h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => accion({ accion: "tema-queen", tema: t.id, texto: resp.value }, "Respuesta publicada ✓") }, "Responder"))));
+  };
+  marco(...cabeza("Conversaciones", "Lo que comparten tus miembros entre ellos. Tú moderas: apruebas, fijas, ocultas o borras."), tabs, nueva,
+    lista.length ? lista.map(tarjeta) : h("div", { class: "empty" }, filtroConv === "todo" ? "Todavía no hay conversaciones. Empieza tú una con una pregunta para la comunidad." : "Nada por aquí. 🌙"));
+}
+
 const comunidad = () => vistaForm({
   n: "comunidad", titulo: "Página de la comunidad", lead: "Lo que ven las personas antes de registrarse, y el mensaje para tus miembros.",
   secciones: [
@@ -1390,6 +1460,11 @@ const comunidad = () => vistaForm({
       { k: "beneficios", t: "area", label: "Lo que reciben (uno por línea)", rows: 5 },
       { k: "intro", t: "area", label: "Texto de presentación", rows: 4 },
     ]],
+    ["Normas y participación", "Cada miembro las acepta al registrarse. Los que ya estaban, las aceptan antes de participar.", [
+      { k: "normas", t: "area", label: "Normas de la comunidad (una por línea)", rows: 8 },
+      { k: "fotosMiembros", t: "bool", label: "Permitir que los miembros suban fotos", hint: "Apagado: solo tú compartes fotos y videos." },
+      { k: "revisarTemas", t: "bool", label: "Revisar antes de publicar", hint: "Lo que publiquen tus miembros sale solo cuando tú lo apruebas." },
+    ]],
     ["Para tus miembros", null, [
       { k: "bienvenida", t: "area", label: "Correo de bienvenida", rows: 3, hint: "Lo reciben apenas se registran." },
       { k: "mensajeMiembros", t: "area", label: "Mensaje arriba del área de miembros", rows: 3 },
@@ -1398,7 +1473,7 @@ const comunidad = () => vistaForm({
 });
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

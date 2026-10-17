@@ -174,6 +174,13 @@ COMUNIDAD QUEEN SPIRITUAL (tu-pagina/comunidad.html)
   · Publicaciones: videos, fotos y enseñanzas. Para videos, súbelos a YouTube como
     "No listado" y pega el enlace (también sirven Vimeo, Google Drive, Instagram, TikTok
     y Facebook). Puedes avisar por correo a todos los miembros al publicar.
+    Con "Programar para otro día" la dejas lista y sale sola en la fecha y hora que elijas
+    (hora de Texas); el aviso por correo sale en esa misma hora.
+  · Conversaciones: los miembros comparten experiencias y conocimientos y se responden
+    entre ellos. Tú puedes dar "🙏 gracias" (lo ven), responder como Queen, fijar, ocultar,
+    borrar y empezar conversaciones. Si alguien reporta algo, te llega un aviso.
+    En "Página de la comunidad" están las normas (cada miembro las acepta), si los miembros
+    pueden subir fotos (apagado) y "Revisar antes de publicar".
   · Comentarios y preguntas: responde, oculta o borra. Al responder una pregunta,
     le llega un correo a esa persona.
   · Encuentros por Zoom: elige el primero y se crean solos cada 15 días. Los miembros

@@ -44,7 +44,7 @@ export async function requireMiembro(req) {
   if (req.method !== "GET" && req.headers.get("x-comunidad") !== "1") throw new Fallo(403, "Solicitud no permitida.");
   return m;
 }
-export const publico = (m) => ({ nombre: m.nombre, apellido: m.apellido, email: m.email, avisos: m.avisos !== false, creado: m.creado, fundador: m.fundador !== false });
+export const publico = (m) => ({ nombre: m.nombre, apellido: m.apellido, email: m.email, avisos: m.avisos !== false, creado: m.creado, fundador: m.fundador !== false, normas: !!m.normasAceptadas });
 
 // Cuántos miembros hay y cuántos lugares de miembro fundador quedan.
 export async function lugares(cfg) {
@@ -53,6 +53,21 @@ export async function lugares(cfg) {
   const total = Math.max(0, parseInt(cfg && cfg.fundadores, 10) || 0);
   return { fundadores: n, limite: total, quedan: total ? Math.max(0, total - n) : 0 };
 }
+
+// Foto que manda un miembro (ya achicada en su teléfono).
+export async function guardarFotoMiembro(dataUrl) {
+  if (!dataUrl) return "";
+  const m = /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl));
+  if (!m) throw new Fallo(415, "Esa foto no se pudo leer. Prueba con otra.");
+  const buf = Buffer.from(m[1], "base64");
+  if (buf.length > 3 * 1024 * 1024) throw new Fallo(413, "La foto es demasiado grande.");
+  if (!(buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff)) throw new Fallo(415, "Esa foto no se pudo leer. Prueba con otra.");
+  const id = crypto.randomUUID();
+  await deps.store("archivos").set(`img/${id}`, buf, { metadata: { tipo: "image/jpeg" } });
+  return `/img/${id}`;
+}
+export const CATEGORIAS = ["General", "Experiencias", "Conocimientos", "Ofrendas y altares", "Pido consejo"];
+export const huellaM = (clave) => crypto.createHash("sha256").update(String(clave)).digest("hex").slice(0, 20);
 
 // Límite simple por conexión (registros, enlaces, comentarios).
 export async function limite(ip, tipo, max, minutosVentana = 60) {
@@ -120,8 +135,38 @@ export function limpiarPost(p, antes = {}) {
     titulo: texto(p.titulo, 160), texto: texto(p.texto, 8000), video: url(p.video),
     fotos: (Array.isArray(p.fotos) ? p.fotos : []).map(foto).filter(Boolean).slice(0, 12),
     fijado: p.fijado === true, visible: p.visible !== false,
+    programado: limpiarProgramado(p.programar === false ? null : p.programado),
+    avisar: p.avisar === true, avisado: antes.avisado || "",
     creado: antes.creado || deps.ahora().toISOString(), editado: antes.creado ? deps.ahora().toISOString() : "",
   };
+}
+function limpiarProgramado(x) {
+  if (!x || !/^\d{4}-\d{2}-\d{2}$/.test(x.fecha || "")) return null;
+  return { fecha: x.fecha, hora: /^([01]\d|2[0-3]):[0-5]\d$/.test(x.hora || "") ? x.hora : "09:00" };
+}
+// ¿Ya salió la publicación? (las programadas salen solas a su fecha y hora de Texas)
+export function salio(p, ahora = ahoraLocal()) { return !p.programado || minutos(p.programado.fecha, p.programado.hora) <= ahora.min; }
+// Fecha real en que salió (para "hace 2 días" y para ordenar).
+export function fechaPublicada(p, ahora = ahoraLocal()) {
+  if (!p.programado) return p.creado;
+  const desfase = ahora.min - Math.round(deps.ahora().getTime() / 60000);
+  return new Date((minutos(p.programado.fecha, p.programado.hora) - desfase) * 60000).toISOString();
+}
+export function correoPublicacion(p, origen) {
+  return correoATodos({ asunto: `✨ Nuevo en la Comunidad: ${p.titulo || "nueva publicación"}`, titulo: p.titulo || "Hay algo nuevo para ti",
+    parrafos: [{ video: "Subí un video nuevo para la comunidad.", fotos: "Compartí fotos nuevas con la comunidad.", ensenanza: "Compartí una enseñanza nueva con la comunidad." }[p.tipo], p.texto ? esc(p.texto.slice(0, 280)) + (p.texto.length > 280 ? "…" : "") : ""].filter(Boolean),
+    boton: { texto: "Verlo en la comunidad", url: `${origen || process.env.URL || ""}/comunidad.html` } });
+}
+// Cada hora: avisa por correo de las publicaciones programadas que ya salieron.
+export async function avisarProgramadas(origen = "") {
+  const doc = await leerDoc("publicaciones", { lista: [] }), ahora = ahoraLocal(), hechos = [];
+  for (const p of doc.lista) {
+    if (!p.programado || !p.avisar || p.avisado || p.visible === false || !salio(p, ahora)) continue;
+    const n = await correoPublicacion(p, origen);
+    p.avisado = deps.ahora().toISOString(); hechos.push(`${p.titulo || p.id} (${n} correos)`);
+  }
+  if (hechos.length) await guardarDoc("publicaciones", doc);
+  return hechos;
 }
 export function limpiarEncuentro(e, antes = {}) {
   const fecha = /^\d{4}-\d{2}-\d{2}$/.test(e.fecha || "") ? e.fecha : "";

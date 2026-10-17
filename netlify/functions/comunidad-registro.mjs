@@ -17,6 +17,7 @@ export default manejar(async (req, ctx) => {
   if (!m.nombre || !m.apellido) throw new Fallo(400, "Escribe tu nombre y apellido.");
   if (!correoValido(m.email)) throw new Fallo(400, "Escribe un correo válido.");
   if (m.telefono.replace(/\D/g, "").length < 10) throw new Fallo(400, "Escribe tu teléfono con código de área.");
+  if (b.normas !== true) throw new Fallo(400, "Para unirte, lee y acepta las normas de la comunidad.");
   if (b.acepta !== true) throw new Fallo(400, "Para unirte, marca que aceptas recibir los correos de la comunidad.");
   await limite((ctx && ctx.ip) || req.headers.get("x-nf-client-connection-ip"), "reg", 5);
 
@@ -24,7 +25,7 @@ export default manejar(async (req, ctx) => {
   const antes = await lugares(cfg);
   m.fundador = antes.quedan > 0;
   const ahora = deps.ahora().toISOString();
-  const r = await s.setJSON(clave, { ...m, creado: ahora, ultimo: ahora, avisos: true, bloqueado: false }, { onlyIfNew: true });
+  const r = await s.setJSON(clave, { ...m, creado: ahora, ultimo: ahora, avisos: true, bloqueado: false, normasAceptadas: ahora }, { onlyIfNew: true });
   if (r && r.modified === false) {
     const ya = await s.get(clave, { type: "json" });
     if (ya && ya.bloqueado) throw new Fallo(403, "Ese correo no puede entrar a la comunidad. Escríbeme si crees que es un error.");

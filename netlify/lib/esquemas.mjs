@@ -62,7 +62,7 @@ export const ESQUEMAS = {
   }),
   comunidad: obj({
     registroAbierto: bool(true), fundadores: int(0, 100000, 50), titulo: str(120), frase: str(400), intro: str(1500), beneficios: str(1500), foto: foto(),
-    bienvenida: str(1200), mensajeMiembros: str(1500),
+    bienvenida: str(1200), mensajeMiembros: str(1500), normas: str(3000), revisarTemas: bool(false), fotosMiembros: bool(false),
   }),
   resenas: obj({
     resenas: lista(obj({ nombre: str(80), estrellas: uno(["5", "4", "3", "2", "1"], "5"), texto: str(1200), tipo: uno(["Arreglos", "Lecturas"], "Arreglos"), foto: foto(), fecha: fecha(), visible: bool(true) }), 300, (r) => r.texto),

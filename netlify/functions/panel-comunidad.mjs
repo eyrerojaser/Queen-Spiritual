@@ -1,9 +1,9 @@
 // Panel: todo lo de la Comunidad (miembros, publicaciones, comentarios, preguntas y encuentros).
 import crypto from "node:crypto";
-import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, minutos, fechaBonita } from "../lib/comun.mjs";
+import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, minutos, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
 import { esc } from "../lib/avisos.mjs";
-import { st, leerDoc, guardarDoc, limpiarPost, limpiarEncuentro, estadoEncuentro, etiquetaEncuentro, correoATodos, correoMiembro } from "../lib/comunidad.mjs";
+import { st, leerDoc, guardarDoc, limpiarPost, limpiarEncuentro, estadoEncuentro, etiquetaEncuentro, correoATodos, correoMiembro, salio, correoPublicacion, fechaPublicada, CATEGORIAS } from "../lib/comunidad.mjs";
 
 const sumarDias = (f, n) => new Date((minutos(f) + n * 1440) * 60000).toISOString().slice(0, 10);
 async function todos(prefijo) {
@@ -21,15 +21,18 @@ export default manejar(async (req) => {
       const ms = await todos("m/"), coms = await todos("c/"), qs = await todos("q/");
       const semana = Date.now() - 7 * 864e5;
       const enc = (await leerDoc("encuentros", { lista: [] })).lista.filter((e) => e.fecha && estadoEncuentro(e) !== "pasado").sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
-      return json({ miembros: ms.filter((m) => !m.bloqueado).length, nuevos: ms.filter((m) => Date.parse(m.creado) > semana).length, comentariosNuevos: coms.filter((c) => c.nuevo).length, preguntasPendientes: qs.filter((q) => !q.respuesta).length, publicaciones: (await leerDoc("publicaciones", { lista: [] })).lista.length, proximo: enc[0] ? { ...enc[0], etiqueta: etiquetaEncuentro(enc[0]) } : null });
+      const ts = await todos("t/"), trs = await todos("tr/");
+      const conv = { temasNuevos: ts.filter((t) => t.nuevo).length, pendientes: ts.filter((t) => t.pendiente && !t.oculto).length, reportados: [...ts, ...trs].filter((x) => x.reportes && !x.oculto && !x.revisado).length };
+      return json({ ...conv, miembros: ms.filter((m) => !m.bloqueado).length, nuevos: ms.filter((m) => Date.parse(m.creado) > semana).length, comentariosNuevos: coms.filter((c) => c.nuevo).length, preguntasPendientes: qs.filter((q) => !q.respuesta).length, publicaciones: (await leerDoc("publicaciones", { lista: [] })).lista.length, proximo: enc[0] ? { ...enc[0], etiqueta: etiquetaEncuentro(enc[0]) } : null });
     }
     if (vista === "miembros") {
       const ms = (await todos("m/")).sort((a, b) => b.creado.localeCompare(a.creado));
-      return json({ miembros: ms.map(({ nombre, apellido, email, telefono, creado, ultimo, bloqueado, avisos, fundador, clave }) => ({ nombre, apellido, email, telefono, creado, ultimo, bloqueado: !!bloqueado, avisos: avisos !== false, fundador: fundador !== false, clave })) });
+      return json({ miembros: ms.map(({ nombre, apellido, email, telefono, creado, ultimo, bloqueado, avisos, fundador, normasAceptadas, clave }) => ({ nombre, apellido, email, telefono, creado, ultimo, bloqueado: !!bloqueado, avisos: avisos !== false, fundador: fundador !== false, normas: normasAceptadas || "", clave })) });
     }
     if (vista === "publicaciones") {
       const doc = await leerDoc("publicaciones", { lista: [] }), coms = await todos("c/");
-      return json({ lista: doc.lista.map((p) => ({ ...p, nComentarios: coms.filter((c) => c.post === p.id && !c.queen).length })).sort((a, b) => (b.fijado - a.fijado) || b.creado.localeCompare(a.creado)) });
+      return json({ lista: doc.lista.map((p) => ({ ...p, salio: salio(p), publicada: fechaPublicada(p), etiquetaProgramada: p.programado ? `${fechaBonita(p.programado.fecha)}, ${horaBonita(p.programado.hora)}` : "", nComentarios: coms.filter((c) => c.post === p.id && !c.queen).length }))
+        .sort((a, b) => (a.salio - b.salio) || (b.fijado - a.fijado) || b.publicada.localeCompare(a.publicada)) });
     }
     if (vista === "interaccion") {
       const pubs = (await leerDoc("publicaciones", { lista: [] })).lista, titulo = new Map(pubs.map((p) => [p.id, p.titulo || "Publicación"]));
@@ -39,6 +42,13 @@ export default manejar(async (req) => {
       for (const c of coms) if (c.nuevo) await s.setJSON(c.clave, { ...c, clave: undefined, nuevo: false });
       for (const q of qs) if (q.nueva) await s.setJSON(q.clave, { ...q, clave: undefined, nueva: false });
       return json(out);
+    }
+    if (vista === "conversaciones") {
+      const ts = (await todos("t/")), trs = await todos("tr/"), gs = (await s.list({ prefix: "g/" })).blobs;
+      const lista = ts.map((t) => ({ ...t, gracias: gs.filter((g) => g.key.startsWith(`g/${t.id}/`)).length, queenGracias: gs.some((g) => g.key === `g/${t.id}/queen`), respuestas: trs.filter((r) => r.tema === t.id).sort((a, b) => a.creado.localeCompare(b.creado)) }))
+        .sort((a, b) => (b.pendiente - a.pendiente) || ((b.reportes && !b.revisado) - (a.reportes && !a.revisado)) || b.creado.localeCompare(a.creado));
+      for (const t of ts) if (t.nuevo) await s.setJSON(t.clave, { ...t, clave: undefined, nuevo: false });
+      return json({ lista, categorias: CATEGORIAS });
     }
     if (vista === "encuentros") {
       const doc = await leerDoc("encuentros", { recordar: true, lista: [] }), ahora = ahoraLocal();
@@ -57,11 +67,13 @@ export default manejar(async (req) => {
       if (!p.titulo && !p.texto && !p.video && !p.fotos.length) throw new Fallo(400, "Escribe un título o agrega contenido.");
       if (p.tipo === "video" && !p.video) throw new Fallo(400, "Pega el enlace del video (YouTube, Vimeo, Instagram, TikTok o Google Drive).");
       if (p.tipo === "fotos" && !p.fotos.length) throw new Fallo(400, "Sube al menos una foto.");
+      if (p.programado && salio(p) && !(i >= 0 && doc.lista[i].programado)) p.programado = null; // fecha pasada: sale ya
       if (i >= 0) doc.lista[i] = p; else doc.lista.unshift(p);
-      await guardarDoc("publicaciones", doc);
       let avisados = 0;
-      if (i < 0 && b.avisar && p.visible) avisados = await correoATodos({ asunto: `✨ Nuevo en la Comunidad: ${p.titulo || "nueva publicación"}`, titulo: p.titulo || "Hay algo nuevo para ti", parrafos: [{ video: "Subí un video nuevo para la comunidad.", fotos: "Compartí fotos nuevas con la comunidad.", ensenanza: "Compartí una enseñanza nueva con la comunidad." }[p.tipo], p.texto ? esc(p.texto.slice(0, 280)) + (p.texto.length > 280 ? "…" : "") : ""].filter(Boolean), boton: { texto: "Verlo en la comunidad", url: `${o}/comunidad.html` } });
-      return json({ ok: true, post: p, avisados });
+      // Si ya está publicada y pediste avisar, el correo sale ahora; si es programada, sale cuando se publique.
+      if (p.avisar && !p.avisado && p.visible && salio(p)) { avisados = await correoPublicacion(p, o); p.avisado = deps.ahora().toISOString(); }
+      await guardarDoc("publicaciones", doc);
+      return json({ ok: true, post: p, avisados, programada: !salio(p) });
     }
     case "post-borrar": {
       const doc = await leerDoc("publicaciones", { lista: [] });
@@ -103,6 +115,33 @@ export default manejar(async (req) => {
       if (b.accion === "miembro-borrar") { await s.delete(k); return json({ ok: true }); }
       const m = await s.get(k, { type: "json" }); if (!m) throw new Fallo(404, "Ese miembro ya no existe.");
       await s.setJSON(k, { ...m, bloqueado: b.bloqueado !== false }); return json({ ok: true });
+    }
+    case "tema-mod": {
+      if (!/^(t|tr)\//.test(k)) throw new Fallo(400, "No válido.");
+      const x = await s.get(k, { type: "json" }); if (!x) throw new Fallo(404, "Ya no existe.");
+      if (b.borrar) {
+        await s.delete(k);
+        if (/^t\//.test(k)) for (const pre of [`tr/${x.id}/`, `g/${x.id}/`]) for (const { key } of (await s.list({ prefix: pre })).blobs) await s.delete(key);
+        return json({ ok: true });
+      }
+      const c = { ...x };
+      if ("oculto" in b) c.oculto = !!b.oculto;
+      if ("fijado" in b) c.fijado = !!b.fijado;
+      if (b.aprobar) c.pendiente = false;
+      if (b.revisado) c.revisado = true;
+      if ("gracias" in b && /^t\//.test(k)) { const gk = `g/${x.id}/queen`; if (b.gracias) await s.setJSON(gk, { en: deps.ahora().toISOString() }); else await s.delete(gk); return json({ ok: true }); }
+      await s.setJSON(k, c); return json({ ok: true });
+    }
+    case "tema-queen": {
+      const t = texto(b.texto, 4000); if (t.length < 2) throw new Fallo(400, "Escribe tu mensaje.");
+      const id = `${deps.ahora().toISOString().replace(/[:.]/g, "-")}_${crypto.randomBytes(4).toString("hex")}`;
+      if (b.tema) {
+        const tema = await s.get(`t/${texto(b.tema, 80)}`, { type: "json" }); if (!tema) throw new Fallo(404, "Esa conversación ya no existe.");
+        await s.setJSON(`tr/${tema.id}/${id}`, { tema: tema.id, autor: "Queen", queen: true, texto: t, creado: deps.ahora().toISOString(), oculto: false });
+      } else {
+        await s.setJSON(`t/${id}`, { id, autor: "Queen", queen: true, categoria: CATEGORIAS.includes(b.categoria) ? b.categoria : "General", titulo: texto(b.titulo, 140), texto: t, foto: "", creado: deps.ahora().toISOString(), oculto: false, fijado: !!b.fijado, pendiente: false, nuevo: false, reportes: 0 });
+      }
+      return json({ ok: true });
     }
     case "encuentros-guardar": {
       const antes = await leerDoc("encuentros", { recordar: true, lista: [] }), porId = new Map(antes.lista.map((e) => [e.id, e]));

@@ -2,10 +2,13 @@
   "registroAbierto": true,
   "fundadores": 50,
   "titulo": "Comunidad Queen Spiritual",
-  "frase": "Un espacio gratuito para crecer espiritualmente, aprender y compartir con personas que caminan como tú.",
-  "intro": "Aquí comparto contigo enseñanzas, videos y fotos que no publico en ningún otro lugar. Nos reunimos por Zoom cada 15 días para conversar, aprender y responder tus preguntas.",
-  "beneficios": "Videos y enseñanzas exclusivas\nEncuentros por Zoom cada 15 días\nPreguntas y respuestas conmigo\nFotos de mis trabajos y altares\nUna comunidad que te acompaña",
+  "frase": "Un espacio para compartir, aprender y conectar.",
+  "intro": "Bienvenida a un espacio donde podemos conversar sobre espiritualidad, compartir experiencias, intercambiar conocimientos y aprender unos de otros. Aquí cada voz tiene su lugar y cada experiencia puede aportar algo valioso.",
+  "beneficios": "Conversa y comparte tus experiencias\nAprende de otras personas con conocimiento\nVideos y enseñanzas exclusivas\nEncuentros por Zoom cada 15 días\nPreguntas y respuestas conmigo",
   "foto": "/images/uploads/lectura-queen.jpg",
   "bienvenida": "Gracias por unirte a nuestra comunidad. Aquí vas a encontrar videos, fotos y enseñanzas, y nos vemos en los encuentros por Zoom cada 15 días.",
-  "mensajeMiembros": "Bienvenida a tu espacio. Aquí encuentras lo nuevo que comparto, los encuentros por Zoom y un lugar para hacerme tus preguntas."
+  "mensajeMiembros": "Este espacio es de todos. Comparte tus experiencias, lo que sabes y lo que te preguntas: aquí cada voz tiene su lugar.",
+  "normas": "Respeto ante todo: todas las tradiciones, casas y caminos se respetan. No se juzga ni se critica a nadie.\nComparte desde tu experiencia y con humildad. Aquí venimos a aprender unos de otros.\nNo se publican fotos. Las fotos y videos de la comunidad los comparte solo Queen.\nNo se comparten secretos, fundamentos ni trabajos que no deban hacerse públicos.\nNo se venden ni se promocionan servicios, productos ni lecturas.\nLo que se habla aquí, incluidos los encuentros por Zoom, se queda aquí. Cuida la privacidad de los demás.\nQueen puede ocultar o borrar publicaciones y retirar a quien no respete estas normas.",
+  "revisarTemas": false,
+  "fotosMiembros": false
 }
