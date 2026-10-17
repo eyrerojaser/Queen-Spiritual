@@ -199,3 +199,20 @@ ESTADÍSTICAS (panel > Tus números > Estadísticas)
   abres el panel no se cuentan.
 - Truco: en tus enlaces de Instagram o TikTok agrega ?utm_source=instagram (o tiktok)
   al final, ej: tu-pagina/comunidad.html?utm_source=instagram, para saber de dónde vienen.
+
+APERTURA, FUNDADORES Y MEMBRESÍA (panel > Página de la comunidad)
+- Fecha de apertura: hasta ese día la comunidad es LISTA DE ESPERA. La gente se registra
+  y reserva su lugar, ve cuántos días faltan, pero todavía no entra. Ese día, a las 8 am,
+  les llega un correo "¡Ya abrimos!". Déjala vacía para abrir de una vez.
+- Para preparar tu contenido antes de abrir: regístrate tú (o alguien de confianza) y en
+  Miembros toca "Entrar antes de abrir".
+- Lugares de fundador (25): los primeros 25 entran gratis para siempre.
+- Membresía al mes ($11.99): cuando se llenan los fundadores Y ya abrió la comunidad,
+  los nuevos pagan cada mes con tarjeta (Stripe). Cancelan cuando quieran desde su área
+  y siguen entrando hasta el final del mes pagado. Pon 0 para que siga siendo gratis.
+  Quienes se registren en la lista de espera después de los 25 activan su membresía al abrir.
+- En Miembros ves quién es fundador, quién paga, quién canceló o tiene el pago atrasado,
+  y puedes dar "Acceso gratis" (cortesía) a quien quieras.
+- IMPORTANTE (una sola vez): en Stripe > Developers > Webhooks, abre tu webhook y en
+  "Events" agrega también: customer.subscription.created, customer.subscription.updated
+  y customer.subscription.deleted. Así la página se entera si alguien cancela o no paga.

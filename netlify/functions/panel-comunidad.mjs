@@ -27,7 +27,7 @@ export default manejar(async (req) => {
     }
     if (vista === "miembros") {
       const ms = (await todos("m/")).sort((a, b) => b.creado.localeCompare(a.creado));
-      return json({ miembros: ms.map(({ nombre, apellido, email, telefono, creado, ultimo, bloqueado, avisos, fundador, normasAceptadas, clave }) => ({ nombre, apellido, email, telefono, creado, ultimo, bloqueado: !!bloqueado, avisos: avisos !== false, fundador: fundador !== false, normas: normasAceptadas || "", clave })) });
+      return json({ miembros: ms.map(({ nombre, apellido, email, telefono, creado, ultimo, bloqueado, avisos, fundador, normasAceptadas, cortesia, previa, pago, clave }) => ({ previa: !!previa, nombre, apellido, email, telefono, creado, ultimo, bloqueado: !!bloqueado, avisos: avisos !== false, fundador: fundador !== false, normas: normasAceptadas || "", cortesia: !!cortesia, pago: pago && pago.suscripcion ? { estado: pago.estado, cancelaAlFinal: !!pago.cancelaAlFinal, hasta: pago.hasta, precio: pago.precio } : null, clave })) });
     }
     if (vista === "publicaciones") {
       const doc = await leerDoc("publicaciones", { lista: [] }), coms = await todos("c/");
@@ -110,6 +110,16 @@ export default manejar(async (req) => {
       await s.setJSON(k, { ...q, publica: b.publica !== false }); return json({ ok: true });
     }
     case "preg-borrar": { if (!/^q\//.test(k)) throw new Fallo(400, "Pregunta no válida."); await s.delete(k); return json({ ok: true }); }
+    case "miembro-previa": {
+      if (!/^m\//.test(k)) throw new Fallo(400, "Miembro no válido.");
+      const m = await s.get(k, { type: "json" }); if (!m) throw new Fallo(404, "Ese miembro ya no existe.");
+      await s.setJSON(k, { ...m, previa: b.previa !== false }); return json({ ok: true });
+    }
+    case "miembro-cortesia": {
+      if (!/^m\//.test(k)) throw new Fallo(400, "Miembro no válido.");
+      const m = await s.get(k, { type: "json" }); if (!m) throw new Fallo(404, "Ese miembro ya no existe.");
+      await s.setJSON(k, { ...m, cortesia: b.cortesia !== false }); return json({ ok: true });
+    }
     case "miembro-bloquear": case "miembro-borrar": {
       if (!/^m\//.test(k)) throw new Fallo(400, "Miembro no válido.");
       if (b.accion === "miembro-borrar") { await s.delete(k); return json({ ok: true }); }

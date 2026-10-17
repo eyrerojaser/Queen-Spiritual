@@ -52,16 +52,17 @@ export default manejar(async (req) => {
   ventas.total = r2(ventas.lecturas + ventas.tienda + ventas.arreglos);
 
   // Comunidad
-  const cs = deps.store("comunidad"); let miembros = 0, registros = 0, registrosAntes = 0;
+  const cs = deps.store("comunidad"); let miembros = 0, registros = 0, registrosAntes = 0, pagando = 0, mensual = 0;
   for (const { key } of (await cs.list({ prefix: "m/" })).blobs) {
     const m = await cs.get(key, { type: "json" }); if (!m) continue;
     if (!m.bloqueado) miembros++;
+    if (m.pago && ["active", "trialing", "past_due"].includes(m.pago.estado) && !m.bloqueado) { pagando++; mensual += m.pago.precio || 0; }
     const f = fechaDe(m.creado); if (enRango(f)) registros++; else if (enAntes(f)) registrosAntes++;
   }
 
   return json({
     dias, desde, hasta: hoy,
-    totales: { visitas, visitasAntes, visitantes: visitantes.size, tienda: paginas["/tienda.html"] || 0, registros, registrosAntes, miembros, ventas: ventas.total, ventasAntes: r2(ventasAntes) },
+    totales: { visitas, visitasAntes, visitantes: visitantes.size, tienda: paginas["/tienda.html"] || 0, registros, registrosAntes, miembros, pagando, mensual: r2(mensual), ventas: ventas.total, ventasAntes: r2(ventasAntes) },
     porDia, ventas,
     paginas: orden(paginas).map(({ k, v }) => ({ p: k, nombre: nombrePagina(k), visitas: v })),
     fuentes: orden(fuentes), dispositivos: orden(disp), eventos,

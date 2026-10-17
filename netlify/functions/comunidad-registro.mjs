@@ -1,7 +1,7 @@
 // Registro gratis a la Comunidad Queen Spiritual: nombre, apellido, correo y teléfono.
 import { deps, json, manejar, origen, texto, Fallo } from "../lib/comun.mjs";
 import { avisarme } from "../lib/avisos.mjs";
-import { st, claveMiembro, correoValido, correoListo, cookieMiembro, enlaceEntrada, correoMiembro, limite, publico, lugares } from "../lib/comunidad.mjs";
+import { st, claveMiembro, correoValido, correoListo, cookieMiembro, enlaceEntrada, correoMiembro, limite, publico, lugares, sesionMembresia } from "../lib/comunidad.mjs";
 
 export default manejar(async (req, ctx) => {
   if (req.method !== "POST") throw new Fallo(405, "Método no permitido.");
@@ -33,6 +33,14 @@ export default manejar(async (req, ctx) => {
     const link = await enlaceEntrada(clave, o);
     await correoMiembro(ya, { asunto: "Tu enlace para entrar a la Comunidad", titulo: `Hola, ${ya.nombre}`, parrafos: ["Ya eras parte de la Comunidad Queen Spiritual. Toca el botón para entrar (el enlace dura 30 minutos)."], boton: { texto: "Entrar a la comunidad", url: link } });
     throw new Fallo(409, "Ese correo ya es miembro. Te mandé un enlace a tu correo para entrar.");
+  }
+  // Ya no quedan lugares de fundador: la persona paga su membresía antes de entrar.
+  if (antes.cobrar) {
+    let url;
+    try { url = await sesionMembresia(m, clave, antes.precio, o); }
+    catch (e) { await s.delete(clave); throw e instanceof Fallo ? e : new Fallo(502, "No pude abrir el pago. Intenta de nuevo en un momento."); }
+    await avisarme({ titulo: "🌙 Alguien se está uniendo a la Comunidad", cuerpo: `${m.nombre} ${m.apellido} · ${m.email} · pasando al pago de la membresía`, url: "/admin/#/miembros", origen: o });
+    return new Response(JSON.stringify({ ok: true, pagar: url }), { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "set-cookie": await cookieMiembro(clave) } });
   }
   await correoMiembro(m, {
     asunto: "¡Bienvenida a la Comunidad Queen Spiritual! 🌙", titulo: `¡Bienvenida, ${m.nombre}!`,

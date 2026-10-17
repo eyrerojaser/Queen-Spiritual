@@ -635,6 +635,16 @@ Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitude
 leer("comunidad").then(c => { if (c && s(c.frase)) $("#comFrase").textContent = c.frase + " Aquí cada voz tiene su lugar."; });
 // Comunidad: lugares de miembro fundador que quedan
 fetch("/api/comunidad?publico=1", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(c => {
+  if (c && c.abierta === false && c.apertura) {
+    const f = new Date(c.apertura + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" });
+    $("#comKick").textContent = c.quedan > 0 ? `🌙 Abrimos el ${f} · Quedan ${c.quedan} lugares gratis` : `🌙 Abrimos el ${f}`;
+    $("#comPill").textContent = `Abrimos el ${f} · reserva tu lugar${c.quedan > 0 ? " gratis" : ""}`;
+    $("#comBtn").textContent = c.quedan > 0 ? "Reservar mi lugar gratis" : "Unirme a la lista de espera"; return;
+  }
+  if (c && c.cobrar && c.precio) {
+    const p = "$" + Number(c.precio).toFixed(2);
+    $("#comPill").textContent = `Únete · ${p} al mes · comparte, aprende y conecta`; $("#comKick").textContent = `Membresía · ${p} al mes`; $("#comBtn").textContent = "Unirme"; return;
+  }
   if (!c || !c.limite || !(c.quedan > 0)) return;
   $("#comPill").textContent = `Gratis para siempre si eres de los primeros ${c.limite} · Quedan ${c.quedan} lugares`;
   $("#comKick").textContent = `👑 Miembros fundadores · Quedan ${c.quedan} lugares gratis`;

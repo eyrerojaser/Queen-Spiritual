@@ -1172,7 +1172,8 @@ async function estadisticas() {
     kpi("Visitas a Queen Shop", numero(T.tienda)),
     kpi("Ventas", dinero(T.ventas), `${V.nLecturas} lecturas · ${V.nOrdenes} pedidos · ${V.nArreglos} arreglos`, cambio(T.ventas, T.ventasAntes)),
     kpi("Registros nuevos", numero(T.registros), "en la comunidad", cambio(T.registros, T.registrosAntes)),
-    kpi("Miembros", numero(T.miembros), "en total"));
+    kpi("Miembros", numero(T.miembros), "en total"),
+    kpi("Membresías pagando", numero(T.pagando || 0), T.pagando ? `${dinero(T.mensual)} al mes` : "cuando se llenen los fundadores"));
   const prods = d.productos.length ? h("div", { class: "tabla-w" }, h("table", { class: "tabla" },
     h("thead", null, h("tr", null, h("th", null, "Producto"), h("th", null, "Vistas"), h("th", null, "Al carrito"), h("th", null, "Vendidos"), h("th", null, "Ingresos"))),
     h("tbody", null, d.productos.map(p => h("tr", null, h("td", null, p.titulo), h("td", null, numero(p.vistas)), h("td", null, numero(p.carrito)), h("td", null, numero(p.vendidos)), h("td", null, dinero(p.ingresos))))))) : h("p", { class: "muted", style: "margin:0" }, "Todavía no hay visitas a productos en este período.");
@@ -1378,11 +1379,13 @@ async function miembros() {
     caja.replaceChildren(l.length ? h("div", { class: "items" }, l.map(m => {
       const tel = String(m.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
       return h("div", { class: "card mb" + (m.bloqueado ? " hid" : "") },
-        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.fundador ? h("span", { class: "pill" }, "👑 Fundador") : null, m.normas ? h("span", { class: "pill ok" }, "Aceptó las normas") : h("span", { class: "pill" }, "Falta aceptar normas"), m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
+        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.fundador ? h("span", { class: "pill" }, "👑 Fundador") : m.cortesia ? h("span", { class: "pill ok" }, "🎁 Cortesía") : m.pago ? (["active", "trialing"].includes(m.pago.estado) ? h("span", { class: "pill ok" }, m.pago.cancelaAlFinal ? `Cancela el ${fechaCorta(m.pago.hasta)}` : `💛 Pagando ${dinero(m.pago.precio)}/mes`) : m.pago.estado === "past_due" ? h("span", { class: "pill off" }, "Pago atrasado") : h("span", { class: "pill off" }, "Membresía terminada")) : h("span", { class: "pill off" }, "Sin pagar"), m.previa ? h("span", { class: "pill" }, "👁 Acceso anticipado") : null, m.normas ? h("span", { class: "pill ok" }, "Aceptó las normas") : h("span", { class: "pill" }, "Falta aceptar normas"), m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
         h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 8px" }, `${m.email} · ${m.telefono} · se unió el ${fechaCorta(m.creado)}${m.ultimo ? " · última vez " + fechaCorta(m.ultimo) : ""}`),
         h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
           t1 ? h("a", { class: "btn btn-line btn-sm", href: `https://wa.me/${t1}`, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
           h("a", { class: "btn btn-line btn-sm", href: `mailto:${m.email}` }, "Correo"),
+          h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "miembro-previa", clave: m.clave, previa: !m.previa }, m.previa ? "Quitado" : "👁 Ya puede entrar antes de la apertura") }, m.previa ? "Quitar acceso anticipado" : "👁 Entrar antes de abrir"),
+          m.fundador ? null : h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "miembro-cortesia", clave: m.clave, cortesia: !m.cortesia }, m.cortesia ? "Cortesía quitada" : "🎁 Ahora entra gratis") }, m.cortesia ? "Quitar cortesía" : "🎁 Dar acceso gratis"),
           h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => accion({ accion: "miembro-bloquear", clave: m.clave, bloqueado: !m.bloqueado }, m.bloqueado ? "Desbloqueado" : "Bloqueado: ya no puede entrar") }, m.bloqueado ? "Desbloquear" : "Bloquear"),
           h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm(`¿Borrar a ${m.nombre} de la comunidad? Podrá registrarse de nuevo.`)) accion({ accion: "miembro-borrar", clave: m.clave }, "Borrado"); } }, "Borrar")));
     })) : h("div", { class: "empty" }, d.miembros.length ? "Nadie coincide con tu búsqueda." : "Todavía no hay miembros. Comparte el enlace de tu comunidad en tus redes."));
@@ -1452,7 +1455,7 @@ async function conversacionesPanel() {
 const comunidad = () => vistaForm({
   n: "comunidad", titulo: "Página de la comunidad", lead: "Lo que ven las personas antes de registrarse, y el mensaje para tus miembros.",
   secciones: [
-    ["Registro", null, [{ k: "registroAbierto", t: "bool", label: "Registro abierto", hint: "Apágalo si por un tiempo no quieres miembros nuevos." }, { k: "fundadores", t: "num", label: "Lugares de miembro fundador", min: 0, hint: "Los primeros en registrarse quedan como fundadores (gratis para siempre). La página muestra cuántos lugares quedan. Pon 0 para no mostrar el contador." }]],
+    ["Registro", null, [{ k: "apertura", t: "date", label: "Fecha de apertura", hint: "Hasta ese día la comunidad es lista de espera: la gente se registra y reserva su lugar, pero todavía no entra. Ese día les llega un correo de que ya abrió. Déjalo vacío para que esté abierta." }, { k: "registroAbierto", t: "bool", label: "Registro abierto", hint: "Apágalo si por un tiempo no quieres miembros nuevos." }, { k: "fundadores", t: "num", label: "Lugares de miembro fundador", min: 0, hint: "Los primeros en registrarse quedan como fundadores: gratis para siempre. La página muestra cuántos lugares quedan." }, { k: "precioMensual", t: "money", label: "Membresía al mes (cuando se llenen los fundadores)", hint: "Los nuevos pagan esto cada mes con tarjeta (Stripe) y cancelan cuando quieran. Pon 0 para que siga siendo gratis para todos." }]],
     ["Página de bienvenida", null, [
       { k: "titulo", t: "text", label: "Título" },
       { k: "frase", t: "area", label: "Frase debajo del título", rows: 2 },

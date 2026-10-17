@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { avisarme } from "../lib/avisos.mjs";
-import { st, requireMiembro, leerMiembro, publico, leerDoc, estadoEncuentro, etiquetaEncuentro, limite, lugares, salio, fechaPublicada, guardarFotoMiembro, CATEGORIAS, huellaM, correoMiembro } from "../lib/comunidad.mjs";
+import { st, requireMiembro, leerMiembro, publico, leerDoc, estadoEncuentro, etiquetaEncuentro, limite, lugares, abierta, salio, fechaPublicada, guardarFotoMiembro, CATEGORIAS, huellaM, correoMiembro } from "../lib/comunidad.mjs";
 import { esc } from "../lib/avisos.mjs";
 
 const nombreCorto = (m) => `${m.nombre} ${(m.apellido || "").slice(0, 1)}.`.trim();
@@ -23,7 +23,12 @@ export default manejar(async (req, ctx) => {
   if (req.method === "GET" && new URL(req.url).searchParams.get("publico")) {
     const e = await encuentros(false), m = await leerMiembro(req);
     const l = await lugares(await deps.contenido(origen(req), "comunidad"));
-    return json({ miembro: m ? publico(m) : null, proximo: e.proximos[0] || null, quedan: l.quedan, limite: l.limite });
+    return json({ miembro: m ? publico(m) : null, proximo: e.proximos[0] || null, quedan: l.quedan, limite: l.limite, precio: l.precio, cobrar: l.cobrar, abierta: l.abierta, apertura: l.apertura });
+  }
+  const cfgC = await deps.contenido(origen(req), "comunidad");
+  if (!abierta(cfgC)) {
+    const mm = await requireMiembro(req, { sinAcceso: true });
+    if (!mm.previa) return json({ error: "La comunidad todavía no abre.", espera: true, apertura: cfgC.apertura, miembro: publico(mm) }, 423);
   }
   const m = await requireMiembro(req);
 

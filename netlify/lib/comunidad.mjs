@@ -38,20 +38,69 @@ export async function leerMiembro(req) {
   if (!mi || mi.bloqueado) return null;
   return { ...mi, clave: d.k };
 }
-export async function requireMiembro(req) {
+export async function requireMiembro(req, { sinAcceso = false } = {}) {
   const m = await leerMiembro(req);
   if (!m) throw new Fallo(401, "Entra a la comunidad con tu correo.");
   if (req.method !== "GET" && req.headers.get("x-comunidad") !== "1") throw new Fallo(403, "Solicitud no permitida.");
+  if (!sinAcceso && !tieneAcceso(m) && !m.previa) throw new Fallo(402, "Tu membresía no está activa.");
   return m;
 }
-export const publico = (m) => ({ nombre: m.nombre, apellido: m.apellido, email: m.email, avisos: m.avisos !== false, creado: m.creado, fundador: m.fundador !== false, normas: !!m.normasAceptadas });
+// Entran gratis los fundadores y a quien tú le des cortesía; los demás, con su membresía al día.
+export const ESTADOS_ACTIVOS = ["active", "trialing", "past_due"];
+export const tieneAcceso = (m) => m.fundador !== false || !!m.cortesia || ESTADOS_ACTIVOS.includes(m.pago && m.pago.estado);
+export const resumenPago = (m) => m.pago && m.pago.suscripcion ? { estado: m.pago.estado, cancelaAlFinal: !!m.pago.cancelaAlFinal, hasta: m.pago.hasta || "", precio: m.pago.precio || 0 } : null;
+export const publico = (m) => ({ nombre: m.nombre, apellido: m.apellido, email: m.email, avisos: m.avisos !== false, creado: m.creado, fundador: m.fundador !== false, cortesia: !!m.cortesia, normas: !!m.normasAceptadas, acceso: tieneAcceso(m), pago: resumenPago(m) });
+
+// Antes de la fecha de apertura, la comunidad funciona como lista de espera.
+export const abierta = (cfg) => !(cfg && /^\d{4}-\d{2}-\d{2}$/.test(cfg.apertura || "")) || ahoraLocal().fecha >= cfg.apertura;
+
+// Correo a todos el día que abre la comunidad (una sola vez).
+export async function avisarApertura(origen = "") {
+  const cfg = await deps.contenido(origen, "comunidad");
+  if (!cfg.apertura || ahoraLocal().fecha < cfg.apertura) return [];
+  const r = await st().setJSON(`abierta/${cfg.apertura}`, { en: deps.ahora().toISOString() }, { onlyIfNew: true });
+  if (r && r.modified === false) return [];
+  const sitio = origen || process.env.URL || "";
+  const n = await correoATodos({ asunto: "🌙 ¡La Comunidad Queen Spiritual ya está abierta!", titulo: "¡Ya abrimos!", parrafos: ["Llegó el día: la Comunidad Queen Spiritual ya está abierta. Entra, preséntate y comparte con los demás.", "Te espero adentro. 💛"], boton: sitio ? { texto: "Entrar a la comunidad", url: `${sitio}/comunidad.html` } : null });
+  return [`apertura (${n} correos)`];
+}
+
+// ───────── Membresía mensual (Stripe) ─────────
+export async function sesionMembresia(m, clave, precio, origen) {
+  const s = await deps.stripe().checkout.sessions.create({
+    mode: "subscription", customer_email: m.email, client_reference_id: clave,
+    line_items: [{ price_data: { currency: "usd", unit_amount: Math.round(precio * 100), recurring: { interval: "month" }, product_data: { name: "Membresía Comunidad Queen Spiritual" } }, quantity: 1 }],
+    metadata: { tipo: "membresia", clave }, subscription_data: { metadata: { tipo: "membresia", clave } },
+    success_url: `${origen}/comunidad.html?pago={CHECKOUT_SESSION_ID}`, cancel_url: `${origen}/comunidad.html?pago=cancelado`,
+  });
+  return s.url;
+}
+const finPeriodo = (sub) => { const t = sub.current_period_end || (sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].current_period_end); return t ? new Date(t * 1000).toISOString() : ""; };
+// Guarda en el miembro cómo va su suscripción. Devuelve { antes, despues } para avisar de cambios.
+export async function actualizarPago(clave, sub) {
+  if (!/^m\//.test(clave || "")) return null;
+  const s = st(), m = await s.get(clave, { type: "json" });
+  if (!m) return null;
+  const precio = sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].price ? (sub.items.data[0].price.unit_amount || 0) / 100 : (m.pago && m.pago.precio) || 0;
+  const pago = { suscripcion: sub.id, cliente: typeof sub.customer === "string" ? sub.customer : (sub.customer && sub.customer.id) || "", estado: sub.status, cancelaAlFinal: !!sub.cancel_at_period_end, hasta: finPeriodo(sub), precio, desde: (m.pago && m.pago.desde) || deps.ahora().toISOString() };
+  await s.setJSON(clave, { ...m, pago });
+  return { antes: m.pago || null, despues: pago, miembro: m };
+}
+export async function confirmarMembresia(sesion) {
+  const md = sesion.metadata || {};
+  if (md.tipo !== "membresia" || sesion.status !== "complete" || !sesion.subscription) return null;
+  const sub = typeof sesion.subscription === "string" ? await deps.stripe().subscriptions.retrieve(sesion.subscription) : sesion.subscription;
+  return actualizarPago(md.clave, sub);
+}
 
 // Cuántos miembros hay y cuántos lugares de miembro fundador quedan.
 export async function lugares(cfg) {
   const s = st(); let n = 0;
   for (const { key } of (await s.list({ prefix: "m/" })).blobs) { const m = await s.get(key, { type: "json" }); if (m && m.fundador !== false) n++; }
-  const total = Math.max(0, parseInt(cfg && cfg.fundadores, 10) || 0);
-  return { fundadores: n, limite: total, quedan: total ? Math.max(0, total - n) : 0 };
+  const total = Math.max(0, parseInt(cfg && cfg.fundadores, 10) || 0), quedan = total ? Math.max(0, total - n) : 0;
+  const precio = Math.max(0, Number(cfg && cfg.precioMensual) || 0);
+  const ab = abierta(cfg);
+  return { fundadores: n, limite: total, quedan, precio, cobrar: precio > 0 && quedan === 0 && ab, abierta: ab, apertura: (cfg && cfg.apertura) || "" };
 }
 
 // Foto que manda un miembro (ya achicada en su teléfono).

@@ -132,6 +132,13 @@
 .normas-c h2{font-size:1.7rem}
 .normas-c .btn{margin-top:14px}
 details.normas summary{cursor:pointer;color:var(--blue);font-weight:600}
+.gratis.apertura{background:#FFD966;color:var(--night);border-color:#FFD966;margin-right:6px}
+.espera .esp-in{padding:56px 0 70px;max-width:620px}
+.espera h1{font-size:clamp(2.2rem,6vw,3.4rem)}
+.cuenta-r{display:inline-flex;align-items:baseline;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,217,102,.45);border-radius:16px;padding:12px 20px;margin:4px 0 18px}
+.cuenta-r b{font-family:"Cormorant",Georgia,serif;font-size:3rem;color:#FFD966;line-height:1}
+.cuenta-r span{color:var(--night-ink);font-weight:600}
+.memb{flex-basis:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink)}
 .nueva-c{max-width:720px;margin-bottom:20px;padding:14px 16px}
 .nc-cab{display:flex;gap:12px;align-items:center;cursor:text;padding:4px 0}
 .nc-cab .av{width:40px;height:40px;border-radius:50%;flex:none}
@@ -298,15 +305,19 @@ let CFG = {};
 // Normas de la comunidad como lista (una por línea).
 function listaNormas(txt) { const ol = el("ol", "normas-l"); s(txt).split("\n").map(s).filter(Boolean).forEach(n => ol.append(el("li", null, n))); return ol; }
 /* ═════════ Bienvenida y registro ═════════ */
-let LUG = { quedan: 0, limite: 0 };
+let LUG = { quedan: 0, limite: 0, precio: 0, cobrar: false, abierta: true, apertura: "" };
+const fechaLarga = f => new Date(f + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" });
+const espera = () => !LUG.abierta && !!LUG.apertura;
+const precioTxt = () => "$" + Number(LUG.precio).toFixed(2);
 const hayLugares = () => LUG.limite > 0 && LUG.quedan > 0;
 function bienvenida(prox) {
   const titulo = s(CFG.titulo) || "Comunidad Queen Spiritual";
   const hero = el("section", "hero-c"), hin = el("div", "wrap hero-in"), tx = el("div");
-  tx.append(el("span", "gratis", hayLugares() ? `👑 Miembros fundadores · Quedan ${LUG.quedan} lugares gratis` : "✦ Gratis · Solo para miembros"));
+  if (espera()) tx.append(el("span", "gratis apertura", `🌙 Abrimos el ${fechaLarga(LUG.apertura)}`));
+  tx.append(el("span", "gratis", hayLugares() ? `👑 Miembros fundadores · Quedan ${LUG.quedan} lugares gratis` : LUG.cobrar ? `✦ Membresía · ${precioTxt()} al mes` : "✦ Gratis · Solo para miembros"));
   const h1 = el("h1"); const partes = titulo.split(" "); h1.append(partes.slice(0, -2).join(" ") + " "); h1.append(el("em", null, partes.slice(-2).join(" "))); tx.append(h1);
   tx.append(el("p", "frase", s(CFG.frase)));
-  const go = el("a", "btn btn-oro", hayLugares() ? "Quiero mi lugar gratis" : "Unirme gratis"); go.href = "#registro";
+  const go = el("a", "btn btn-oro", espera() ? (hayLugares() ? "Reservar mi lugar gratis" : "Unirme a la lista de espera") : hayLugares() ? "Quiero mi lugar gratis" : LUG.cobrar ? "Unirme" : "Unirme gratis"); go.href = "#registro";
   const ya = el("button", "btn btn-claro", "Ya soy miembro"); ya.type = "button"; ya.onclick = () => { modo("entrar"); $("#registro").scrollIntoView({ behavior: "smooth" }); };
   const bt = el("div", "btns"); bt.append(go, ya); tx.append(bt);
   if (prox) { const p = el("div", "prox-t"); p.style.marginTop = "22px"; const t = el("div"); t.append(el("b", null, "Próximo encuentro por Zoom"), el("span", null, prox.etiqueta + (prox.tema ? " · " + prox.tema : ""))); p.append(el("span", null, "🌙"), t); tx.append(p); }
@@ -343,7 +354,7 @@ function modo(cual) {
     const t = el("span"); t.append("Acepto recibir los correos de la comunidad (encuentros y novedades). Puedo dejar de recibirlos cuando quiera. ");
     const pol = el("a", null, "Privacidad"); pol.href = "/politicas.html#privacidad"; pol.target = "_blank"; t.append(pol); acL.append(ac, t);
     const tr = el("label", "trampa", "No llenes esto"); const ti = el("input"); ti.name = "web"; ti.tabIndex = -1; ti.autocomplete = "off"; tr.append(ti);
-    const textoBtn = hayLugares() ? "Quiero mi lugar de fundador" : "Unirme gratis";
+    const textoBtn = espera() ? (hayLugares() ? "Reservar mi lugar gratis" : "Unirme a la lista de espera") : hayLugares() ? "Quiero mi lugar de fundador" : LUG.cobrar ? `Continuar al pago (${precioTxt()}/mes)` : "Unirme gratis";
     const go = el("button", "btn btn-solid", textoBtn); go.type = "submit";
     f.append(n, campo("Correo electrónico", "email", "email", { autocomplete: "email", required: true }), campo("Teléfono", "telefono", "tel", { autocomplete: "tel", placeholder: "512 555 1234", required: true }), ...(s(CFG.normas) ? [nBox, nL] : []), acL, tr, err, go);
     const otro = el("p", "muted"); otro.style.margin = "14px 0 0"; otro.append("¿Ya eres miembro? "); const l = el("button", "lnk", "Entrar"); l.type = "button"; l.onclick = () => modo("entrar"); otro.append(l);
@@ -354,11 +365,11 @@ function modo(cual) {
       if (!s(v.nombre) || !s(v.apellido)) { err.textContent = "Escribe tu nombre y apellido."; err.hidden = false; return; }
       if (!ac.checked) { err.textContent = "Para unirte, marca que aceptas recibir los correos de la comunidad."; err.hidden = false; return; }
       go.disabled = true; go.textContent = "Creando tu cuenta…";
-      try { await api("/api/comunidad/registro", { body: v }); if (window.qsEvento) qsEvento("registro"); history.replaceState(null, "", location.pathname); await iniciar(true); }
+      try { const r = await api("/api/comunidad/registro", { body: v }); if (window.qsEvento) qsEvento("registro"); if (r.pagar) { go.textContent = "Abriendo el pago…"; location.href = r.pagar; return; } history.replaceState(null, "", location.pathname); await iniciar(true); }
       catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = textoBtn; }
     };
-    const sub = hayLugares() ? `Los primeros ${LUG.limite} miembros entran gratis para siempre. Quedan ${LUG.quedan} lugares.` : "Exclusivo para miembros registrados.";
-    caja.replaceChildren(el("h2", null, hayLugares() ? "Únete como fundador" : "Únete gratis"), el("p", "muted", sub), f, otro);
+    const sub = espera() ? (hayLugares() ? `Abrimos el ${fechaLarga(LUG.apertura)}. Los primeros ${LUG.limite} en reservar entran gratis para siempre. Quedan ${LUG.quedan} lugares.` : `Abrimos el ${fechaLarga(LUG.apertura)}. Ya se llenaron los lugares gratis: al abrir, la membresía es de ${precioTxt()} al mes.`) : hayLugares() ? `Los primeros ${LUG.limite} miembros entran gratis para siempre. Quedan ${LUG.quedan} lugares.` : LUG.cobrar ? `Membresía de ${precioTxt()} al mes con tarjeta. Cancelas cuando quieras.` : "Exclusivo para miembros registrados.";
+    caja.replaceChildren(el("h2", null, espera() ? "Reserva tu lugar" : hayLugares() ? "Únete como fundador" : LUG.cobrar ? "Únete a la comunidad" : "Únete gratis"), el("p", "muted", sub), f, otro);
     return;
   }
   // Entrar
@@ -406,7 +417,21 @@ function area() {
   sw.onchange = async () => { try { await api("/api/comunidad", { body: { accion: "avisos", avisos: sw.checked } }); D.miembro.avisos = sw.checked; toast(sw.checked ? "Listo: te avisaré por correo." : "Listo: ya no te mandaré correos de la comunidad."); } catch (e) { sw.checked = !sw.checked; toast(e.message); } };
   swL.append(sw, "Recibir avisos por correo");
   const out = el("button", "lnk", "Salir"); out.type = "button"; out.onclick = async () => { try { await api("/api/comunidad/entrar", { method: "DELETE" }); } catch (e) {} location.href = "/comunidad.html"; };
-  cu.append(el("span", null, `Entraste como ${m.email}`), swL, out); cw.append(cu);
+  cu.append(el("span", null, `Entraste como ${m.email}`), swL, out);
+  if (m.pago && !m.fundador && !m.cortesia) {
+    const fin = m.pago.hasta ? new Date(m.pago.hasta).toLocaleDateString("es", { day: "numeric", month: "long" }) : "";
+    const mb = el("div", "memb"); mb.append(el("b", null, "Tu membresía: "), m.pago.cancelaAlFinal ? `termina el ${fin}. ` : `${"$" + Number(m.pago.precio).toFixed(2)} al mes${fin ? ", se renueva el " + fin : ""}. `);
+    const b = el("button", "lnk", m.pago.cancelaAlFinal ? "Seguir con mi membresía" : "Cancelar membresía"); b.type = "button";
+    b.onclick = async () => {
+      const cancelar = !m.pago.cancelaAlFinal;
+      if (cancelar && !confirm(`¿Cancelar tu membresía? Sigues entrando hasta el ${fin} y no se te vuelve a cobrar.`)) return;
+      b.disabled = true;
+      try { const r = await api("/api/comunidad/membresia", { body: { accion: cancelar ? "cancelar" : "reactivar" } }); D.miembro = r.miembro; toast(cancelar ? "Listo. No se te volverá a cobrar." : "¡Qué alegría! Tu membresía sigue activa."); area(); }
+      catch (e) { toast(e.message); b.disabled = false; }
+    };
+    mb.append(b); cu.append(mb);
+  }
+  cw.append(cu);
   app.replaceChildren(hola, tabs, cont);
 }
 
@@ -627,13 +652,52 @@ function preguntas(w) {
 }
 
 /* ═════════ Inicio ═════════ */
+// Antes de la apertura: ya está en la lista.
+function pantallaEspera(m, apertura) {
+  const w = el("section", "hero-c espera"), inn = el("div", "wrap"), c = el("div", "esp-in");
+  const dias = Math.max(0, Math.ceil((new Date(apertura + "T00:00") - new Date()) / 864e5));
+  c.append(el("span", "gratis", m.fundador ? "👑 Miembro fundador · Gratis para siempre" : "✦ Estás en la lista de espera"),
+    el("h1", null, `¡Ya tienes tu lugar, ${m.nombre}!`),
+    el("p", "frase", `La Comunidad Queen Spiritual abre el ${fechaLarga(apertura)}. Ese día te aviso por correo para que entres.`));
+  const cd = el("div", "cuenta-r"); const n = el("b", null, String(dias)); cd.append(n, el("span", null, dias === 1 ? "día para abrir" : "días para abrir")); c.append(cd);
+  if (!m.fundador && !m.cortesia) c.append(el("p", "frase", `Al abrir, activas tu membresía de ${precioTxt()} al mes.`));
+  const comp = el("button", "btn btn-oro", "Invitar a alguien"); comp.type = "button";
+  comp.onclick = async () => { const url = location.origin + "/comunidad.html"; try { if (navigator.share) await navigator.share({ title: "Comunidad Queen Spiritual", text: "Únete conmigo a la Comunidad Queen Spiritual 🌙", url }); else { await navigator.clipboard.writeText(url); toast("Enlace copiado ✓"); } } catch (e) {} };
+  const out = el("button", "btn btn-claro", "Salir"); out.type = "button"; out.onclick = async () => { try { await api("/api/comunidad/entrar", { method: "DELETE" }); } catch (e) {} location.href = "/comunidad.html"; };
+  const bt = el("div", "btns"); bt.append(comp, out); c.append(bt);
+  inn.append(c); w.append(inn); app.replaceChildren(w);
+}
+// Sin membresía activa: pantalla para pagar.
+function pantallaPago(m) {
+  const w = el("section", "wrap"); w.style.padding = "40px 22px 60px";
+  const c = el("div", "caja"); c.style.maxWidth = "560px";
+  const yaPago = m && m.pago;
+  c.append(el("span", "kicker", "Comunidad Queen Spiritual"), el("h2", null, yaPago ? `Hola, ${m.nombre}: tu membresía no está activa` : `Hola, ${m.nombre} 🌙`),
+    el("p", "muted", yaPago ? "Para volver a entrar a las conversaciones, enseñanzas y encuentros, renueva tu membresía." : `Para entrar a la comunidad, activa tu membresía de ${precioTxt()} al mes. Cancelas cuando quieras.`));
+  const ben = el("ul", "normas-l"); s(CFG.beneficios).split("\n").map(s).filter(Boolean).forEach(x => ben.append(el("li", null, x))); c.append(ben);
+  const err = el("p", "note err"); err.hidden = true;
+  const b = el("button", "btn btn-solid", `${yaPago ? "Renovar" : "Activar"} mi membresía · ${precioTxt()}/mes`); b.type = "button"; b.style.marginTop = "16px";
+  b.onclick = async () => { b.disabled = true; err.hidden = true; try { const r = await api("/api/comunidad/membresia", { body: { accion: "pagar" } }); if (r.yaActiva) return iniciar(true); location.href = r.url; } catch (e) { err.textContent = e.message; err.hidden = false; b.disabled = false; } };
+  const out = el("button", "lnk", "Salir"); out.type = "button"; out.style.marginTop = "14px"; out.onclick = async () => { try { await api("/api/comunidad/entrar", { method: "DELETE" }); } catch (e) {} location.href = "/comunidad.html"; };
+  c.append(err, b, el("br"), out); w.append(c); app.replaceChildren(w);
+}
 async function iniciar(recienEntro) {
+  const pago = new URLSearchParams(location.search).get("pago");
+  if (pago) {
+    history.replaceState(null, "", location.pathname);
+    if (pago === "cancelado") toast("No se completó el pago. Puedes intentarlo cuando quieras.");
+    else { try { await api("/api/comunidad/membresia?s=" + encodeURIComponent(pago)); toast("¡Bienvenida! Tu membresía está activa 🌙"); recienEntro = true; } catch (e) { toast(e.message); } }
+  }
   try {
     D = await api("/api/comunidad");
     const h = location.hash.replace("#", ""); if (["conversaciones", "publicaciones", "encuentros", "preguntas"].includes(h)) TAB = h;
     area(); if (recienEntro) window.scrollTo(0, 0);
   } catch (e) {
-    if (e.status === 401) { let pub = {}; try { pub = await api("/api/comunidad?publico=1"); } catch (x) {} LUG = { quedan: pub.quedan || 0, limite: pub.limite || 0 }; bienvenida(pub.proximo); }
+    if (e.status === 401 || e.status === 402 || e.status === 423) {
+      let pub = {}; try { pub = await api("/api/comunidad?publico=1"); } catch (x) {}
+      LUG = { quedan: pub.quedan || 0, limite: pub.limite || 0, precio: pub.precio || 0, cobrar: !!pub.cobrar, abierta: pub.abierta !== false, apertura: pub.apertura || "" };
+      if (e.status === 423 && pub.miembro) pantallaEspera(pub.miembro, pub.apertura); else if (e.status === 402 && pub.miembro) pantallaPago(pub.miembro); else bienvenida(pub.proximo);
+    }
     else app.replaceChildren(el("p", "wrap note err", e.message));
   }
 }

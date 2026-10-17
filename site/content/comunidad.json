@@ -1,6 +1,8 @@
 {
   "registroAbierto": true,
-  "fundadores": 50,
+  "apertura": "2026-12-01",
+  "fundadores": 25,
+  "precioMensual": 11.99,
   "titulo": "Comunidad Queen Spiritual",
   "frase": "Un espacio para compartir, aprender y conectar.",
   "intro": "Bienvenida a un espacio donde podemos conversar sobre espiritualidad, compartir experiencias, intercambiar conocimientos y aprender unos de otros. Aquí cada voz tiene su lugar y cada experiencia puede aportar algo valioso.",
