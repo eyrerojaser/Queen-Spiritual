@@ -1483,11 +1483,11 @@ async function correos() {
     try {
       const r = await api("/api/panel/probar-correo", { method: "POST", body: {} });
       const fila = (k, v) => h("div", { class: "rw", style: "margin:4px 0" }, h("b", { style: "min-width:190px" }, k), v ? h("span", { class: "pill ok" }, v) : h("span", { class: "pill off" }, "No está"));
-      salida.replaceChildren(
+      salida.replaceChildren(...[
         h("p", { class: "note " + (r.ok ? "ok" : "err"), style: "margin-top:16px" }, (r.ok ? "✅ " : "⚠️ ") + r.mensaje),
         r.estado.aviso ? h("p", { class: "note err" }, r.estado.aviso) : null,
         h("div", { class: "card", style: "margin-top:12px" }, h("h2", null, "Lo que tiene Netlify"), fila("GMAIL_USER", r.estado.GMAIL_USER), fila("GMAIL_APP_PASSWORD", r.estado.GMAIL_APP_PASSWORD), fila("AVISOS_EMAIL (opcional)", r.estado.AVISOS_EMAIL)),
-        r.tecnico ? h("p", { class: "muted", style: "font-size:.8rem;word-break:break-word" }, "Detalle técnico: " + r.tecnico) : null);
+        r.tecnico ? h("p", { class: "muted", style: "font-size:.8rem;word-break:break-word" }, "Detalle técnico: " + r.tecnico) : null].filter(Boolean));
     } catch (e) { fallo(e); }
     b.disabled = false; b.textContent = "Probar correo";
   } }, "Probar correo");
