@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { avisarme } from "../lib/avisos.mjs";
-import { st, requireMiembro, leerMiembro, publico, leerDoc, estadoEncuentro, etiquetaEncuentro, limite } from "../lib/comunidad.mjs";
+import { st, requireMiembro, leerMiembro, publico, leerDoc, estadoEncuentro, etiquetaEncuentro, limite, lugares } from "../lib/comunidad.mjs";
 
 const nombreCorto = (m) => `${m.nombre} ${(m.apellido || "").slice(0, 1)}.`.trim();
 const clave = () => `${deps.ahora().toISOString().replace(/[:.]/g, "-")}_${crypto.randomBytes(4).toString("hex")}`;
@@ -21,7 +21,8 @@ export default manejar(async (req, ctx) => {
   const s = st();
   if (req.method === "GET" && new URL(req.url).searchParams.get("publico")) {
     const e = await encuentros(false), m = await leerMiembro(req);
-    return json({ miembro: m ? publico(m) : null, proximo: e.proximos[0] || null });
+    const l = await lugares(await deps.contenido(origen(req), "comunidad"));
+    return json({ miembro: m ? publico(m) : null, proximo: e.proximos[0] || null, quedan: l.quedan, limite: l.limite });
   }
   const m = await requireMiembro(req);
 

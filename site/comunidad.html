@@ -262,13 +262,15 @@ function ics(e) {
 
 let CFG = {};
 /* ═════════ Bienvenida y registro ═════════ */
+let LUG = { quedan: 0, limite: 0 };
+const hayLugares = () => LUG.limite > 0 && LUG.quedan > 0;
 function bienvenida(prox) {
   const titulo = s(CFG.titulo) || "Comunidad Queen Spiritual";
   const hero = el("section", "hero-c"), hin = el("div", "wrap hero-in"), tx = el("div");
-  tx.append(el("span", "gratis", "✦ Gratis · Solo para miembros"));
+  tx.append(el("span", "gratis", hayLugares() ? `👑 Miembros fundadores · Quedan ${LUG.quedan} lugares gratis` : "✦ Gratis · Solo para miembros"));
   const h1 = el("h1"); const partes = titulo.split(" "); h1.append(partes.slice(0, -2).join(" ") + " "); h1.append(el("em", null, partes.slice(-2).join(" "))); tx.append(h1);
   tx.append(el("p", "frase", s(CFG.frase)));
-  const go = el("a", "btn btn-oro", "Unirme gratis"); go.href = "#registro";
+  const go = el("a", "btn btn-oro", hayLugares() ? "Quiero mi lugar gratis" : "Unirme gratis"); go.href = "#registro";
   const ya = el("button", "btn btn-claro", "Ya soy miembro"); ya.type = "button"; ya.onclick = () => { modo("entrar"); $("#registro").scrollIntoView({ behavior: "smooth" }); };
   const bt = el("div", "btns"); bt.append(go, ya); tx.append(bt);
   if (prox) { const p = el("div", "prox-t"); p.style.marginTop = "22px"; const t = el("div"); t.append(el("b", null, "Próximo encuentro por Zoom"), el("span", null, prox.etiqueta + (prox.tema ? " · " + prox.tema : ""))); p.append(el("span", null, "🌙"), t); tx.append(p); }
@@ -303,7 +305,8 @@ function modo(cual) {
     const t = el("span"); t.append("Acepto recibir los correos de la comunidad (encuentros y novedades). Puedo dejar de recibirlos cuando quiera. ");
     const pol = el("a", null, "Privacidad"); pol.href = "/politicas.html#privacidad"; pol.target = "_blank"; t.append(pol); acL.append(ac, t);
     const tr = el("label", "trampa", "No llenes esto"); const ti = el("input"); ti.name = "web"; ti.tabIndex = -1; ti.autocomplete = "off"; tr.append(ti);
-    const go = el("button", "btn btn-solid", "Unirme gratis"); go.type = "submit";
+    const textoBtn = hayLugares() ? "Quiero mi lugar de fundador" : "Unirme gratis";
+    const go = el("button", "btn btn-solid", textoBtn); go.type = "submit";
     f.append(n, campo("Correo electrónico", "email", "email", { autocomplete: "email", required: true }), campo("Teléfono", "telefono", "tel", { autocomplete: "tel", placeholder: "512 555 1234", required: true }), acL, tr, err, go);
     const otro = el("p", "muted"); otro.style.margin = "14px 0 0"; otro.append("¿Ya eres miembro? "); const l = el("button", "lnk", "Entrar"); l.type = "button"; l.onclick = () => modo("entrar"); otro.append(l);
     f.onsubmit = async ev => {
@@ -313,9 +316,10 @@ function modo(cual) {
       if (!ac.checked) { err.textContent = "Para unirte, marca que aceptas recibir los correos de la comunidad."; err.hidden = false; return; }
       go.disabled = true; go.textContent = "Creando tu cuenta…";
       try { await api("/api/comunidad/registro", { body: v }); if (window.qsEvento) qsEvento("registro"); history.replaceState(null, "", location.pathname); await iniciar(true); }
-      catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = "Unirme gratis"; }
+      catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = textoBtn; }
     };
-    caja.replaceChildren(el("h2", null, "Únete gratis"), el("p", "muted", "Exclusivo para miembros registrados."), f, otro);
+    const sub = hayLugares() ? `Los primeros ${LUG.limite} miembros entran gratis para siempre. Quedan ${LUG.quedan} lugares.` : "Exclusivo para miembros registrados.";
+    caja.replaceChildren(el("h2", null, hayLugares() ? "Únete como fundador" : "Únete gratis"), el("p", "muted", sub), f, otro);
     return;
   }
   // Entrar
@@ -342,7 +346,7 @@ let D = null, TAB = "publicaciones", FILTRO = "";
 function area() {
   const m = D.miembro;
   const hola = el("section", "hola"), w = el("div", "wrap");
-  w.append(el("span", "kicker", "Comunidad Queen Spiritual"), el("h1", null, `Hola, ${m.nombre} 🌙`));
+  w.append(el("span", "kicker", m.fundador ? "👑 Miembro fundador · Comunidad Queen Spiritual" : "Comunidad Queen Spiritual"), el("h1", null, `Hola, ${m.nombre} 🌙`));
   if (s(D.mensaje)) w.append(el("p", null, D.mensaje));
   const prox = D.encuentros.proximos[0];
   if (prox) w.append(tarjetaEncuentro(prox));
@@ -477,7 +481,7 @@ async function iniciar(recienEntro) {
     const h = location.hash.replace("#", ""); if (["publicaciones", "encuentros", "preguntas"].includes(h)) TAB = h;
     area(); if (recienEntro) window.scrollTo(0, 0);
   } catch (e) {
-    if (e.status === 401) { let pub = {}; try { pub = await api("/api/comunidad?publico=1"); } catch (x) {} bienvenida(pub.proximo); }
+    if (e.status === 401) { let pub = {}; try { pub = await api("/api/comunidad?publico=1"); } catch (x) {} LUG = { quedan: pub.quedan || 0, limite: pub.limite || 0 }; bienvenida(pub.proximo); }
     else app.replaceChildren(el("p", "wrap note err", e.message));
   }
 }

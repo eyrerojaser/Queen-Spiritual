@@ -25,7 +25,7 @@ export default manejar(async (req) => {
     }
     if (vista === "miembros") {
       const ms = (await todos("m/")).sort((a, b) => b.creado.localeCompare(a.creado));
-      return json({ miembros: ms.map(({ nombre, apellido, email, telefono, creado, ultimo, bloqueado, avisos, clave }) => ({ nombre, apellido, email, telefono, creado, ultimo, bloqueado: !!bloqueado, avisos: avisos !== false, clave })) });
+      return json({ miembros: ms.map(({ nombre, apellido, email, telefono, creado, ultimo, bloqueado, avisos, fundador, clave }) => ({ nombre, apellido, email, telefono, creado, ultimo, bloqueado: !!bloqueado, avisos: avisos !== false, fundador: fundador !== false, clave })) });
     }
     if (vista === "publicaciones") {
       const doc = await leerDoc("publicaciones", { lista: [] }), coms = await todos("c/");

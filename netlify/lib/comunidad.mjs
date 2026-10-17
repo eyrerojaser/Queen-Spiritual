@@ -44,7 +44,15 @@ export async function requireMiembro(req) {
   if (req.method !== "GET" && req.headers.get("x-comunidad") !== "1") throw new Fallo(403, "Solicitud no permitida.");
   return m;
 }
-export const publico = (m) => ({ nombre: m.nombre, apellido: m.apellido, email: m.email, avisos: m.avisos !== false, creado: m.creado });
+export const publico = (m) => ({ nombre: m.nombre, apellido: m.apellido, email: m.email, avisos: m.avisos !== false, creado: m.creado, fundador: m.fundador !== false });
+
+// Cuántos miembros hay y cuántos lugares de miembro fundador quedan.
+export async function lugares(cfg) {
+  const s = st(); let n = 0;
+  for (const { key } of (await s.list({ prefix: "m/" })).blobs) { const m = await s.get(key, { type: "json" }); if (m && m.fundador !== false) n++; }
+  const total = Math.max(0, parseInt(cfg && cfg.fundadores, 10) || 0);
+  return { fundadores: n, limite: total, quedan: total ? Math.max(0, total - n) : 0 };
+}
 
 // Límite simple por conexión (registros, enlaces, comentarios).
 export async function limite(ip, tipo, max, minutosVentana = 60) {

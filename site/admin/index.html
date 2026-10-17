@@ -930,7 +930,9 @@ async function vistaForm({ n, titulo, lead, secciones, preparar = d => d, armar 
   b.onclick = async () => {
     b.disabled = true; b.textContent = "Guardando…";
     const nuevo = clon(doc);
-    fs.forEach(({ fm, ruta }) => { if (ruta) nuevo[ruta] = { ...(nuevo[ruta] || {}), ...fm.valores() }; else Object.assign(nuevo, fm.valores()); });
+    // Cada sección guarda solo sus propios campos (así una sección no pisa lo que cambiaste en otra).
+    const propios = fm => { const v = fm.valores(), o = {}; fm.campos.forEach(c => { o[c.def.k] = v[c.def.k]; if (c.extra) Object.assign(o, c.extra()); }); return o; };
+    fs.forEach(({ fm, ruta }) => { if (ruta) nuevo[ruta] = { ...(nuevo[ruta] || {}), ...propios(fm) }; else Object.assign(nuevo, propios(fm)); });
     try { await guardar(n, armar ? armar(nuevo) : nuevo); } catch (e) { fallo(e); }
     b.disabled = false; b.textContent = "Guardar cambios";
   };
@@ -1355,7 +1357,7 @@ async function miembros() {
     caja.replaceChildren(l.length ? h("div", { class: "items" }, l.map(m => {
       const tel = String(m.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
       return h("div", { class: "card mb" + (m.bloqueado ? " hid" : "") },
-        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
+        h("div", { class: "rw" }, h("b", null, `${m.nombre} ${m.apellido}`), m.fundador ? h("span", { class: "pill" }, "👑 Fundador") : null, m.bloqueado ? h("span", { class: "pill off" }, "Bloqueado") : null, m.avisos ? null : h("span", { class: "pill" }, "Sin correos")),
         h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 8px" }, `${m.email} · ${m.telefono} · se unió el ${fechaCorta(m.creado)}${m.ultimo ? " · última vez " + fechaCorta(m.ultimo) : ""}`),
         h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
           t1 ? h("a", { class: "btn btn-line btn-sm", href: `https://wa.me/${t1}`, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
@@ -1372,15 +1374,15 @@ async function miembros() {
   } }, "Descargar lista (Excel)");
   const enlace = location.origin + "/comunidad.html";
   const copiar = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => { try { await navigator.clipboard.writeText(enlace); toast("Enlace copiado ✓ Pégalo en tus redes."); } catch (e) { prompt("Copia este enlace:", enlace); } } }, "Copiar enlace para invitar");
-  const nm = d.miembros.filter(m => !m.bloqueado).length;
-  marco(...cabeza("Miembros", `${nm} miembro${nm === 1 ? "" : "s"} en tu comunidad.`), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" }, copiar, csv), busca, caja);
+  const nm = d.miembros.filter(m => !m.bloqueado).length, nf = d.miembros.filter(m => m.fundador).length;
+  marco(...cabeza("Miembros", `${nm} miembro${nm === 1 ? "" : "s"} en tu comunidad · ${nf} fundador${nf === 1 ? "" : "es"}.`), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" }, copiar, csv), busca, caja);
   pintar();
 }
 
 const comunidad = () => vistaForm({
   n: "comunidad", titulo: "Página de la comunidad", lead: "Lo que ven las personas antes de registrarse, y el mensaje para tus miembros.",
   secciones: [
-    ["Registro", null, [{ k: "registroAbierto", t: "bool", label: "Registro abierto", hint: "Apágalo si por un tiempo no quieres miembros nuevos." }]],
+    ["Registro", null, [{ k: "registroAbierto", t: "bool", label: "Registro abierto", hint: "Apágalo si por un tiempo no quieres miembros nuevos." }, { k: "fundadores", t: "num", label: "Lugares de miembro fundador", min: 0, hint: "Los primeros en registrarse quedan como fundadores (gratis para siempre). La página muestra cuántos lugares quedan. Pon 0 para no mostrar el contador." }]],
     ["Página de bienvenida", null, [
       { k: "titulo", t: "text", label: "Título" },
       { k: "frase", t: "area", label: "Frase debajo del título", rows: 2 },

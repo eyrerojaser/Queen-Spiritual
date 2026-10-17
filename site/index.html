@@ -53,6 +53,17 @@
 .pillars a:hover{transform:translateY(-2px);border-color:#FFD966;box-shadow:0 12px 28px rgba(26,35,64,.38),0 0 18px rgba(255,217,102,.25)}
 .pillars b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.45rem;font-weight:600;color:#FFD966;text-shadow:0 0 12px rgba(255,217,102,.55)}
 .pillars span{color:#E6EAF7;font-size:.9rem}
+.pillars a.p-com{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:6px 14px;flex-wrap:wrap;background:linear-gradient(100deg,#FFD966,#E9B949);border-color:#FFD966;color:#1A2340;padding:14px 20px}
+.pillars a.p-com b{color:#1A2340;text-shadow:none;font-size:1.35rem}
+.pillars a.p-com span{color:#2A3558;font-weight:600}
+.pillars a.p-com::after{animation-delay:1.8s;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%)}
+.banda-com{background:linear-gradient(100deg,#FFF4D1,#FFE7A3);border-top:0}
+.banda-com .wrap{display:flex;align-items:center;justify-content:space-between;gap:18px 30px;flex-wrap:wrap}
+.banda-com h2{font-size:clamp(1.8rem,4vw,2.5rem);color:#1A2340}
+.banda-com p{margin:8px 0 0;color:#3A4466;max-width:56ch}
+.banda-com .lista{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0 0;padding:0;list-style:none;color:#1A2340;font-weight:600;font-size:.95rem}
+.banda-com .lista li::before{content:"✦ ";color:#B8912A}
+.banda-com .btn{background:#1A2340;border-color:#1A2340;color:#FFD966}
 @media (prefers-reduced-motion:reduce){.pillars a::after{animation:none;display:none}}
 section{padding:72px 0;border-top:1px solid var(--line)}
 .sec-head{max-width:600px;margin-bottom:44px}
@@ -227,6 +238,10 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .pillars a{padding:12px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px;border-radius:12px}
   .pillars b{font-size:1.2rem;line-height:1.05}
   .pillars span{font-size:.72rem;line-height:1.2}
+  .pillars a.p-com{flex-direction:column;justify-content:center;padding:11px 10px;gap:2px}
+  .pillars a.p-com b{font-size:1.15rem}
+  .pillars a.p-com span{font-size:.74rem}
+  .banda-com{padding:30px 0}
   section{padding:44px 0}
   .sec-head{margin-bottom:26px}
   .sec-head p{margin-top:8px}
@@ -271,6 +286,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
         <a href="/personaliza.html"><b>Arreglos</b><span>Personalízalo</span></a>
         <a href="/lecturas.html"><b>Lecturas</b><span>Cartas españolas</span></a>
         <a href="/tienda.html"><b>Queen Shop</b><span>Baños y más</span></a>
+        <a href="/comunidad.html" class="p-com"><b>✦ Comunidad Queen Spiritual</b><span id="comPill">Únete gratis · videos, enseñanzas y Zoom cada 15 días</span></a>
       </div>
     </div>
     <div class="arch" id="heroArch"><img id="heroImg" alt=""></div>
@@ -295,6 +311,18 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <p id="lecIntro"></p>
       <a class="btn on-night" href="/lecturas.html" id="lecBtn">Ver calendario y reservar</a>
     </div>
+  </div>
+</section>
+
+<section class="banda-com" id="comunidad">
+  <div class="wrap">
+    <div>
+      <span class="kicker" style="color:#8A6A12" id="comKick">Gratis · Solo para miembros</span>
+      <h2>Comunidad Queen Spiritual</h2>
+      <p>Un espacio para crecer espiritualmente, aprender y compartir conmigo y con personas que caminan como tú.</p>
+      <ul class="lista"><li>Videos y enseñanzas</li><li>Zoom cada 15 días</li><li>Preguntas y respuestas</li></ul>
+    </div>
+    <a class="btn" href="/comunidad.html" id="comBtn">Unirme gratis</a>
   </div>
 </section>
 
@@ -603,6 +631,13 @@ Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitude
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
 });
 
+// Comunidad: lugares de miembro fundador que quedan
+fetch("/api/comunidad?publico=1", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(c => {
+  if (!c || !c.limite || !(c.quedan > 0)) return;
+  $("#comPill").textContent = `Gratis para siempre si eres de los primeros ${c.limite} · Quedan ${c.quedan} lugares`;
+  $("#comKick").textContent = `👑 Miembros fundadores · Quedan ${c.quedan} lugares gratis`;
+  $("#comBtn").textContent = "Quiero mi lugar gratis";
+}).catch(() => {});
 // Enlaces viejos (/?cancelado=1#lecturas) → la página de lecturas
 if (new URLSearchParams(location.search).has("cancelado")) location.replace("/lecturas.html" + location.search);
 </script>

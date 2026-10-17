@@ -61,7 +61,7 @@ export const ESQUEMAS = {
     cerrados: lista(obj({ fecha: fecha(), motivo: str(120) }), 400, (c) => c.fecha),
   }),
   comunidad: obj({
-    registroAbierto: bool(true), titulo: str(120), frase: str(400), intro: str(1500), beneficios: str(1500), foto: foto(),
+    registroAbierto: bool(true), fundadores: int(0, 100000, 50), titulo: str(120), frase: str(400), intro: str(1500), beneficios: str(1500), foto: foto(),
     bienvenida: str(1200), mensajeMiembros: str(1500),
   }),
   resenas: obj({
