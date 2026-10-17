@@ -138,6 +138,7 @@ details.normas summary{cursor:pointer;color:var(--blue);font-weight:600}
 .cuenta-r{display:inline-flex;align-items:baseline;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,217,102,.45);border-radius:16px;padding:12px 20px;margin:4px 0 18px}
 .cuenta-r b{font-family:"Cormorant",Georgia,serif;font-size:3rem;color:#FFD966;line-height:1}
 .cuenta-r span{color:var(--night-ink);font-weight:600}
+.spam-n{background:rgba(255,255,255,.08);border:1px solid var(--night-line);border-radius:12px;padding:10px 14px;color:var(--night-ink);font-size:.92rem;max-width:520px}
 .memb{flex-basis:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink)}
 .nueva-c{max-width:720px;margin-bottom:20px;padding:14px 16px}
 .nc-cab{display:flex;gap:12px;align-items:center;cursor:text;padding:4px 0}
@@ -382,7 +383,7 @@ function modo(cual) {
     const v = Object.fromEntries(new FormData(f));
     try {
       const r = await api("/api/comunidad/entrar", { body: v });
-      if (r.enviado) { caja.replaceChildren(el("h2", null, "Revisa tu correo 💌"), el("p", null, `Te mandé un enlace a ${v.email}. Tócalo para entrar (dura 30 minutos).`), el("p", "muted", "Si no lo ves, busca en Promociones o Spam.")); return; }
+      if (r.enviado) { caja.replaceChildren(el("h2", null, "Revisa tu correo 💌"), el("p", null, `Te mandé un enlace a ${v.email}. Tócalo para entrar (dura 30 minutos).`), el("p", "muted", "Si no lo ves en unos minutos, búscalo en Spam o Promociones y márcalo como “No es spam”. Así te llegan bien los próximos avisos.")); return; }
       if (r.pedirTelefono) { telL.hidden = false; telL.querySelector("input").focus(); go.textContent = "Entrar"; go.disabled = false; return; }
       await iniciar(true);
     } catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; }
@@ -658,7 +659,8 @@ function pantallaEspera(m, apertura) {
   const dias = Math.max(0, Math.ceil((new Date(apertura + "T00:00") - new Date()) / 864e5));
   c.append(el("span", "gratis", m.fundador ? "👑 Miembro fundador · Gratis para siempre" : "✦ Estás en la lista de espera"),
     el("h1", null, `¡Ya tienes tu lugar, ${m.nombre}!`),
-    el("p", "frase", `La Comunidad Queen Spiritual abre el ${fechaLarga(apertura)}. Ese día te aviso por correo para que entres.`));
+    el("p", "frase", `La Comunidad Queen Spiritual abre el ${fechaLarga(apertura)}. Ese día te aviso por correo para que entres.`),
+    el("p", "spam-n", `📩 Te mandé un correo de confirmación a ${m.email}. Si no lo ves, búscalo en Spam o Promociones y márcalo como “No es spam”, así no te pierdes el aviso de la apertura.`));
   const cd = el("div", "cuenta-r"); const n = el("b", null, String(dias)); cd.append(n, el("span", null, dias === 1 ? "día para abrir" : "días para abrir")); c.append(cd);
   if (!m.fundador && !m.cortesia) c.append(el("p", "frase", `Al abrir, activas tu membresía de ${precioTxt()} al mes.`));
   const comp = el("button", "btn btn-oro", "Invitar a alguien"); comp.type = "button";

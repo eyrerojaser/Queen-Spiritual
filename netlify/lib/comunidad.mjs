@@ -143,7 +143,7 @@ export async function usarEnlace(t) {
 
 export async function correoMiembro(m, { asunto, titulo, parrafos, boton, pie }) {
   const negocio = await nombreNegocio();
-  const html = plantilla({ negocio, titulo, parrafos, boton, pie: pie || "Recibes este correo porque eres parte de la Comunidad Queen Spiritual." });
+  const html = plantilla({ negocio, titulo, parrafos, boton, pie: pie || "Recibes este correo porque eres parte de la Comunidad Queen Spiritual. Para no perderte nada, agrega este correo a tus contactos." });
   const text = [titulo, ...parrafos.map((p) => p.replace(/<[^>]+>/g, "")), boton ? `${boton.texto}: ${boton.url}` : ""].filter(Boolean).join("\n\n");
   try { return await avisosDeps.enviarCorreo({ to: m.email, subject: asunto, text, html, nombre: negocio, replyTo: process.env.AVISOS_EMAIL || process.env.GMAIL_USER }); }
   catch (e) { console.error("correo comunidad", e.message); return false; }
