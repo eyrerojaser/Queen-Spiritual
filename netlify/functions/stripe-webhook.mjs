@@ -4,6 +4,7 @@ import { trasPagoReserva, trasPagoOrden, trasPagoArreglo, trasPagoSaldo } from "
 import { confirmarArreglo, confirmarSaldo } from "../lib/arreglos.mjs";
 import { confirmarMembresia, actualizarPago } from "../lib/comunidad.mjs";
 import { avisarCambio } from "./comunidad-membresia.mjs";
+import { confirmarSus, actualizarSus, avisarSus } from "../lib/suscripcion.mjs";
 
 export default manejar(async (req) => {
   const secreto = process.env.STRIPE_WEBHOOK_SECRET;
@@ -17,7 +18,10 @@ export default manejar(async (req) => {
   // Membresía de la Comunidad: alta, cambios, pagos fallidos y cancelaciones.
   if (ev.type === "checkout.session.completed" && (s.metadata || {}).tipo === "membresia") await avisarCambio(await confirmarMembresia(s), origen(req));
   if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(ev.type) && (s.metadata || {}).tipo === "membresia") await avisarCambio(await actualizarPago(s.metadata.clave, s), origen(req));
-  if (ev.type === "checkout.session.expired" && s.metadata && s.metadata.clave && s.metadata.tipo !== "membresia") {
+  // Suscripción mensual de lecturas.
+  if (ev.type === "checkout.session.completed" && (s.metadata || {}).tipo === "suscripcion-lectura") await avisarSus(await confirmarSus(s), origen(req));
+  if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(ev.type) && (s.metadata || {}).tipo === "suscripcion-lectura") await avisarSus(await actualizarSus(s.metadata.clave, s), origen(req));
+  if (ev.type === "checkout.session.expired" && s.metadata && s.metadata.clave && !["membresia", "suscripcion-lectura"].includes(s.metadata.tipo)) {
     const r = await store.get(s.metadata.clave, { type: "json" });
     if (r && r.sesion === s.id && r.estado === "pendiente") await store.delete(s.metadata.clave);
   }

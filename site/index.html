@@ -361,7 +361,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 <section id="contacto">
   <div class="wrap contact">
     <div>
-      <h3>Pedidos y consultas</h3>
+      <h3>Pide tu arreglo o tu mesa</h3>
       <p class="muted" id="solIntro">Cuéntame qué necesitas y para qué fecha. Reviso tu solicitud y te contacto para confirmar los detalles.</p>
       <div class="btns" id="contactBtns"></div>
     </div>
@@ -430,7 +430,7 @@ function renderNegocio(N) {
   const map = safeUrl(s(C.mapa)); if (map) $("#mapBtn").href = map; else $("#mapBtn").remove();
   const cb = $("#contactBtns");
   const w = el("a", "btn btn-solid", "Personaliza tu arreglo"); w.href = "/personaliza.html";
-  const q = el("button", "btn btn-line", "Hacer una consulta"); q.type = "button"; q.onclick = () => abrirSolicitud({ tipo: "Otra consulta" });
+  const q = el("button", "btn btn-line", "Hacer una pregunta"); q.type = "button"; q.onclick = () => abrirSolicitud({ tipo: "Otra consulta" });
   cb.append(w, q);
   const tel = s(C.telefono).replace(/\D/g, "") || WA;
   if (tel) { const t = el("a", "btn btn-line", "Llamar"); t.href = "tel:+" + (tel.length === 10 ? "1" + tel : tel); cb.append(t); }
@@ -555,7 +555,7 @@ function renderResenas(R, C) {
   if (linkRes) { const b = el("a", "btn btn-line", "Reseña en Google"); b.href = linkRes; ac.append(ext(b)); }
 }
 
-/* ───── Solicitudes (arreglos, centros de mesa, montajes y consultas) ───── */
+/* ───── Solicitudes (arreglos, centros de mesa, montajes y preguntas) ───── */
 let SOL = { activo: true, anticipacionDias: 3, cerrados: [] };
 const TIPOS_SOL = ["Arreglo floral", "Centro de mesa", "Montaje de mesa", "Otra consulta"];
 const solDlg = $("#solDlg"), solBody = $("#solBody");
@@ -583,8 +583,8 @@ function abrirSolicitud(pre) {
   const bloque = el("div", "form"), lugar = campo("Dirección o lugar del evento", "lugar", "text", { autocomplete: "street-address" });
   const pintar = () => {
     const consulta = v.tipo === "Otra consulta";
-    $("#solTitle").textContent = consulta ? "Hacer una consulta" : "Solicitar " + v.tipo.toLowerCase();
-    bloque.replaceChildren(...(consulta ? [campo("Tu consulta", "detalles", "textarea", { rows: 4, maxLength: 1500, required: true })] : [
+    $("#solTitle").textContent = consulta ? "Hacer una pregunta" : "Solicitar " + v.tipo.toLowerCase();
+    bloque.replaceChildren(...(consulta ? [campo("Tu pregunta", "detalles", "textarea", { rows: 4, maxLength: 1500, required: true })] : [
       v.referencia ? el("p", "summary", `Basado en: ${v.referencia}`) : null,
       campo("¿Para qué orisha o celebración?", "ocasion", "text", { placeholder: "Ej: Cumpleaños de santo de Oshún" }),
       (() => {
@@ -607,7 +607,7 @@ function abrirSolicitud(pre) {
     lugar.hidden = v.entrega !== "entrega";
     $("#solMeta").textContent = consulta ? "Te respondo lo antes posible." : (SOL.anticipacionDias ? `Pide con al menos ${SOL.anticipacionDias} día${SOL.anticipacionDias == 1 ? "" : "s"} de anticipación.` : "");
   };
-  const tipos = seg("¿Qué necesitas?", "tipo", TIPOS_SOL.map(t => [t, t]), () => { guardarCampos(); pintar(); });
+  const tipos = seg("¿Qué necesitas?", "tipo", TIPOS_SOL.map(t => [t, t === "Otra consulta" ? "Otra pregunta" : t]), () => { guardarCampos(); pintar(); });
   const guardarCampos = () => f.querySelectorAll("input[name],textarea[name],select[name]").forEach(i => { if (i.name !== "web") v[i.name] = i.value; });
   const pref = el("label", null, "¿Cómo prefieres que te contacte?"), sel = el("select"); sel.name = "contacto";
   ["Llamada", "Mensaje de texto", "Correo", "WhatsApp"].forEach(o => sel.append(new Option(o, o))); sel.value = v.contacto; pref.append(sel);
@@ -673,6 +673,8 @@ fetch("/api/comunidad?publico=1", { cache: "no-store" }).then(r => r.ok ? r.json
 }).catch(() => {});
 // Enlaces viejos (/?cancelado=1#lecturas) → la página de lecturas
 if (new URLSearchParams(location.search).has("cancelado")) location.replace("/lecturas.html" + location.search);
+// Desde "Personaliza tu arreglo": abre directo el formulario para pedir un arreglo especial.
+if (location.hash === "#pedir") addEventListener("load", () => setTimeout(() => { abrirSolicitud({ tipo: "Arreglo floral" }); history.replaceState(null, "", location.pathname); }, 700));
 </script>
 <script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 <script src="/stats.js" defer></script>

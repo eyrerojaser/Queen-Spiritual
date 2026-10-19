@@ -1,6 +1,7 @@
 // "Administrar mi cita": el cliente ve, cancela o cambia su cita con el enlace privado de su correo.
 import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, reservasDesde, calcularDisponibilidad, clave, fechaBonita, horaBonita, diasParaCita, politica, textoPolitica } from "../lib/comun.mjs";
 import { avisarme, correoCita } from "../lib/avisos.mjs";
+import { devolverLectura, moverUso } from "../lib/suscripcion.mjs";
 
 async function buscar(st, token) {
   if (!/^[\w-]{20,40}$/.test(token)) throw new Fallo(404, "Este enlace no es válido.");
@@ -49,17 +50,18 @@ export default manejar(async (req) => {
       await deps.stripe().refunds.create({ payment_intent: r.pago, reason: "requested_by_customer" });
       reembolso = r.precio;
     }
+    const lecturaDevuelta = !!(r.suscripcion && e.reembolsable && (await devolverLectura(r)));
     const kc = `cancelada/${Date.now()}_${k.slice(2)}`;
-    const final = { ...r, estado: "cancelada", cancelada: deps.ahora().toISOString(), canceladaPor: "cliente", reembolso };
+    const final = { ...r, estado: "cancelada", cancelada: deps.ahora().toISOString(), canceladaPor: "cliente", reembolso, lecturaDevuelta };
     await st.setJSON(kc, final);
     await st.setJSON(`tok/${r.token}`, { clave: kc });
     await st.setJSON(`ses/${r.sesion}`, { clave: kc });
     await st.delete(k);
     await Promise.all([
-      avisarme({ titulo: "❌ Cita cancelada", cuerpo: `${r.nombre} canceló su cita del ${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)}. ${reembolso ? `Se le devolvieron $${reembolso}.` : "Sin reembolso (mismo día)."}`, url: "/admin/#/reservas", origen: o }),
+      avisarme({ titulo: "❌ Cita cancelada", cuerpo: `${r.nombre} canceló su cita del ${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)}. ${r.suscripcion ? (lecturaDevuelta ? "Era de su suscripción: su lectura del mes quedó disponible otra vez." : "Era de su suscripción: fuera de plazo, cuenta como usada.") : reembolso ? `Se le devolvieron $${reembolso}.` : "Sin reembolso (mismo día)."}`, url: "/admin/#/reservas", origen: o }),
       correoCita("cancelada", final, { origen: o, reembolso }),
     ]);
-    return json({ ok: true, estado: "cancelada", reembolso });
+    return json({ ok: true, estado: "cancelada", reembolso, lecturaDevuelta });
   }
 
   if (b.accion === "cambiar") {
@@ -74,6 +76,7 @@ export default manejar(async (req) => {
     await st.setJSON(`tok/${r.token}`, { clave: nk });
     await st.setJSON(`ses/${r.sesion}`, { clave: nk });
     await st.delete(k);
+    await moverUso(nueva);
     await Promise.all([
       avisarme({ titulo: "🔁 Cita cambiada", cuerpo: `${r.nombre} cambió su cita del ${fechaBonita(r.fecha)} ${horaBonita(r.hora)} al ${fechaBonita(fecha)} a las ${horaBonita(hora)}.`, url: "/admin/#/reservas", origen: o }),
       correoCita("cambiada", nueva, { origen: o }),

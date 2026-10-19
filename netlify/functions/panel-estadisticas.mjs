@@ -60,9 +60,16 @@ export default manejar(async (req) => {
     const f = fechaDe(m.creado); if (enRango(f)) registros++; else if (enAntes(f)) registrosAntes++;
   }
 
+  // Suscripciones mensuales de lecturas
+  let suscritas = 0, susMensual = 0;
+  for (const { key } of (await st.list({ prefix: "sus/" })).blobs) {
+    const x = await st.get(key, { type: "json" });
+    if (x && x.pago && ["active", "trialing", "past_due"].includes(x.pago.estado)) { suscritas++; susMensual += x.pago.precio || 0; }
+  }
+
   return json({
     dias, desde, hasta: hoy,
-    totales: { visitas, visitasAntes, visitantes: visitantes.size, tienda: paginas["/tienda.html"] || 0, registros, registrosAntes, miembros, pagando, mensual: r2(mensual), ventas: ventas.total, ventasAntes: r2(ventasAntes) },
+    totales: { visitas, visitasAntes, visitantes: visitantes.size, tienda: paginas["/tienda.html"] || 0, registros, registrosAntes, miembros, pagando, mensual: r2(mensual), suscritas, susMensual: r2(susMensual), ventas: ventas.total, ventasAntes: r2(ventasAntes) },
     porDia, ventas,
     paginas: orden(paginas).map(({ k, v }) => ({ p: k, nombre: nombrePagina(k), visitas: v })),
     fuentes: orden(fuentes), dispositivos: orden(disp), eventos,

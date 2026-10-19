@@ -23,6 +23,7 @@ export const ESQUEMAS = {
   }),
   lecturas: obj({
     intro: str(800), foto: foto(), enLinea: bool(true),
+    suscripcion: obj({ activa: bool(true), precio: num(1, 10000, 35), titulo: str(120), texto: str(1200), beneficios: str(1200) }),
     lecturas: lista(obj({ nombre: str(100), duracion: str(40), descripcion: str(800), precio: num(1, 10000, 1), visible: bool(true) }), 20, (l) => l.nombre),
   }),
   horario: obj({

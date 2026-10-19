@@ -360,7 +360,7 @@ function armar() {
   const app = $("#app");
   const paso = (id, n, titulo, sub, ...kids) => { const sct = el("section", "paso"); sct.id = id; const h = el("h2"); h.append(el("span", "num", n), titulo); sct.append(h); if (sub) sct.append(el("p", "muted", sub)); sct.append(...kids); return sct; };
   const arrs = el("div", "arrs"); arrs.id = "arrs";
-  const otros = el("p", "otros"); otros.append("¿Buscas otro arreglo, centro de mesa o montaje? "); const ol = el("a", null, "Mándame una consulta"); ol.href = "/#contacto"; otros.append(ol);
+  const otros = el("p", "otros"); otros.append("¿Buscas otro arreglo, centro de mesa o montaje? "); const ol = el("a", null, "Pide tu arreglo especial aquí"); ol.href = "/#pedir"; otros.append(ol);
   const grid = el("div", "flores"); grid.id = "flores";
   const oc = el("div", "form");
   const campo = (k, lab, tipo = "text", extra = {}) => { const L = el("label", null, lab), i = el(tipo === "textarea" ? "textarea" : "input"); if (tipo !== "textarea") i.type = tipo; i.value = P[k] || ""; Object.assign(i, extra); i.oninput = () => { P[k] = i.value; guardar(); }; L.append(i); return L; };
@@ -405,7 +405,7 @@ Promise.all(["negocio", "flores", "solicitudes", "politicas", "arreglos"].map(le
   FLORES = (CFG.flores || []).filter(f => f && f.visible !== false && s(f.nombre)).map(f => ({ ...f, id: slug(f.nombre) }));
   P.favs = P.favs.filter(id => FLORES.some(f => f.id === id && !f.agotada));
   if (!ARREGLOS.some(a => a.id === P.arreglo)) P.arreglo = "";
-  if (CFG.activo === false || !ARREGLOS.length) { const c = el("div", "cerrado"); c.append(el("p", null, "Por ahora no hay arreglos para personalizar en línea. Puedes dejarme una consulta en la página principal.")); const a = el("a", "btn btn-solid", "Ir a la página principal"); a.href = "/#contacto"; c.append(a); $("#app").replaceChildren(c); return; }
+  if (CFG.activo === false || !ARREGLOS.length) { const c = el("div", "cerrado"); c.append(el("p", null, "Por ahora no hay arreglos para personalizar en línea. Puedes pedirme tu arreglo en la página principal.")); const a = el("a", "btn btn-solid", "Ir a la página principal"); a.href = "/#contacto"; c.append(a); $("#app").replaceChildren(c); return; }
   armar();
   if (q.has("cancelado")) { toast("No se completó el pago. Tu selección sigue aquí."); history.replaceState(null, "", location.pathname); }
 });

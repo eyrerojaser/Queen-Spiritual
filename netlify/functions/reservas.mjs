@@ -3,6 +3,7 @@ import { deps, json, manejar, texto, Fallo, ahoraLocal, reservasDesde, fechaBoni
 
 import { requireAdmin } from "../lib/panel.mjs";
 import { correoCita } from "../lib/avisos.mjs";
+import { devolverLectura } from "../lib/suscripcion.mjs";
 import { origen } from "../lib/comun.mjs";
 deps.autorizar = deps.autorizar || requireAdmin;
 
@@ -17,7 +18,8 @@ export default manejar(async (req) => {
       if (!r) return json({ ok: true });
       let reembolso = 0;
       if (b.reembolsar && r.pago && r.precio > 0) { await deps.stripe().refunds.create({ payment_intent: r.pago }); reembolso = r.precio; }
-      const kc = `cancelada/${Date.now()}_${k.slice(2)}`, final = { ...r, estado: "cancelada", cancelada: deps.ahora().toISOString(), canceladaPor: "negocio", reembolso };
+      const lecturaDevuelta = await devolverLectura(r);
+      const kc = `cancelada/${Date.now()}_${k.slice(2)}`, final = { ...r, estado: "cancelada", cancelada: deps.ahora().toISOString(), canceladaPor: "negocio", reembolso, lecturaDevuelta };
       await store.setJSON(kc, final);
       if (r.token) await store.setJSON(`tok/${r.token}`, { clave: kc });
       if (r.sesion) await store.setJSON(`ses/${r.sesion}`, { clave: kc });

@@ -109,7 +109,7 @@ export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } =
   if (tipo === "confirmada") {
     asunto = `Tu cita está reservada: ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
     titulo = `¡Tu cita está reservada, ${r.nombre}!`;
-    parrafos = [`<b>${esc(r.lectura)}</b><br>${esc(cuando)}<br>Por videollamada · $${esc(r.precio)} pagado`,
+    parrafos = [`<b>${esc(r.lectura)}</b><br>${esc(cuando)}<br>Por videollamada · ${r.suscripcion ? "Incluida en tu suscripción mensual" : `$${esc(r.precio)} pagado`}`,
       "Antes de tu cita te escribo con el enlace de la videollamada.",
       `<b>Política de cancelación:</b> ${esc(politicaTexto)}`,
       "Si necesitas cancelar o cambiar el día, usa el botón de abajo."];
@@ -121,7 +121,7 @@ export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } =
     asunto = "Tu cita fue cancelada";
     titulo = "Tu cita fue cancelada";
     parrafos = [`<b>${esc(r.lectura)}</b> del ${esc(cuando)}.`,
-      reembolso ? `Te devolví <b>$${esc(reembolso)}</b> a tu tarjeta. Puede tardar de 5 a 10 días en verse en tu estado de cuenta.` : r.canceladaPor === "negocio" ? "Si tienes alguna duda sobre tu pago, respóndeme a este correo." : "Como la cancelación fue fuera del plazo de la política, el pago no es reembolsable.",
+      r.suscripcion ? (r.lecturaDevuelta ? "Tu lectura del mes quedó disponible otra vez: puedes reservar otro día cuando quieras." : "Como la cancelación fue fuera del plazo de la política, la lectura de este mes se cuenta como usada.") : reembolso ? `Te devolví <b>$${esc(reembolso)}</b> a tu tarjeta. Puede tardar de 5 a 10 días en verse en tu estado de cuenta.` : r.canceladaPor === "negocio" ? "Si tienes alguna duda sobre tu pago, respóndeme a este correo." : "Como la cancelación fue fuera del plazo de la política, el pago no es reembolsable.",
       "Cuando quieras, puedes reservar otra cita en mi página."];
     boton = { texto: "Reservar otra cita", url: `${origen}/lecturas.html` };
   }
@@ -142,7 +142,7 @@ export async function trasPagoReserva(r, origen) {
   const cfg = await deps.contenido(origen, "horario").catch(() => ({}));
   const { textoPolitica } = await import("./comun.mjs");
   await Promise.all([
-    avisarme({ titulo: "📅 Nueva cita reservada", cuerpo: `${r.nombre} reservó ${r.lectura} para el ${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)}. Pagó $${r.precio}.`, url: "/admin/#/reservas", origen }),
+    avisarme({ titulo: "📅 Nueva cita reservada", cuerpo: `${r.nombre} reservó ${r.lectura} para el ${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)}. ${r.suscripcion ? "🔮 Con su suscripción mensual." : `Pagó $${r.precio}.`}`, url: "/admin/#/reservas", origen }),
     correoCita("confirmada", r, { origen, politicaTexto: textoPolitica(cfg) }),
   ]);
 }
