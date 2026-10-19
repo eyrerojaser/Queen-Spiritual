@@ -57,6 +57,14 @@
 .pillars a.p-com b{color:#1A2340;text-shadow:none;font-size:1.35rem}
 .pillars a.p-com span{color:#2A3558;font-weight:600}
 .pillars a.p-com::after{animation-delay:1.8s;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%)}
+.sus-home{position:relative;overflow:hidden;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 12px;margin:0 0 16px;padding:12px 16px;border-radius:14px;border:1.5px solid #FFD966;background:radial-gradient(130% 140% at 100% 0%,#2E4F9A 0%,#1A2340 75%);color:#fff;text-decoration:none;box-shadow:0 0 22px rgba(255,217,102,.2);max-width:520px}
+.sus-home::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.14) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 5s ease-in-out infinite;animation-delay:.9s}
+.sus-home .sh-cinta{grid-row:1/3;background:linear-gradient(100deg,#FFD966,#E9B949);color:#1A2340;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.sus-home b{font-family:"Cormorant",Georgia,serif;font-size:1.35rem;font-weight:600;color:#FFD966;line-height:1.1}
+.sus-home span:not(.sh-cinta){color:#E6EAF7;font-size:.9rem;grid-column:2}
+.sus-home i{grid-row:1/3;grid-column:3;font-style:normal;color:#FFD966;font-size:1.3rem}
+.sus-home:hover{border-color:#fff}
+@media (prefers-reduced-motion:reduce){.sus-home::after{animation:none;display:none}}
 .banda-com{background:linear-gradient(100deg,#FFF4D1,#FFE7A3);border-top:0}
 .banda-com .wrap{display:flex;align-items:center;justify-content:space-between;gap:18px 30px;flex-wrap:wrap}
 .banda-com h2{font-size:clamp(1.8rem,4vw,2.5rem);color:#1A2340}
@@ -131,7 +139,7 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .estado.on i{background:#4A8BFF;box-shadow:0 0 0 4px rgba(74,139,255,.25),0 0 14px #4A8BFF}
 .estado.off{background:rgba(229,72,72,.14);border:1px solid #E54848;color:#FFD0D0}
 .estado.off i{background:#E54848;box-shadow:0 0 10px #E54848}
-@media (max-width:640px){.banda{grid-template-columns:96px 1fr;gap:16px;align-items:start}.banda-tx{display:contents}.banda-tx .kicker,.banda-tx h2,.banda-tx .estado{grid-column:2}.banda-foto{grid-row:1/4}.banda-tx h2{font-size:1.7rem}#lecIntro,#lecBtn{grid-column:1/-1}#lecIntro{margin:2px 0 4px;font-size:.96rem}#lecBtn{justify-self:start}.estado{margin-top:4px;font-size:.85rem;justify-self:start}}
+@media (max-width:640px){.banda{grid-template-columns:96px 1fr;gap:16px;align-items:start}.banda-tx{display:contents}.banda-tx .kicker,.banda-tx h2,.banda-tx .estado{grid-column:2}.banda-foto{grid-row:1/4}.banda-tx h2{font-size:1.7rem}#lecIntro,#lecBtn,.sus-home{grid-column:1/-1}.sus-home{margin:4px 0 6px}#lecIntro{margin:2px 0 4px;font-size:.96rem}#lecBtn{justify-self:start}.estado{margin-top:4px;font-size:.85rem;justify-self:start}}
 .on-night{background:var(--night-ink);color:var(--night);border-color:var(--night-ink)}
 .how{display:flex;gap:28px;flex-wrap:wrap;margin-top:36px;color:var(--night-muted);font-size:.95rem}
 .how b{color:var(--night-ink)}
@@ -143,8 +151,12 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .contact{display:grid;grid-template-columns:1fr 1fr;gap:40px}
 .contact h3{font-size:1.6rem;margin-bottom:12px}
 .social{display:flex;gap:12px;flex-wrap:wrap}
-.social a{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink);background:var(--surface);font-weight:500}
-.social svg{width:18px;height:18px}
+.social a{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid rgba(255,217,102,.45);border-radius:999px;text-decoration:none;color:#fff;background:radial-gradient(120% 140% at 50% 0%,#2E4F9A 0%,#1A2340 75%);font-weight:600;box-shadow:0 8px 22px rgba(26,35,64,.28),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .15s,box-shadow .15s,border-color .15s}
+.social a::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 5s ease-in-out infinite}
+.social a:nth-child(2)::after{animation-delay:.6s}.social a:nth-child(3)::after{animation-delay:1.2s}.social a:nth-child(4)::after{animation-delay:1.8s}
+.social a:hover{transform:translateY(-2px);border-color:#FFD966;box-shadow:0 12px 28px rgba(26,35,64,.38),0 0 18px rgba(255,217,102,.25)}
+.social svg{width:18px;height:18px;color:#FFD966}
+@media (prefers-reduced-motion:reduce){.social a::after{animation:none;display:none}}
 footer{padding:36px 0 48px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line)}
 /* ventana de reserva */
 dialog{border:0;border-radius:18px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -311,6 +323,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <h2>Mensajes de tus ancestros</h2>
       <div class="estado" id="estado" hidden></div>
       <p id="lecIntro"></p>
+      <a class="sus-home" href="/lecturas.html#suscripcion" id="susHome" hidden><span class="sh-cinta">✨ Nuevo</span><b id="susHomeTit">Suscripción mensual</b><span id="susHomeTx">Tu lectura de cartas cada mes por $35</span><i aria-hidden="true">→</i></a>
       <a class="btn on-night" href="/lecturas.html" id="lecBtn">Ver calendario y reservar</a>
     </div>
   </div>
@@ -487,6 +500,12 @@ function renderLecturas(L) {
   if (s(L.foto)) $("#lecFotoMini").src = L.foto;
   const on = L.enLinea !== false, e = $("#estado"); e.hidden = false; e.className = "estado " + (on ? "on" : "off");
   e.replaceChildren(el("i"), el("span", null, on ? "Disponible" : "No disponible ahora"));
+  const sc = L.suscripcion || {};
+  if (sc.activa !== false) {
+    const pr = Number(sc.precio) > 0 ? Number(sc.precio) : 35;
+    $("#susHome").hidden = false;
+    $("#susHomeTx").textContent = `Tu lectura de cartas cada mes por ${"$" + (pr % 1 ? pr.toFixed(2) : pr)}`;
+  }
 }
 
 /* ───── Queen Shop (vista previa; la tienda completa está en /tienda.html) ───── */

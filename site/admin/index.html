@@ -494,7 +494,7 @@ const SECCIONES = [
   ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
   ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
   ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
-  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
+  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
   ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]]],
 ];
 async function inicio() {
@@ -559,7 +559,7 @@ async function reservas() {
     const link = wa(r.whatsapp, conf ? `Hola ${r.nombre}, gracias por reservar tu ${r.lectura}. Ese horario se llenó justo antes; ¿te puedo ofrecer otro día u hora?` : `Hola ${r.nombre}, te escribo por tu ${r.lectura} del ${r.fechaBonita} a las ${r.horaBonita}. Este es el enlace de la videollamada: `);
     return h("div", { class: "bk" + (conf ? " conf" : "") },
       h("div", { class: "rw" }, h("b", null, r.nombre), h("span", { class: "when" }, r.horaBonita + (conf ? " · " + r.fechaBonita : ""))),
-      h("span", { class: "muted" }, `${r.lectura} · $${r.precio} pagado · ${r.email}`),
+      h("span", { class: "muted" }, `${r.lectura} · ${r.suscripcion ? "🔮 Con su suscripción mensual" : `$${r.precio} pagado`} · ${r.email}`),
       r.nota ? h("div", { class: "nota" }, r.nota) : null,
       h("div", { class: "btns" },
         link ? h("a", { class: "btn btn-solid btn-sm", href: link, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
@@ -581,11 +581,11 @@ function cancelarCita(r) {
     try { const x = await api("/api/reservas", { method: "POST", body: { accion: "cancelar", clave: r.clave, reembolsar } }); delete dlg.dataset.busy; dlg.close(); toast(x.reembolso ? `Cita cancelada. Se devolvieron $${x.reembolso} ✓` : "Cita cancelada ✓"); reservas(); }
     catch (e) { delete dlg.dataset.busy; btn.disabled = false; fallo(e); }
   };
-  const con = h("button", { class: "btn btn-solid", type: "button", onclick: e => hacer(true, e.currentTarget) }, `Cancelar y devolver $${r.precio}`);
-  const sin = h("button", { class: "btn danger", type: "button", onclick: e => hacer(false, e.currentTarget) }, "Cancelar sin devolver");
+  const con = r.suscripcion ? null : h("button", { class: "btn btn-solid", type: "button", onclick: e => hacer(true, e.currentTarget) }, `Cancelar y devolver $${r.precio}`);
+  const sin = h("button", { class: "btn danger", type: "button", onclick: e => hacer(false, e.currentTarget) }, r.suscripcion ? "Cancelar cita" : "Cancelar sin devolver");
   dlgIn.replaceChildren(
     h("header", null, h("h2", null, "Cancelar cita"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
-    h("div", { class: "bd" }, h("p", null, h("b", null, r.nombre), ` · ${r.lectura}`), h("p", { class: "muted" }, `${r.fechaBonita} a las ${r.horaBonita}. La hora queda libre otra vez y al cliente le llega un correo avisándole.`)),
+    h("div", { class: "bd" }, h("p", null, h("b", null, r.nombre), ` · ${r.lectura}`), h("p", { class: "muted" }, `${r.fechaBonita} a las ${r.horaBonita}. La hora queda libre otra vez y al cliente le llega un correo avisándole.${r.suscripcion ? " Como es de su suscripción, recupera su lectura del mes para reservar otro día." : ""}`)),
     h("footer", null, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "No cancelar"), h("div", { class: "r", style: "flex-wrap:wrap" }, sin, con)));
   dlg.showModal();
 }
@@ -806,6 +806,37 @@ const lecturas = () => vistaLista({
   resumen: l => ({ titulo: l.nombre, sub: [l.duracion, dinero(l.precio)].filter(Boolean).join(" · ") }),
   pie: () => h("p", { class: "muted", style: "margin-top:18px" }, "Los días y horas se cambian en ", h("a", { href: "#/calendario" }, "Mi calendario"), "."),
 });
+
+/* ═════════ Suscripción mensual de lecturas ═════════ */
+const SUS_DEF = { activa: true, precio: 35, titulo: "Tu lectura de cada mes", texto: "Cada mes trae su propia energía. Suscríbete y recibe una lectura de cartas españolas todos los meses, para caminar acompañada por los mensajes de tus guías espirituales y ancestros. Tú eliges el día y la hora en mi calendario.", beneficios: "1 lectura completa cada mes, por videollamada\nTú eliges el día y la hora en mi calendario\nSin pagar cada vez: tu lectura ya está cubierta\nCancelas cuando quieras, sin compromiso" };
+async function suscripciones() {
+  cargando();
+  let [doc, d] = await Promise.all([leer("lecturas"), api("/api/panel/suscripciones")]);
+  const actual = doc.suscripcion || {}, val = { ...SUS_DEF };
+  for (const k of Object.keys(SUS_DEF)) if (actual[k] !== undefined && actual[k] !== "") val[k] = actual[k];
+  const fm = formulario([
+    { k: "activa", t: "bool", label: "Ofrecer la suscripción en la página" },
+    { k: "precio", t: "money", label: "Precio al mes", si: v => v.activa, hint: "Cada mes pagado le da 1 lectura para reservar en tu calendario. Si cambias el precio, aplica a las nuevas suscriptoras." },
+    { k: "titulo", t: "text", label: "Título", si: v => v.activa },
+    { k: "texto", t: "area", label: "Texto que vende la suscripción", rows: 4, si: v => v.activa },
+    { k: "beneficios", t: "area", label: "Lo que incluye (uno por línea)", rows: 4, si: v => v.activa },
+  ], val);
+  const b = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => { b.disabled = true; try { doc = await guardar("lecturas", { ...doc, suscripcion: fm.valores() }); } catch (e) { fallo(e); } b.disabled = false; } }, "Guardar");
+  const act = d.suscripciones.filter(x => x.activa), total = act.reduce((a, x) => a + (x.precio || 0), 0);
+  const lista = d.suscripciones.length ? h("div", { class: "items" }, d.suscripciones.map(x => {
+    const tel = String(x.whatsapp || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
+    const pill = x.activa ? (x.cancelaAlFinal ? h("span", { class: "pill off" }, `Cancela el ${fechaCorta(x.hasta)}`) : x.estado === "past_due" ? h("span", { class: "pill off" }, "Pago atrasado") : h("span", { class: "pill ok" }, `🔮 ${dinero(x.precio)}/mes`)) : h("span", { class: "pill off" }, "Terminada");
+    return h("div", { class: "card mb" + (x.activa ? "" : " hid") },
+      h("div", { class: "rw" }, h("b", null, x.nombre), pill, x.activa ? (x.esteMes ? h("span", { class: "pill" }, `Este mes: ${x.esteMes}`) : h("span", { class: "pill" }, "Aún no reserva este mes")) : null),
+      h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 8px" }, `${x.email} · desde el ${fechaCorta(x.creada)} · ${x.lecturas} lectura${x.lecturas === 1 ? "" : "s"} reservada${x.lecturas === 1 ? "" : "s"}${x.activa && x.hasta ? " · se renueva el " + fechaCorta(x.hasta) : ""}`),
+      h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+        t1 ? h("a", { class: "btn btn-line btn-sm", href: `https://wa.me/${t1}`, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
+        h("a", { class: "btn btn-line btn-sm", href: `mailto:${x.email}` }, "Correo")));
+  })) : h("div", { class: "empty" }, "Todavía no tienes suscriptoras. La suscripción aparece arriba en tu página de lecturas.");
+  marco(...cabeza("Suscripción de lecturas", `${act.length} suscriptora${act.length === 1 ? "" : "s"} activa${act.length === 1 ? "" : "s"}${act.length ? ` · ${dinero(total)} al mes` : ""}. Stripe cobra solo cada mes y a ellas les llega un correo cuando ya pueden reservar.`),
+    Object.assign(h("details", { class: "card" }, h("summary", { style: "cursor:pointer;font-weight:700" }, "Precio y texto de la suscripción"), h("div", { class: "f", style: "margin-top:16px" }, fm.nodo, h("div", null, b), h("p", null, h("a", { href: "/lecturas.html#suscripcion", target: "_blank", rel: "noopener" }, "Ver cómo se ve en tu página")))), { open: !d.suscripciones.length }),
+    h("h2", { class: "day" }, "Tus suscriptoras"), lista);
+}
 
 const TIPOS_ARR = ["Arreglo floral", "Centro de mesa", "Montaje de mesa"];
 const arreglos = () => vistaLista({
@@ -1174,7 +1205,8 @@ async function estadisticas() {
     kpi("Ventas", dinero(T.ventas), `${V.nLecturas} lecturas · ${V.nOrdenes} pedidos · ${V.nArreglos} arreglos`, cambio(T.ventas, T.ventasAntes)),
     kpi("Registros nuevos", numero(T.registros), "en la comunidad", cambio(T.registros, T.registrosAntes)),
     kpi("Miembros", numero(T.miembros), "en total"),
-    kpi("Membresías pagando", numero(T.pagando || 0), T.pagando ? `${dinero(T.mensual)} al mes` : "cuando se llenen los fundadores"));
+    kpi("Membresías pagando", numero(T.pagando || 0), T.pagando ? `${dinero(T.mensual)} al mes` : "cuando se llenen los fundadores"),
+    kpi("Suscripciones de lecturas", numero(T.suscritas || 0), T.suscritas ? `${dinero(T.susMensual)} al mes` : "lectura mensual"));
   const prods = d.productos.length ? h("div", { class: "tabla-w" }, h("table", { class: "tabla" },
     h("thead", null, h("tr", null, h("th", null, "Producto"), h("th", null, "Vistas"), h("th", null, "Al carrito"), h("th", null, "Vendidos"), h("th", null, "Ingresos"))),
     h("tbody", null, d.productos.map(p => h("tr", null, h("td", null, p.titulo), h("td", null, numero(p.vistas)), h("td", null, numero(p.carrito)), h("td", null, numero(p.vendidos)), h("td", null, dinero(p.ingresos))))))) : h("p", { class: "muted", style: "margin:0" }, "Todavía no hay visitas a productos en este período.");
@@ -1536,7 +1568,7 @@ const eventos = () => vistaLista({
 });
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

@@ -222,3 +222,14 @@ APERTURA, FUNDADORES Y MEMBRESÍA (panel > Página de la comunidad)
 ¿NO LLEGAN LOS CORREOS?
 - En tu panel > Tu cuenta > Correos, toca "Probar correo". Te dice si faltan variables
   en Netlify o si Google no aceptó la contraseña de aplicación, y qué hacer.
+
+SUSCRIPCIÓN MENSUAL DE LECTURAS (panel > Suscripción de lecturas)
+- Arriba en la página de Lecturas aparece la tarjeta "Tu lectura de cada mes" ($35 al mes) y en la
+  portada un botón dorado "✨ Nuevo · Suscripción mensual". Precio y textos se cambian en el panel.
+- Stripe cobra solo cada mes. Cada mes pagado = 1 lectura que la clienta reserva en tu calendario
+  sin volver a pagar. Si quiere más lecturas en el mismo mes, las paga normal.
+- Al suscribirse le llega un correo con su enlace privado. Cada vez que se renueva le llega otro
+  correo: "Tu lectura de este mes ya está lista".
+- Si cancela su cita a tiempo (o la cancelas tú), recupera su lectura del mes. Fuera de plazo cuenta como usada.
+- Ella misma puede cancelar la suscripción desde su enlace; sigue teniendo su lectura hasta el final del mes pagado.
+- No hay que configurar nada nuevo en Stripe: usa el mismo webhook y los mismos 6 eventos.
