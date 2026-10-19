@@ -150,11 +150,14 @@ export async function correoMiembro(m, { asunto, titulo, parrafos, boton, pie })
 }
 
 // Correo a todos los miembros que aceptan avisos: en copia oculta (nadie ve los correos de los demás), de a 45 por envío.
-export async function correoATodos({ asunto, titulo, parrafos, boton }) {
+export async function correoATodos({ asunto, titulo, parrafos, boton, soloConAcceso = false, todos = false }) {
   const s = st(), para = [];
   for (const { key } of (await s.list({ prefix: "m/" })).blobs) {
     const m = await s.get(key, { type: "json" });
-    if (m && !m.bloqueado && m.avisos !== false && correoValido(m.email)) para.push(m.email);
+    if (!m || m.bloqueado || !correoValido(m.email)) continue;
+    if (m.avisos === false && !todos) continue;
+    if (soloConAcceso && !(tieneAcceso(m) || m.previa)) continue;
+    para.push(m.email);
   }
   if (!para.length) return 0;
   const negocio = await nombreNegocio();
@@ -220,7 +223,7 @@ export async function avisarProgramadas(origen = "") {
 export function limpiarEncuentro(e, antes = {}) {
   const fecha = /^\d{4}-\d{2}-\d{2}$/.test(e.fecha || "") ? e.fecha : "";
   const hora = /^([01]\d|2[0-3]):[0-5]\d$/.test(e.hora || "") ? e.hora : "19:00";
-  return { id: antes.id || texto(e.id, 20) || id(), fecha, hora, tema: texto(e.tema, 160), zoom: url(e.zoom), clave: texto(e.clave, 60), notas: texto(e.notas, 1500), grabacion: url(e.grabacion), recordado: antes.recordado || "" };
+  return { id: antes.id || texto(e.id, 20) || id(), fecha, hora, tema: texto(e.tema, 160), zoom: url(e.zoom), clave: texto(e.clave, 60), notas: texto(e.notas, 1500), grabacion: url(e.grabacion), recordado: antes.recordado || "", recordadoHora: antes.recordadoHora || "", enviado: antes.enviado || "" };
 }
 export const DURACION_ENCUENTRO = 90; // minutos que se muestra "en vivo"
 export function estadoEncuentro(e, ahora = ahoraLocal()) {
@@ -231,23 +234,47 @@ export function estadoEncuentro(e, ahora = ahoraLocal()) {
 }
 export const etiquetaEncuentro = (e) => `${fechaBonita(e.fecha)} a las ${horaBonita(e.hora)}`;
 
-// Recordatorio por correo el día antes de cada encuentro.
+// Correo con el enlace de Zoom a todos los miembros con acceso (sin agregar contactos uno por uno).
+export async function correoEncuentro(e, tipo, origen = "") {
+  const sitio = origen || process.env.URL || "";
+  const asuntos = { manana: `🌙 Mañana: encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}`, hora: `⏰ En 1 hora: encuentro de la Comunidad por Zoom`, ahora: `🔔 Encuentro de la Comunidad por Zoom${e.tema ? " · " + e.tema : ""}` };
+  const titulos = { manana: "Te espero mañana en nuestro encuentro", hora: "Nos vemos en una hora 🌙", ahora: "Aquí tienes el enlace de nuestro encuentro" };
+  const parrafos = [
+    `Nuestro encuentro por Zoom es el <b>${esc(etiquetaEncuentro(e))}</b> (hora de Texas).`,
+    e.tema ? `Tema: <b>${esc(e.tema)}</b>` : "",
+    e.zoom ? `Enlace para entrar: <a href="${esc(e.zoom)}">${esc(e.zoom)}</a>` : "El enlace para entrar está en tu área de miembros.",
+    e.clave ? `Código de acceso: <b>${esc(e.clave)}</b>` : "",
+    e.notas ? esc(e.notas) : "",
+  ].filter(Boolean);
+  return correoATodos({ asunto: asuntos[tipo] || asuntos.ahora, titulo: titulos[tipo] || titulos.ahora, parrafos, soloConAcceso: true,
+    boton: e.zoom ? { texto: "Entrar a Zoom", url: e.zoom } : sitio ? { texto: "Ir a la comunidad", url: `${sitio}/comunidad.html` } : null });
+}
+
+// Recordatorio el día antes (8 am) y, si lo dejas prendido, 1 hora antes. Siempre con el enlace.
 export async function recordarEncuentros(origen = "") {
-  const doc = await leerDoc("encuentros", { recordar: true, lista: [] });
+  const doc = await leerDoc("encuentros", { recordar: true, recordarHora: true, lista: [] });
   if (doc.recordar === false) return [];
   const hoy = ahoraLocal().fecha, hechos = [];
   for (const e of doc.lista) {
     if (!e.fecha || e.recordado) continue;
     const dias = Math.round((minutos(e.fecha) - minutos(hoy)) / 1440);
     if (dias !== 1) continue;
-    const sitio = origen || process.env.URL || "";
-    const n = await correoATodos({
-      asunto: `🌙 Mañana: encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}`,
-      titulo: "Te espero mañana en nuestro encuentro",
-      parrafos: [`Nuestro encuentro por Zoom es el <b>${esc(etiquetaEncuentro(e))}</b> (hora de Texas).`, e.tema ? `Tema: <b>${esc(e.tema)}</b>` : "", "El enlace para entrar está en tu área de miembros."].filter(Boolean),
-      boton: sitio ? { texto: "Ir a la comunidad", url: `${sitio}/comunidad.html` } : null,
-    });
+    const n = await correoEncuentro(e, "manana", origen);
     e.recordado = hoy; hechos.push(`encuentro ${e.fecha} (${n} correos)`);
+  }
+  if (hechos.length) await guardarDoc("encuentros", doc);
+  return hechos;
+}
+export async function recordarHoraAntes(origen = "") {
+  const doc = await leerDoc("encuentros", { recordar: true, recordarHora: true, lista: [] });
+  if (doc.recordar === false || doc.recordarHora === false) return [];
+  const ahora = ahoraLocal(), hechos = [];
+  for (const e of doc.lista) {
+    if (!e.fecha || e.recordadoHora) continue;
+    const faltan = minutos(e.fecha, e.hora) - ahora.min;
+    if (faltan < 20 || faltan > 90) continue;
+    const n = await correoEncuentro(e, "hora", origen);
+    e.recordadoHora = deps.ahora().toISOString(); hechos.push(`1 hora antes ${e.fecha} (${n} correos)`);
   }
   if (hechos.length) await guardarDoc("encuentros", doc);
   return hechos;

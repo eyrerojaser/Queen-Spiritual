@@ -494,7 +494,7 @@ const SECCIONES = [
   ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
   ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
   ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
-  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
+  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
   ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]]],
 ];
 async function inicio() {
@@ -854,15 +854,16 @@ async function tienda() {
 
 const flores = () => vistaLista({
   n: "flores", clave: "flores", titulo: "Flores", singular: "flor", lead: "Las flores que tus clientes marcan como favoritas en “Personaliza tu arreglo”. No tienen precio: el precio es el del arreglo.",
-  nuevo: () => ({ nombre: "", foto: "", visible: true, agotada: false }),
+  nuevo: () => ({ nombre: "", foto: "", color: "Blanco", visible: true, agotada: false }),
   requeridos: [["nombre", "Escribe el nombre de la flor."]],
   campos: [
     { k: "foto", t: "foto", label: "Foto de la flor", hint: "Mejor una foto cuadrada y de cerca." },
     { k: "nombre", t: "text", label: "Nombre", ph: "Ej: Rosa roja" },
+    { k: "color", t: "select", label: "Color", ops: [["Blanco", "Blanco"], ["Amarillo", "Amarillo"], ["Naranja", "Naranja"], ["Rojo", "Rojo"], ["Rosado", "Rosado"], ["Morado", "Morado"], ["Azul", "Azul"], ["Verde", "Verde"], ["Multicolor", "Multicolor"]], hint: "En la página las flores salen agrupadas por color." },
     { k: "agotada", t: "bool", label: "No disponible por ahora", hint: "Se ve, pero no se puede elegir." },
     { k: "visible", t: "bool", label: "Mostrar en la galería" },
   ],
-  resumen: f => ({ foto: f.foto, titulo: f.nombre, pills: f.agotada ? [["No disponible", "off"]] : [] }),
+  resumen: f => ({ foto: f.foto, titulo: f.nombre, sub: f.color || "", pills: f.agotada ? [["No disponible", "off"]] : [] }),
   cabecera: (doc, setDoc) => {
     const fm = formulario([
       { k: "activo", t: "bool", label: "Aceptar arreglos personalizados" },
@@ -1324,8 +1325,8 @@ const selHora = (v, on) => { const i = h("select", { "aria-label": "Hora", style
 async function encuentros() {
   cargando();
   const d = await api("/api/panel/comunidad?vista=encuentros");
-  let lista = d.lista, recordar = d.recordar;
-  const guardarTodo = async (msg) => { try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-guardar", recordar, lista } }); toast(msg || "Guardado ✓"); encuentros(); } catch (e) { fallo(e); } };
+  let lista = d.lista, recordar = d.recordar, recordarHora = d.recordarHora;
+  const guardarTodo = async (msg) => { try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-guardar", recordar, recordarHora, lista } }); toast(msg || "Guardado ✓"); encuentros(); } catch (e) { fallo(e); } };
   // Crear varios cada 15 días
   const hoy = new Date(); hoy.setDate(hoy.getDate() + 1);
   const ser = { desde: "", hora: "19:00", tema: "", zoom: "", clave: "", cantidad: 6, cada: 15 };
@@ -1353,16 +1354,24 @@ async function encuentros() {
     const g = h("input", { type: "url", placeholder: "Enlace de la grabación (opcional)", "aria-label": "Grabación" }); g.value = e.grabacion || ""; g.oninput = () => e.grabacion = g.value;
     const f = h("input", { type: "date", "aria-label": "Fecha" }); f.value = e.fecha; f.onchange = () => e.fecha = f.value;
     return h("div", { class: "card enc" + (pasado ? " hid" : "") },
-      h("div", { class: "rw" }, h("b", null, e.etiqueta || "Nuevo encuentro"), e.estado === "envivo" ? h("span", { class: "pill ok" }, "En vivo ahora") : pasado ? h("span", { class: "pill" }, "Pasado") : null, e.recordado ? h("span", { class: "pill" }, "Recordatorio enviado") : null),
+      h("div", { class: "rw" }, h("b", null, e.etiqueta || "Nuevo encuentro"), e.estado === "envivo" ? h("span", { class: "pill ok" }, "En vivo ahora") : pasado ? h("span", { class: "pill" }, "Pasado") : null, e.recordado ? h("span", { class: "pill" }, "Recordatorio enviado") : null, e.recordadoHora ? h("span", { class: "pill" }, "Aviso 1 hora antes enviado") : null, e.enviado ? h("span", { class: "pill ok" }, "Enlace enviado") : null),
       h("div", { class: "enc-g" }, f, selHora(e.hora, v => e.hora = v), t, z, pasado ? g : null),
-      h("div", { style: "display:flex;gap:8px;margin-top:10px" },
+      h("div", { style: "display:flex;gap:8px;margin-top:10px;flex-wrap:wrap" },
         h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => guardarTodo() }, "Guardar"),
+        pasado ? null : h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async ev => {
+          if (!confirm("¿Mandar ahora el enlace de Zoom por correo a todos tus miembros?")) return;
+          const bt = ev.currentTarget; bt.disabled = true;
+          try { const r = await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentro-enviar", id: e.id } }); toast(`📩 Enlace enviado a ${r.enviados} miembro${r.enviados === 1 ? "" : "s"}.`); encuentros(); } catch (er) { fallo(er); bt.disabled = false; }
+        } }, e.enviado ? "📩 Enviar enlace otra vez" : "📩 Enviar enlace ahora"),
         h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { if (confirm("¿Borrar este encuentro?")) { lista.splice(i, 1); guardarTodo("Borrado"); } } }, "Borrar")));
   };
   const prox = lista.filter(e => e.estado !== "pasado"), pas = lista.filter(e => e.estado === "pasado").reverse();
   const sw = h("input", { type: "checkbox", checked: recordar, role: "switch" }); sw.onchange = () => { recordar = sw.checked; guardarTodo(sw.checked ? "Recordatorios activados ✓" : "Recordatorios apagados"); };
+  const sw2 = h("input", { type: "checkbox", checked: recordarHora, role: "switch" }); sw2.onchange = () => { recordarHora = sw2.checked; guardarTodo(sw2.checked ? "Aviso 1 hora antes activado ✓" : "Aviso 1 hora antes apagado"); };
   marco(...cabeza("Encuentros por Zoom", "Tus encuentros con la comunidad. Los miembros ven el enlace en su área y pueden agregarlo a su calendario."),
-    h("div", { class: "card" }, h("label", { class: "sw" }, h("span", null, "Recordatorio por correo un día antes", h("small", null, "Se manda a todos los miembros a las 8 de la mañana.")), sw)),
+    h("div", { class: "card" }, h("h2", null, "Envío automático del enlace"), h("p", { class: "sub" }, "Tus miembros reciben el enlace de Zoom por correo, sin que tengas que mandarlo uno por uno."),
+      h("label", { class: "sw" }, h("span", null, "Un día antes", h("small", null, "A las 8 de la mañana, con el enlace de Zoom.")), sw),
+      h("label", { class: "sw", style: "margin-top:8px" }, h("span", null, "1 hora antes", h("small", null, "Otro correo con el enlace, justo antes de empezar.")), sw2)),
     h("h2", { class: "sec-t" }, `Próximos (${prox.length})`), prox.length ? prox.map(e => fila(e, lista.indexOf(e))) : h("div", { class: "empty", style: "margin-bottom:16px" }, "No tienes encuentros próximos. Créalos abajo."),
     serie,
     pas.length ? [h("h2", { class: "sec-t" }, "Anteriores"), h("p", { class: "muted", style: "margin:-6px 0 12px;font-size:.9rem" }, "Pega el enlace de la grabación y tus miembros podrán verla."), pas.map(e => fila(e, lista.indexOf(e)))] : null);
@@ -1509,8 +1518,25 @@ async function correos() {
       b, salida), bit);
 }
 
+
+const eventos = () => vistaLista({
+  n: "eventos", clave: "eventos", titulo: "Eventos realizados", singular: "foto", lead: "Tu portafolio: fotos de tronos, arreglos y montajes que has hecho. Salen en la página “Eventos” del menú. La primera de la lista sale primero.",
+  intro: "Texto de arriba de la página",
+  nuevo: () => ({ foto: "", titulo: "", lugar: "", descripcion: "", visible: true }),
+  requeridos: [["foto", "Sube la foto del evento."]],
+  campos: [
+    { k: "foto", t: "foto", label: "Foto del evento", hint: "Se ve completa, vertical u horizontal." },
+    { k: "titulo", t: "text", label: "Título (opcional)", ph: "Ej: Trono para Yemayá" },
+    { k: "lugar", t: "text", label: "Celebración (opcional)", ph: "Ej: Cumpleaños de santo · Houston" },
+    { k: "descripcion", t: "area", label: "Descripción (opcional)", rows: 3, hint: "Sale cuando la persona abre la foto en grande." },
+    { k: "visible", t: "bool", label: "Mostrar en la página" },
+  ],
+  resumen: e => ({ foto: e.foto, titulo: e.titulo || "Evento", sub: e.lugar || "" }),
+  pie: () => h("p", { class: "muted", style: "margin-top:18px" }, h("a", { href: "/eventos.html", target: "_blank", rel: "noopener" }, "Ver la página de Eventos"), "."),
+});
+
 /* ═════════ Rutas ═════════ */
-const RUTAS = { correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

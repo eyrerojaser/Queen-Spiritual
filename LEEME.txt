@@ -184,7 +184,9 @@ COMUNIDAD QUEEN SPIRITUAL (tu-pagina/comunidad.html)
   · Comentarios y preguntas: responde, oculta o borra. Al responder una pregunta,
     le llega un correo a esa persona.
   · Encuentros por Zoom: elige el primero y se crean solos cada 15 días. Los miembros
-    reciben un recordatorio por correo un día antes (8 am). Después del encuentro puedes
+    reciben el enlace de Zoom por correo solos: un día antes (8 am) y 1 hora antes.
+    También puedes tocar "📩 Enviar enlace ahora" en cada encuentro. Solo les llega a
+    los miembros con acceso (fundadores, cortesía y membresías al día). Después del encuentro puedes
     pegar el enlace de la grabación.
   · Miembros: buscar, WhatsApp, correo, bloquear, borrar y descargar la lista.
   · Página de la comunidad: títulos, foto, beneficios y correo de bienvenida.

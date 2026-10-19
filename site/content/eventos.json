@@ -1,0 +1,26 @@
+{
+  "intro": "Tronos, arreglos y montajes que he preparado para cumpleaños de santo, tambores y celebraciones de mis clientes.",
+  "eventos": [
+    {
+      "foto": "/images/uploads/paz-blanca.jpg",
+      "titulo": "Arreglo para Obatalá",
+      "lugar": "Cumpleaños de santo",
+      "descripcion": "",
+      "visible": true
+    },
+    {
+      "foto": "/images/uploads/cielo-azul.jpg",
+      "titulo": "Arreglo para Yemayá",
+      "lugar": "Tambor",
+      "descripcion": "",
+      "visible": true
+    },
+    {
+      "foto": "/images/uploads/luz-de-girasol.jpg",
+      "titulo": "Río y Mar",
+      "lugar": "Ofrenda a Oshún y Yemayá",
+      "descripcion": "",
+      "visible": true
+    }
+  ]
+}

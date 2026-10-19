@@ -40,7 +40,23 @@ body{padding-bottom:110px}
 .paso h2 .num{font-family:"Figtree",sans-serif;font-size:.85rem;font-weight:700;color:var(--bg);background:var(--blue);border-radius:999px;width:28px;height:28px;display:inline-grid;place-items:center;flex:none;transform:translateY(-4px)}
 .paso h2 .ok{background:var(--ok)}
 .paso > p.muted{margin:8px 0 18px}
-.flores{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.flores{display:block}
+.color-t{display:flex;align-items:center;gap:8px;font-family:"Figtree",sans-serif;font-size:.95rem;font-weight:700;margin:18px 0 8px}
+.color-t:first-child{margin-top:4px}
+.color-t i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.flores3{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.flores3 .flor{padding:0;font:inherit;color:inherit;text-align:center;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.flores3 .flor .ft{aspect-ratio:1;position:relative;background:var(--blue-soft)}
+.flores3 .flor .ft img{width:100%;height:100%;object-fit:cover}
+.flores3 .flor .nm{padding:7px 6px 9px;font-size:.84rem;font-weight:600;line-height:1.2}
+.flores3 .flor.sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
+.flores3 .flor.sel .nm{color:var(--blue)}
+.flores3 .flor .chk{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:none;place-items:center;font-weight:700;font-size:.9rem;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.flores3 .flor.sel .chk{display:grid}
+.flores3 .flor.agot{opacity:.55;cursor:default}
+.flores3 .flor .agot-t{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-size:.7rem;padding:3px}
+@media (max-width:520px){.flores3{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.flores3 .flor .nm{font-size:.76rem;padding:6px 4px 8px}}
+
 .flor{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .flor.sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
 .flor .ft{aspect-ratio:1;background:var(--blue-soft);position:relative}
@@ -174,22 +190,28 @@ function pintarArreglos() {
 }
 
 /* ── 2. Flores favoritas ── */
+const COLORES = ["Blanco", "Amarillo", "Naranja", "Rojo", "Rosado", "Morado", "Azul", "Verde", "Multicolor"];
+const PLURAL = { Blanco: "Blancas", Amarillo: "Amarillas", Naranja: "Naranjas", Rojo: "Rojas", Rosado: "Rosadas", Morado: "Moradas", Azul: "Azules", Verde: "Verdes", Multicolor: "Otras flores" };
+const PUNTO = { Blanco: "#F4F1EA", Amarillo: "#F2C230", Naranja: "#EE8A2E", Rojo: "#C8102E", Rosado: "#F08CB4", Morado: "#7B4FA0", Azul: "#2E5BC8", Verde: "#4E8A3E", Multicolor: "conic-gradient(#F2C230,#C8102E,#2E5BC8,#4E8A3E,#F2C230)" };
 function pintarFlores() {
   const g = $("#flores"); g.replaceChildren();
-  FLORES.forEach(f => {
-    const on = P.favs.includes(f.id), card = el("article", "flor" + (on ? " sel" : "")), ft = el("div", "ft");
-    if (f.foto) { const im = el("img"); im.src = f.foto; im.alt = f.nombre; im.loading = "lazy"; ft.append(im); }
-    ft.append(el("span", "chk", "✓"));
-    const bd = el("div", "bd"); bd.append(el("b", null, f.nombre));
-    const acc = el("div", "acc");
-    if (f.agotada) acc.append(el("span", "agotada", "No disponible por ahora"));
-    else {
-      const b = el("button", on ? "btn btn-solid" : "btn btn-line", on ? "✓ Añadida" : "Añadir"); b.type = "button";
-      b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-label", `${on ? "Quitar" : "Añadir"} ${f.nombre}`);
-      b.onclick = () => { P.favs = on ? P.favs.filter(x => x !== f.id) : [...P.favs, f.id]; guardar(); pintarFlores(); actualizar(); };
-      acc.append(b);
-    }
-    bd.append(acc); card.append(ft, bd); g.append(card);
+  const grupos = COLORES.map(c => [c, FLORES.filter(f => (f.color || "Multicolor") === c)]).filter(([, l]) => l.length);
+  grupos.forEach(([color, lista]) => {
+    const h = el("h3", "color-t"); const pt = el("i"); pt.style.background = PUNTO[color]; h.append(pt, PLURAL[color] || color); g.append(h);
+    const grid = el("div", "flores3");
+    lista.forEach(f => {
+      const on = P.favs.includes(f.id), card = el("button", "flor" + (on ? " sel" : "") + (f.agotada ? " agot" : "")); card.type = "button";
+      card.setAttribute("aria-pressed", String(on)); card.setAttribute("aria-label", f.agotada ? `${f.nombre}: no disponible por ahora` : `${on ? "Quitar" : "Añadir"} ${f.nombre}`);
+      const ft = el("div", "ft");
+      if (f.foto) { const im = el("img"); im.src = f.foto; im.alt = ""; im.loading = "lazy"; ft.append(im); }
+      ft.append(el("span", "chk", "✓"));
+      if (f.agotada) ft.append(el("span", "agot-t", "No disponible"));
+      card.append(ft, el("span", "nm", f.nombre));
+      if (f.agotada) card.disabled = true;
+      else card.onclick = () => { P.favs = on ? P.favs.filter(x => x !== f.id) : [...P.favs, f.id]; guardar(); pintarFlores(); actualizar(); };
+      grid.append(card);
+    });
+    g.append(grid);
   });
 }
 
@@ -357,7 +379,7 @@ function armar() {
   const prog = el("div", "progreso"); prog.innerHTML = '<div class="rot" id="pRot"></div><div class="pista"><i id="pBar"></i></div><div class="elegido" id="pEleg"></div>';
   app.replaceChildren(prog,
     paso("paso1", "1", "Elige tu arreglo", "El precio es por el arreglo completo.", arrs, otros),
-    paso("paso2", "2", "Tus flores favoritas", "Opcional. Toca “Añadir” en las que te gusten y las incluyo en tu arreglo, sin costo extra.", grid),
+    paso("paso2", "2", "Tus flores favoritas", "Opcional. Toca las flores que te gusten y las incluyo en tu arreglo, sin costo extra.", grid),
     paso("paso3", "3", "Tu celebración", null, oc),
     paso("paso4", "4", "Fecha del evento", "Toca el día de tu celebración.", cal, fd),
     paso("paso5", "5", "Entrega", null, ent),

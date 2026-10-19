@@ -20,7 +20,7 @@ export function fuente(ref, utm) {
   return "Otros sitios";
 }
 
-export const nombrePagina = (p) => ({ "/": "Portada", "/index.html": "Portada", "/lecturas.html": "Lecturas", "/personaliza.html": "Personaliza tu arreglo", "/tienda.html": "Queen Shop", "/politicas.html": "Políticas", "/comunidad.html": "Comunidad", "/gracias.html": "Gracias (pago hecho)", "/cita.html": "Mi cita" }[p] || p);
+export const nombrePagina = (p) => ({ "/": "Portada", "/index.html": "Portada", "/lecturas.html": "Lecturas", "/personaliza.html": "Personaliza tu arreglo", "/tienda.html": "Queen Shop", "/politicas.html": "Políticas", "/comunidad.html": "Comunidad", "/eventos.html": "Eventos realizados", "/gracias.html": "Gracias (pago hecho)", "/cita.html": "Mi cita" }[p] || p);
 
 const vacio = (fecha) => ({ fecha, visitas: 0, visitantes: [], paginas: {}, fuentes: {}, disp: {}, productos: {}, eventos: {} });
 function sumar(r, h) {

@@ -18,60 +18,70 @@
     {
       "nombre": "Girasol",
       "foto": "/images/flores/girasol.jpg",
+      "color": "Amarillo",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Rosa amarilla",
       "foto": "/images/flores/rosa-amarilla.jpg",
+      "color": "Amarillo",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Rosa blanca",
       "foto": "/images/flores/rosa-blanca.jpg",
+      "color": "Blanco",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Rosa azul",
       "foto": "/images/flores/rosa-azul.jpg",
+      "color": "Azul",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Rosa pintada azul con brillo",
       "foto": "/images/flores/rosa-pintada-azul.jpg",
+      "color": "Azul",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Clavel blanco",
       "foto": "/images/flores/clavel-blanco.jpg",
+      "color": "Blanco",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Lirio",
       "foto": "/images/flores/lirio.jpg",
+      "color": "Blanco",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Perrito (snapdragon)",
       "foto": "/images/flores/perrito.jpg",
+      "color": "Blanco",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Campana de Irlanda",
       "foto": "/images/flores/campana-de-irlanda.jpg",
+      "color": "Verde",
       "visible": true,
       "agotada": false
     },
     {
       "nombre": "Nube celeste (ramito)",
       "foto": "/images/flores/nube-celeste.jpg",
+      "color": "Azul",
       "visible": true,
       "agotada": false
     }

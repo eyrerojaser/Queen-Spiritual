@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, minutos, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
 import { esc } from "../lib/avisos.mjs";
-import { st, leerDoc, guardarDoc, limpiarPost, limpiarEncuentro, estadoEncuentro, etiquetaEncuentro, correoATodos, correoMiembro, salio, correoPublicacion, fechaPublicada, CATEGORIAS } from "../lib/comunidad.mjs";
+import { st, leerDoc, guardarDoc, limpiarPost, limpiarEncuentro, estadoEncuentro, etiquetaEncuentro, correoATodos, correoMiembro, salio, correoPublicacion, fechaPublicada, CATEGORIAS, correoEncuentro } from "../lib/comunidad.mjs";
 
 const sumarDias = (f, n) => new Date((minutos(f) + n * 1440) * 60000).toISOString().slice(0, 10);
 async function todos(prefijo) {
@@ -52,7 +52,7 @@ export default manejar(async (req) => {
     }
     if (vista === "encuentros") {
       const doc = await leerDoc("encuentros", { recordar: true, lista: [] }), ahora = ahoraLocal();
-      return json({ recordar: doc.recordar !== false, lista: doc.lista.map((e) => ({ ...e, estado: e.fecha ? estadoEncuentro(e, ahora) : "proximo", etiqueta: e.fecha ? etiquetaEncuentro(e) : "" })).sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora)) });
+      return json({ recordar: doc.recordar !== false, recordarHora: doc.recordarHora !== false, lista: doc.lista.map((e) => ({ ...e, estado: e.fecha ? estadoEncuentro(e, ahora) : "proximo", etiqueta: e.fecha ? etiquetaEncuentro(e) : "" })).sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora)) });
     }
     throw new Fallo(404, "No existe.");
   }
@@ -156,9 +156,17 @@ export default manejar(async (req) => {
     case "encuentros-guardar": {
       const antes = await leerDoc("encuentros", { recordar: true, lista: [] }), porId = new Map(antes.lista.map((e) => [e.id, e]));
       const lista = (Array.isArray(b.lista) ? b.lista : []).slice(0, 200).map((e) => limpiarEncuentro(e, porId.get(e.id) || {})).filter((e) => e.fecha);
-      for (const e of lista) { const a = porId.get(e.id); if (a && (a.fecha !== e.fecha || a.hora !== e.hora)) e.recordado = ""; }
-      await guardarDoc("encuentros", { recordar: b.recordar !== false, lista });
+      for (const e of lista) { const a = porId.get(e.id); if (a && (a.fecha !== e.fecha || a.hora !== e.hora)) { e.recordado = ""; e.recordadoHora = ""; } }
+      await guardarDoc("encuentros", { recordar: b.recordar !== false, recordarHora: b.recordarHora !== false, lista });
       return json({ ok: true });
+    }
+    case "encuentro-enviar": {
+      const doc = await leerDoc("encuentros", { recordar: true, lista: [] }), e = doc.lista.find((x) => x.id === b.id);
+      if (!e) throw new Fallo(404, "Ese encuentro ya no existe.");
+      if (!e.zoom) throw new Fallo(400, "Primero pega el enlace de Zoom de este encuentro y toca Guardar.");
+      const n = await correoEncuentro(e, "ahora", o);
+      e.enviado = deps.ahora().toISOString(); await guardarDoc("encuentros", doc);
+      return json({ ok: true, enviados: n });
     }
     case "encuentros-serie": {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(b.desde || "")) throw new Fallo(400, "Elige la fecha del primer encuentro.");

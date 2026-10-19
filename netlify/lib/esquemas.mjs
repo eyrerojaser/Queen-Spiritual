@@ -53,12 +53,16 @@ export const ESQUEMAS = {
     depositoPorcentaje: int(10, 100, 50), permitirPagoTotal: bool(true),
     entrega: obj({ activo: bool(true), costo: num(0, 1000, 0), texto: str(300) }),
     recoger: obj({ activo: bool(true), texto: str(300) }),
-    flores: lista(obj({ nombre: str(80), foto: foto(), visible: bool(true), agotada: bool(false) }), 200, (f) => f.nombre),
+    flores: lista(obj({ nombre: str(80), foto: foto(), color: uno(["Blanco", "Amarillo", "Naranja", "Rojo", "Rosado", "Morado", "Azul", "Verde", "Multicolor"], "Multicolor"), visible: bool(true), agotada: bool(false) }), 200, (f) => f.nombre),
   }),
   politicas: obj({ lecturas: str(3000), envios: str(3000), arreglos: str(3000), privacidad: str(3000) }),
   solicitudes: obj({
     activo: bool(true), anticipacionDias: int(0, 90, 3), intro: str(600),
     cerrados: lista(obj({ fecha: fecha(), motivo: str(120) }), 400, (c) => c.fecha),
+  }),
+  eventos: obj({
+    intro: str(800),
+    eventos: lista(obj({ foto: foto(), titulo: str(140), lugar: str(140), descripcion: str(800), visible: bool(true) }), 400, (e) => e.foto),
   }),
   comunidad: obj({
     registroAbierto: bool(true), apertura: fecha(), fundadores: int(0, 100000, 25), precioMensual: num(0, 1000, 11.99), titulo: str(120), frase: str(400), intro: str(1500), beneficios: str(1500), foto: foto(),
