@@ -233,3 +233,9 @@ SUSCRIPCIÓN MENSUAL DE LECTURAS (panel > Suscripción de lecturas)
 - Si cancela su cita a tiempo (o la cancelas tú), recupera su lectura del mes. Fuera de plazo cuenta como usada.
 - Ella misma puede cancelar la suscripción desde su enlace; sigue teniendo su lectura hasta el final del mes pagado.
 - No hay que configurar nada nuevo en Stripe: usa el mismo webhook y los mismos 6 eventos.
+
+RESEÑAS: tu enlace para mandar a tus clientas -> queenspiritual.netlify.app/resena
+  (para lecturas: queenspiritual.netlify.app/resena?tipo=lectura). También está en el panel > Reseñas.
+
+COMUNIDAD - PDFs: al crear una publicación (panel > Publicaciones) usa "📄 Subir PDF".
+  Tus miembros ven el botón "Descargar". Solo lo pueden bajar miembros con acceso.

@@ -932,6 +932,19 @@ const resenas = () => vistaLista({
   resumen: r => ({ titulo: r.nombre || "Cliente", foto: r.foto, sub: "★".repeat(+r.estrellas || 5) + " · " + s(r.texto).slice(0, 70) + (s(r.texto).length > 70 ? "…" : ""), pills: [[r.tipo === "Lecturas" ? "Lectura" : "Arreglo"]] }),
   cabecera: () => {
     const box = h("div");
+    const copiar = (url, msg) => async () => { try { await navigator.clipboard.writeText(url); toast(msg); } catch (e) { prompt("Copia este enlace:", url); } };
+    const wa = (url, txt) => "https://wa.me/?text=" + encodeURIComponent(txt + " " + url);
+    const uA = location.origin + "/resena", uL = location.origin + "/resena?tipo=lectura";
+    const caja = (u, t) => { const i = h("input", { type: "text", readonly: true, "aria-label": t, style: "font-size:15px;font-weight:600;color:var(--blue);background:var(--bg)" }); i.value = u; i.onclick = () => i.select(); return h("div", { class: "fld", style: "margin:0 0 10px" }, h("label", null, t), i); };
+    box.append(h("div", { class: "card", style: "margin-bottom:14px;border-color:var(--gold)" },
+      h("b", null, "📩 Tu enlace para pedir reseñas"),
+      h("p", { class: "muted", style: "margin:6px 0 12px" }, "Cópialo y mándaselo a tu clienta por WhatsApp o mensaje. Cuando lo abre, le sale directo el formulario para escribir su reseña y subir una foto. Te llega aquí para que la apruebes."),
+      caja(uA, "Para arreglos y mesas"), caja(uL, "Para lecturas de cartas"),
+      h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+        h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: copiar(uA, "Enlace copiado ✓ (para arreglos)") }, "Copiar enlace · Arreglos"),
+        h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: copiar(uL, "Enlace copiado ✓ (para lecturas)") }, "Copiar enlace · Lecturas"),
+        h("a", { class: "btn btn-line btn-sm", href: wa(uA, "¡Hola! 💛 Me encantaría saber cómo te fue con tu arreglo. ¿Me dejas tu reseña aquí?"), target: "_blank", rel: "noopener" }, "Enviar por WhatsApp · Arreglos"),
+        h("a", { class: "btn btn-line btn-sm", href: wa(uL, "¡Hola! 💛 Me encantaría saber cómo te fue con tu lectura. ¿Me dejas tu reseña aquí?"), target: "_blank", rel: "noopener" }, "Enviar por WhatsApp · Lecturas"))));
     api("/api/panel/resenas").then(({ pendientes }) => {
       if (!pendientes.length) return;
       const accion = async (r, accion, b) => {
@@ -939,7 +952,7 @@ const resenas = () => vistaLista({
         try { await api("/api/panel/resenas", { method: "POST", body: { clave: r.clave, accion } }); delete cache.resenas; toast(accion === "publicar" ? "Publicada ✓ Ya sale en tu página." : "Borrada"); resenas(); }
         catch (e) { fallo(e); b.disabled = false; }
       };
-      box.replaceChildren(h("div", { class: "card", style: "border-color:var(--gold)" },
+      box.prepend(h("div", { class: "card", style: "border-color:var(--gold);margin-bottom:14px" },
         h("h2", null, `⭐ Por aprobar (${pendientes.length})`), h("p", { class: "sub" }, "Te las mandaron desde tu página. Solo salen cuando tocas Publicar."),
         pendientes.map(r => h("div", { class: "rv-pend" },
           r.foto ? h("a", { href: r.foto, target: "_blank", rel: "noopener" }, h("img", { src: r.foto, alt: "Foto de la reseña" })) : null,
@@ -1248,9 +1261,33 @@ function campoFotos(valor) {
   return { nodo: h("div", { class: "fld" }, h("div", { class: "lab" }, "Fotos"), g, h("div", null, add), inp, h("div", { class: "hint" }, "Hasta 12 fotos. Las de tu teléfono se achican solas.")), get: () => v };
 }
 
+// PDFs descargables para una publicación (solo los bajan tus miembros).
+function campoArchivos(valor) {
+  let v = Array.isArray(valor) ? valor.map(a => ({ ...a })) : [];
+  const lista = h("div", { style: "display:grid;gap:6px" }), inp = h("input", { type: "file", accept: "application/pdf,.pdf", multiple: true, hidden: true });
+  const add = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => inp.click() }), bar = h("progress", { max: 1, value: 0, hidden: true, style: "width:100%" });
+  const pintar = () => {
+    lista.replaceChildren(...v.map((a, i) => h("div", { style: "display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)" },
+      h("span", null, "📄"), h("span", { style: "flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, a.nombre),
+      h("button", { type: "button", class: "ib", "aria-label": "Quitar archivo", onclick: () => { v.splice(i, 1); pintar(); } }, "×"))));
+    add.textContent = v.length ? "+ Agregar otro PDF" : "📄 Subir PDF"; add.hidden = v.length >= 6;
+  };
+  inp.onchange = async () => {
+    const fs = [...inp.files].slice(0, 6 - v.length); inp.value = "";
+    add.disabled = true; bar.hidden = false;
+    for (let i = 0; i < fs.length; i++) {
+      add.textContent = `Subiendo ${i + 1} de ${fs.length}…`; bar.value = 0;
+      try { if (!/\.pdf$/i.test(fs[i].name) && fs[i].type !== "application/pdf") throw new Error(`“${fs[i].name}” no es un PDF.`); const r = await subirPdf(fs[i], x => bar.value = x); v.push({ ref: r.ref, nombre: r.nombre }); } catch (e) { fallo(e); }
+    }
+    add.disabled = false; bar.hidden = true; pintar();
+  };
+  pintar();
+  return { nodo: h("div", { class: "fld" }, h("div", { class: "lab" }, "Archivos para descargar (PDF)"), lista, bar, h("div", null, add), inp, h("div", { class: "hint" }, "Guías, oraciones o enseñanzas en PDF. Solo tus miembros los pueden descargar. Hasta 6, de máximo 20 MB cada uno.")), get: () => v };
+}
+
 function editarPost(p, alGuardar) {
   const nuevo = !p;
-  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", fotos: [], fijado: false, visible: true, avisar: true };
+  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", fotos: [], archivos: [], fijado: false, visible: true, avisar: true };
   const yaSalio = !nuevo && p.salio !== false;
   p.programar = !!p.programado; p.pfecha = p.programado ? p.programado.fecha : ""; p.phora = p.programado ? p.programado.hora : "09:00";
   const manana = new Date(Date.now() + 864e5), hoyIso = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, "0")}-${String(manana.getDate()).padStart(2, "0")}`;
@@ -1268,12 +1305,13 @@ function editarPost(p, alGuardar) {
     ]),
     ...(p.avisado ? [] : [{ k: "avisar", t: "bool", label: "Avisar a los miembros por correo", hint: "Si la programas, el aviso sale cuando se publique." }]),
   ], p);
-  const fotos = campoFotos(p.fotos);
+  const fotos = campoFotos(p.fotos), archivos = campoArchivos(p.archivos);
   fm.nodo.insertBefore(fotos.nodo, fm.nodo.children[3]);
+  fm.nodo.insertBefore(archivos.nodo, fotos.nodo.nextSibling);
   const err = h("p", { class: "note err", hidden: true });
   const ok = h("button", { type: "button", class: "btn btn-solid" }, nuevo ? "Publicar" : "Guardar");
   ok.onclick = async () => {
-    const v = { ...fm.valores(), fotos: fotos.get(), id: p.id };
+    const v = { ...fm.valores(), fotos: fotos.get(), archivos: archivos.get(), id: p.id };
     if (v.programar && !v.pfecha) { err.textContent = "Elige el día en que sale la publicación."; err.hidden = false; return; }
     if ("programar" in v) v.programado = v.programar ? { fecha: v.pfecha, hora: v.phora } : null; else v.programado = p.programado || null;
     if (!("avisar" in v)) v.avisar = !!p.avisar;
@@ -1303,7 +1341,7 @@ async function publicaciones() {
     h("div", { class: "th" }, p.fotos && p.fotos[0] ? h("img", { src: p.fotos[0], alt: "" }) : ({ video: "🎬", fotos: "📷", ensenanza: "📖" }[p.tipo])),
     h("button", { class: "open", type: "button", onclick: () => editarPost(p, publicaciones) },
       h("div", { class: "nm" }, p.titulo || "(sin título)"),
-      h("div", { class: "ds" }, `${({ video: "Video", fotos: `${p.fotos.length} foto${p.fotos.length === 1 ? "" : "s"}`, ensenanza: "Enseñanza" })[p.tipo]} · ${p.salio ? fechaCorta(p.publicada) + " · " + p.nComentarios + " comentario" + (p.nComentarios === 1 ? "" : "s") : "todavía no sale"}`),
+      h("div", { class: "ds" }, `${({ video: "Video", fotos: `${p.fotos.length} foto${p.fotos.length === 1 ? "" : "s"}`, ensenanza: "Enseñanza" })[p.tipo]}${(p.archivos || []).length ? ` · 📄 ${p.archivos.length} PDF` : ""} · ${p.salio ? fechaCorta(p.publicada) + " · " + p.nComentarios + " comentario" + (p.nComentarios === 1 ? "" : "s") : "todavía no sale"}`),
       h("div", null, !p.salio ? h("span", { class: "pill prog" }, `🕒 Sale el ${p.etiquetaProgramada}`) : null, p.fijado ? h("span", { class: "pill" }, "📌 Fijado") : null, p.visible === false ? h("span", { class: "pill off" }, "Borrador") : null, !p.salio && p.avisar ? h("span", { class: "pill" }, "✉️ Con aviso") : null)),
     h("div", { class: "ia" })))) : h("div", { class: "empty" }, "Todavía no has publicado nada. Empieza con un video de bienvenida 🌙");
   marco(...cabeza("Publicaciones", "Videos, fotos y enseñanzas que solo ven tus miembros."),

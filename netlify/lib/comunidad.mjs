@@ -186,6 +186,7 @@ export function limpiarPost(p, antes = {}) {
     tipo: TIPOS_POST.includes(p.tipo) ? p.tipo : "ensenanza",
     titulo: texto(p.titulo, 160), texto: texto(p.texto, 8000), video: url(p.video),
     fotos: (Array.isArray(p.fotos) ? p.fotos : []).map(foto).filter(Boolean).slice(0, 12),
+    archivos: (Array.isArray(p.archivos) ? p.archivos : []).map((a) => a && /^pdf\/[0-9a-f-]{36}$/.test(a.ref || "") ? { ref: a.ref, nombre: texto(a.nombre, 200) || "archivo.pdf" } : null).filter(Boolean).slice(0, 6),
     fijado: p.fijado === true, visible: p.visible !== false,
     programado: limpiarProgramado(p.programar === false ? null : p.programado),
     avisar: p.avisar === true, avisado: antes.avisado || "",

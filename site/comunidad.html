@@ -113,6 +113,12 @@
 .video.vertical{aspect-ratio:9/16;max-height:78vh;margin-left:auto;margin-right:auto;width:min(100%,440px)}
 .enlace-video{margin:14px 18px 0}
 .fotos{display:grid;gap:3px;margin-top:14px}
+.adjuntos{display:grid;gap:8px;margin-top:14px}
+.adj{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--gold);border-radius:12px;background:var(--blue-soft);color:var(--ink);text-decoration:none}
+.adj:hover{border-color:var(--blue)}
+.adj-ic{font-size:1.4rem}
+.adj-n{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.adj-b{flex:none;background:var(--blue);color:#fff;font-size:.85rem;font-weight:700;padding:7px 12px;border-radius:999px}
 .fotos.n1{grid-template-columns:1fr}.fotos.n2{grid-template-columns:1fr 1fr}.fotos.n3,.fotos.nmas{grid-template-columns:1fr 1fr 1fr}
 .fotos button{padding:0;border:0;background:var(--blue-soft);cursor:zoom-in;aspect-ratio:1;overflow:hidden}
 .fotos.n1 button{aspect-ratio:auto;max-height:620px}
@@ -482,6 +488,11 @@ function tarjetaPost(p) {
     const n = p.fotos.length, g = el("div", "fotos " + (n === 1 ? "n1" : n === 2 ? "n2" : n === 3 ? "n3" : "nmas"));
     p.fotos.forEach(src => { const b = el("button"), im = el("img"); b.type = "button"; b.setAttribute("aria-label", "Ver foto"); im.src = src; im.alt = p.titulo || "Foto"; im.loading = "lazy"; b.append(im); b.onclick = () => verFoto(src); g.append(b); });
     c.append(g);
+  }
+  if ((p.archivos || []).length) {
+    const ad = el("div", "adjuntos");
+    p.archivos.forEach((a, i) => { const l = el("a", "adj"); l.href = `/api/comunidad/archivo?p=${encodeURIComponent(p.id)}&i=${i}`; l.setAttribute("download", ""); l.append(el("span", "adj-ic", "📄"), el("span", "adj-n", a.nombre.replace(/\.pdf$/i, "")), el("span", "adj-b", "Descargar")); ad.append(l); });
+    c.append(ad);
   }
   // comentarios
   const cs = el("div", "coms"), lista = el("div"); lista.style.cssText = "display:grid;gap:8px";

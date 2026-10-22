@@ -133,7 +133,7 @@ export default manejar(async (req, ctx) => {
   const cfg = await deps.contenido(origen(req), "comunidad");
   const ahoraTx = ahoraLocal();
   const pubs = (await leerDoc("publicaciones", { lista: [] })).lista.filter((p) => p.visible !== false && salio(p, ahoraTx))
-    .map(({ avisar, avisado, programado, ...p }) => ({ ...p, creado: fechaPublicada({ ...p, programado }, ahoraTx) }));
+    .map(({ avisar, avisado, programado, archivos, ...p }) => ({ ...p, archivos: (archivos || []).map((a) => ({ nombre: a.nombre })), creado: fechaPublicada({ ...p, programado }, ahoraTx) }));
   const coms = new Map();
   for (const { key } of (await s.list({ prefix: "c/" })).blobs) {
     const c = await s.get(key, { type: "json" });
