@@ -494,7 +494,7 @@ const SECCIONES = [
   ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
   ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
   ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
-  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
+  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
   ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]]],
 ];
 async function inicio() {
@@ -559,7 +559,7 @@ async function reservas() {
     const link = wa(r.whatsapp, conf ? `Hola ${r.nombre}, gracias por reservar tu ${r.lectura}. Ese horario se llenó justo antes; ¿te puedo ofrecer otro día u hora?` : `Hola ${r.nombre}, te escribo por tu ${r.lectura} del ${r.fechaBonita} a las ${r.horaBonita}. Este es el enlace de la videollamada: `);
     return h("div", { class: "bk" + (conf ? " conf" : "") },
       h("div", { class: "rw" }, h("b", null, r.nombre), h("span", { class: "when" }, r.horaBonita + (conf ? " · " + r.fechaBonita : ""))),
-      h("span", { class: "muted" }, `${r.lectura} · ${r.suscripcion ? "🔮 Con su suscripción mensual" : `$${r.precio} pagado`} · ${r.email}`),
+      h("span", { class: "muted" }, `${r.lectura} · ${r.suscripcion ? "🔮 Con su suscripción mensual" : r.cupon && !r.precio ? "Gratis" : `$${r.precio} pagado`}${r.cupon ? ` · 🎟️ ${r.cupon} (−$${r.descuento})` : ""} · ${r.email}`),
       r.nota ? h("div", { class: "nota" }, r.nota) : null,
       h("div", { class: "btns" },
         link ? h("a", { class: "btn btn-solid btn-sm", href: link, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
@@ -836,6 +836,43 @@ async function suscripciones() {
   marco(...cabeza("Suscripción de lecturas", `${act.length} suscriptora${act.length === 1 ? "" : "s"} activa${act.length === 1 ? "" : "s"}${act.length ? ` · ${dinero(total)} al mes` : ""}. Stripe cobra solo cada mes y a ellas les llega un correo cuando ya pueden reservar.`),
     Object.assign(h("details", { class: "card" }, h("summary", { style: "cursor:pointer;font-weight:700" }, "Precio y texto de la suscripción"), h("div", { class: "f", style: "margin-top:16px" }, fm.nodo, h("div", null, b), h("p", null, h("a", { href: "/lecturas.html#suscripcion", target: "_blank", rel: "noopener" }, "Ver cómo se ve en tu página")))), { open: !d.suscripciones.length }),
     h("h2", { class: "day" }, "Tus suscriptoras"), lista);
+}
+
+/* ═════════ Cupones de descuento ═════════ */
+let USOS_CUP = {};
+async function cupones() {
+  cargando();
+  try { USOS_CUP = (await api("/api/panel/cupones")).usos || {}; } catch (e) { USOS_CUP = {}; }
+  const desc = c => c.tipo === "porcentaje" ? `${c.valor}% de descuento` : `${dinero(c.valor)} de descuento`;
+  vistaLista({
+    n: "cupones", clave: "cupones", titulo: "Cupones", singular: "cupón", lead: "Códigos de descuento para tus lecturas. Tu clienta lo escribe al reservar y la página le descuenta el precio antes de pagar.",
+    vacio: "Todavía no tienes cupones. Crea el primero, por ejemplo AMIGA5 con $5 de descuento.",
+    nuevo: () => ({ codigo: "", tipo: "monto", valor: 5, vence: "", usosMax: 0, unoPorPersona: true, nota: "", visible: true }),
+    requeridos: [["codigo", "Escribe el código del cupón (mínimo 3 letras o números)."], ["valor", "Escribe cuánto descuenta."]],
+    campos: [
+      { k: "codigo", t: "text", label: "Código", ph: "Ej: AMIGA5", hint: "Solo letras y números, sin espacios. Es lo que tu clienta escribe. No importa si lo escribe en mayúsculas o minúsculas." },
+      { k: "tipo", t: "seg", label: "Tipo de descuento", ops: [["monto", "$ Dólares"], ["porcentaje", "% Por ciento"]] },
+      { k: "valor", t: "num", label: "¿Cuánto descuenta?", min: 0, hint: "Ej: 5 = $5 menos (o 5% si elegiste por ciento). Si el cupón cubre todo el precio, la lectura se reserva gratis sin pagar." },
+      { k: "vence", t: "date", label: "Vence el (opcional)", hint: "Déjalo vacío si no vence." },
+      { k: "usosMax", t: "num", label: "¿Cuántas veces se puede usar en total?", min: 0, hint: "0 = sin límite." },
+      { k: "unoPorPersona", t: "bool", label: "Una sola vez por persona", hint: "Se revisa con el correo de la clienta." },
+      { k: "nota", t: "text", label: "Nota para ti (opcional)", ph: "Ej: Para las que me recomiendan" },
+      { k: "visible", t: "bool", label: "Activo" },
+    ],
+    resumen: c => {
+      const u = USOS_CUP[c.codigo] || 0, vencido = c.vence && c.vence < new Date().toISOString().slice(0, 10), lleno = c.usosMax > 0 && u >= c.usosMax;
+      return { titulo: c.codigo, sub: [desc(c), c.nota].filter(Boolean).join(" · "), pills: [[`Usado ${u}${c.usosMax ? " de " + c.usosMax : ""} ${u === 1 ? "vez" : "veces"}`], c.vence ? [vencido ? "Venció" : `Vence ${fechaCorta(c.vence + "T12:00")}`, vencido ? "off" : ""] : null, lleno ? ["Agotado", "off"] : null].filter(Boolean) };
+    },
+    pie: () => {
+      const caja = h("div", { class: "card", style: "margin-top:18px" }, h("b", null, "📩 Mandar un cupón"),
+        h("p", { class: "muted", style: "margin:6px 0 10px" }, "Toca un cupón para copiar un mensaje listo para WhatsApp, con el código y el enlace para reservar."));
+      leer("cupones").then(D => (D.cupones || []).filter(c => c.visible !== false).forEach(c => {
+        const msg = `¡Hola! 💛 Gracias por recomendarme. Aquí tienes tu cupón de ${desc(c)} para tu próxima lectura de cartas: ${c.codigo}\nEscríbelo al reservar aquí 👉 ${location.origin}/lecturas${c.vence ? `\nVálido hasta el ${new Date(c.vence + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })}.` : ""}`;
+        caja.append(h("button", { class: "btn btn-line btn-sm", type: "button", style: "margin:0 8px 8px 0", onclick: async () => { try { await navigator.clipboard.writeText(msg); toast("Mensaje copiado ✓ Pégalo en WhatsApp."); } catch (e) { prompt("Copia este mensaje:", msg); } } }, `Copiar mensaje · ${c.codigo}`));
+      }));
+      return caja;
+    },
+  });
 }
 
 const TIPOS_ARR = ["Arreglo floral", "Centro de mesa", "Montaje de mesa"];
@@ -1606,7 +1643,7 @@ const eventos = () => vistaLista({
 });
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

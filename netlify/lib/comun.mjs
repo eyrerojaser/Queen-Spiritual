@@ -23,6 +23,9 @@ export function leerLocal(rel) {
   return null;
 }
 
+// Solo los lee el panel y el servidor (nunca la página pública).
+export const CONTENIDO_PRIVADO = ["cupones"];
+const VACIO_PRIVADO = { cupones: { cupones: [] } };
 export const NOMBRES_CONTENIDO = ["negocio", "arreglos", "lecturas", "horario", "tienda", "tienda-ajustes", "resenas", "solicitudes", "politicas", "flores", "comunidad", "eventos"];
 const esPdfSubido = (ref) => /^pdf\/[0-9a-f-]{36}$/.test(String(ref || ""));
 const esPdfLocal = (ref) => /^private\/pdfs\/[^/]+\.pdf$/i.test(String(ref || "").replace(/^\/+/, ""));
@@ -38,9 +41,10 @@ export const deps = {
   },
   // Lo guardado desde el panel; si todavía no se ha guardado nada, el contenido inicial del sitio.
   contenido: async (_origen, nombre) => {
-    if (!NOMBRES_CONTENIDO.includes(nombre)) throw new Fallo(404, "No existe.");
+    if (!NOMBRES_CONTENIDO.includes(nombre) && !CONTENIDO_PRIVADO.includes(nombre)) throw new Fallo(404, "No existe.");
     const v = await deps.store("contenido").get(`c/${nombre}`, { type: "json" });
     if (v) return v;
+    if (VACIO_PRIVADO[nombre]) return structuredClone(VACIO_PRIVADO[nombre]);
     const f = leerLocal(`site/content/${nombre}.json`);
     if (!f) throw new Fallo(500, "No se pudo leer la información del sitio.");
     return JSON.parse(f.toString("utf8"));
@@ -176,6 +180,7 @@ export async function confirmarReserva(store, sesion) {
     fecha: m.fecha, hora: m.hora, lectura: m.lectura,
     nombre: m.nombre, whatsapp: m.whatsapp, email: (sesion.customer_details && sesion.customer_details.email) || m.email || "",
     nota: m.nota || "", precio: (sesion.amount_total || 0) / 100, pagada: deps.ahora().toISOString(),
+    ...(m.cupon ? { cupon: m.cupon, descuento: Number(m.descuento) || 0 } : {}),
     token: crypto.randomBytes(18).toString("base64url"), cambios: 0,
   };
   let final = null;

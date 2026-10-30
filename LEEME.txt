@@ -239,3 +239,11 @@ RESEÑAS: tu enlace para mandar a tus clientas -> queenspiritual.netlify.app/res
 
 COMUNIDAD - PDFs: al crear una publicación (panel > Publicaciones) usa "📄 Subir PDF".
   Tus miembros ven el botón "Descargar". Solo lo pueden bajar miembros con acceso.
+
+CUPONES (panel > Cupones)
+- Creas un código (ej: AMIGA5) con $ o % de descuento, fecha de vencimiento y límite de usos.
+- Tu clienta lo escribe al reservar su lectura ("🎟️ ¿Tienes un cupón de descuento?") y paga menos.
+  Si el cupón cubre todo (100%), la lectura se reserva gratis sin pasar por el pago.
+- "Una sola vez por persona" se revisa con el correo. Los códigos nunca se ven en la página pública.
+- Enlace con el cupón ya puesto (para PageBloom o WhatsApp): queenspiritual.netlify.app/lecturas?cupon=AMIGA5
+  El código tiene que existir también aquí en el panel > Cupones.

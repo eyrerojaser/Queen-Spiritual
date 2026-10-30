@@ -1,11 +1,11 @@
-import { deps, json, manejar, origen, Fallo, NOMBRES_CONTENIDO } from "../lib/comun.mjs";
+import { deps, json, manejar, origen, Fallo, NOMBRES_CONTENIDO, CONTENIDO_PRIVADO } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
 import { ESQUEMAS } from "../lib/esquemas.mjs";
 
 export default manejar(async (req) => {
   await requireAdmin(req);
   const n = new URL(req.url).searchParams.get("n");
-  if (!NOMBRES_CONTENIDO.includes(n)) throw new Fallo(404, "No existe.");
+  if (!NOMBRES_CONTENIDO.includes(n) && !CONTENIDO_PRIVADO.includes(n)) throw new Fallo(404, "No existe.");
   if (req.method === "GET") return json(await deps.contenido(origen(req), n));
   if (req.method !== "PUT") throw new Fallo(405, "Método no permitido.");
   const cuerpo = await req.json().catch(() => null);

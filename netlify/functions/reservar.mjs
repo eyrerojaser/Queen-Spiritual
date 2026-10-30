@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { deps, json, manejar, origen, texto, slug, Fallo, ahoraLocal, reservasDesde, calcularDisponibilidad, clave, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { porToken, lecturaDisponible, periodo, activa } from "../lib/suscripcion.mjs";
 import { trasPagoReserva } from "../lib/avisos.mjs";
+import { aplicarCupon } from "../lib/cupones.mjs";
 
 export default manejar(async (req) => {
   if (req.method !== "POST") throw new Fallo(405, "Método no permitido.");
@@ -33,9 +34,14 @@ export default manejar(async (req) => {
   const libre = calcularDisponibilidad(cfg, ocupadas, ahora).some((d) => d.fecha === fecha && d.horas.some((h) => h.hora === hora));
   if (!libre) throw new Fallo(409, "Ese horario ya no está disponible. Elige otro, por favor.");
 
+  // Cupón de descuento (se vuelve a revisar aquí aunque la página ya lo haya mostrado).
+  const cup = texto(b.cupon, 40) ? await aplicarCupon(o, texto(b.cupon, 40), email, precio / 100) : null;
+  const cobrar = cup ? Math.round(cup.final * 100) : precio;
+  if (cup && cobrar < 50) return reservarGratis({ store, lectura, nombre, email, whatsapp, nota, fecha, hora, cup, o });
+
   const stripe = deps.stripe(); // antes de apartar, por si los pagos no están configurados
   const k = clave(fecha, hora);
-  const apartado = { estado: "pendiente", creada: deps.ahora().toISOString(), fecha, hora, lectura: lectura.nombre, nombre, email, whatsapp, nota };
+  const apartado = { estado: "pendiente", creada: deps.ahora().toISOString(), fecha, hora, lectura: lectura.nombre, nombre, email, whatsapp, nota, ...(cup ? { cupon: cup.codigo, descuento: cup.descuento } : {}) };
   const r = await store.setJSON(k, apartado, { onlyIfNew: true });
   if (r && r.modified === false) throw new Fallo(409, "Alguien acaba de tomar ese horario. Elige otro, por favor.");
 
@@ -44,8 +50,8 @@ export default manejar(async (req) => {
       mode: "payment",
       locale: "es",
       customer_email: email,
-      line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: precio, product_data: { name: `${lectura.nombre} · ${fechaBonita(fecha)}, ${horaBonita(hora)} (hora de Texas)` } } }],
-      metadata: { tipo: "reserva", clave: k, fecha, hora, lectura: lectura.nombre, nombre, email, whatsapp, nota },
+      line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: cobrar, product_data: { name: `${lectura.nombre} · ${fechaBonita(fecha)}, ${horaBonita(hora)} (hora de Texas)${cup ? ` · Cupón ${cup.codigo} (−$${cup.descuento})` : ""}` } } }],
+      metadata: { tipo: "reserva", clave: k, fecha, hora, lectura: lectura.nombre, nombre, email, whatsapp, nota, cupon: cup ? cup.codigo : "", descuento: cup ? String(cup.descuento) : "" },
       expires_at: Math.floor(deps.ahora().getTime() / 1000) + 31 * 60,
       success_url: `${o}/gracias.html?s={CHECKOUT_SESSION_ID}`,
       cancel_url: `${o}/lecturas.html?cancelado=1`,
@@ -76,5 +82,16 @@ async function reservarConSuscripcion({ sus, lectura, nombre, email, whatsapp, n
   await store.setJSON(sus.clave, { ...x, usos: { ...(x.usos || {}), [per]: { fecha, hora } } });
   await trasPagoReserva({ ...r, clave: k }, o);
   return json({ ok: true, suscripcion: true, fecha: fechaBonita(fecha), hora: horaBonita(hora), lectura: lectura.nombre, gestion: `/cita.html?t=${encodeURIComponent(r.token)}` });
+}
+// Cupón que cubre toda la lectura: se reserva sin pasar por el pago.
+async function reservarGratis({ store, lectura, nombre, email, whatsapp, nota, fecha, hora, cup, o }) {
+  const k = clave(fecha, hora), ahoraIso = deps.ahora().toISOString(), sesion = "cup_" + crypto.randomBytes(9).toString("base64url");
+  const r = { estado: "pagada", sesion, pago: "", fecha, hora, lectura: lectura.nombre, nombre, whatsapp, email, nota, precio: 0, cupon: cup.codigo, descuento: cup.descuento, pagada: ahoraIso, creada: ahoraIso, token: crypto.randomBytes(18).toString("base64url"), cambios: 0 };
+  const w = await store.setJSON(k, r, { onlyIfNew: true });
+  if (w && w.modified === false) throw new Fallo(409, "Alguien acaba de tomar ese horario. Elige otro, por favor.");
+  await store.setJSON(`ses/${sesion}`, { clave: k });
+  await store.setJSON(`tok/${r.token}`, { clave: k });
+  await trasPagoReserva({ ...r, clave: k }, o);
+  return json({ ok: true, gratis: true, fecha: fechaBonita(fecha), hora: horaBonita(hora), lectura: lectura.nombre, gestion: `/cita.html?t=${encodeURIComponent(r.token)}` });
 }
 export const config = { path: "/api/reservar" };

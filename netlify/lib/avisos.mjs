@@ -109,7 +109,7 @@ export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } =
   if (tipo === "confirmada") {
     asunto = `Tu cita está reservada: ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
     titulo = `¡Tu cita está reservada, ${r.nombre}!`;
-    parrafos = [`<b>${esc(r.lectura)}</b><br>${esc(cuando)}<br>Por videollamada · ${r.suscripcion ? "Incluida en tu suscripción mensual" : `$${esc(r.precio)} pagado`}`,
+    parrafos = [`<b>${esc(r.lectura)}</b><br>${esc(cuando)}<br>Por videollamada · ${r.suscripcion ? "Incluida en tu suscripción mensual" : r.cupon && !r.precio ? `Gratis con tu cupón ${esc(r.cupon)}` : `$${esc(r.precio)} pagado${r.cupon ? ` (cupón ${esc(r.cupon)}: −$${esc(r.descuento)})` : ""}`}`,
       "Antes de tu cita te escribo con el enlace de la videollamada.",
       `<b>Política de cancelación:</b> ${esc(politicaTexto)}`,
       "Si necesitas cancelar o cambiar el día, usa el botón de abajo."];
@@ -139,10 +139,11 @@ export async function trasPagoReserva(r, origen) {
   }
   const lock = await deps.store("reservas").setJSON(`aviso/${r.sesion}`, { en: deps.ahora().toISOString() }, { onlyIfNew: true });
   if (lock && lock.modified === false) return;
+  if (r.cupon) { const { registrarUso } = await import("./cupones.mjs"); await registrarUso(r.cupon, r.email).catch((e) => console.error("cupón", e.message)); }
   const cfg = await deps.contenido(origen, "horario").catch(() => ({}));
   const { textoPolitica } = await import("./comun.mjs");
   await Promise.all([
-    avisarme({ titulo: "📅 Nueva cita reservada", cuerpo: `${r.nombre} reservó ${r.lectura} para el ${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)}. ${r.suscripcion ? "🔮 Con su suscripción mensual." : `Pagó $${r.precio}.`}`, url: "/admin/#/reservas", origen }),
+    avisarme({ titulo: "📅 Nueva cita reservada", cuerpo: `${r.nombre} reservó ${r.lectura} para el ${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)}. ${r.suscripcion ? "🔮 Con su suscripción mensual." : `Pagó $${r.precio}.`}${r.cupon ? ` 🎟️ Cupón ${r.cupon} (−$${r.descuento}).` : ""}`, url: "/admin/#/reservas", origen }),
     correoCita("confirmada", r, { origen, politicaTexto: textoPolitica(cfg) }),
   ]);
 }

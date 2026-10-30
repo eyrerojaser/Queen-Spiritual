@@ -120,6 +120,15 @@ footer .pie-links a:hover{color:var(--night-ink)}
 .reserva.pulso{animation:pulso 1.4s ease-out 1}
 @keyframes pulso{0%{box-shadow:0 0 0 0 rgba(255,217,102,.8)}100%{box-shadow:0 0 0 16px rgba(255,217,102,0)}}
 .o-lectura{font-size:.85rem!important;color:#FFD966!important;text-align:center;margin:6px 0 10px!important}
+.cupon{display:grid;gap:8px;min-width:0}
+.form > *{min-width:0}
+.lnk-cupon{justify-self:start;background:none;border:0;padding:4px 0;font:inherit;font-weight:600;color:var(--blue);text-decoration:underline;cursor:pointer}
+.cupon-fila{display:flex;gap:8px;min-width:0}
+.cupon-fila button{flex:none}
+.cupon-fila:not([hidden]){display:flex}
+.cupon-fila input{flex:1;min-width:0;width:100%;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.cupon-msg{margin:0;font-size:.92rem;font-weight:600}
+.cupon-msg.ok{color:#1F7A4A}.cupon-msg.err{color:#C0392B}
 /* suscripción mensual */
 .sus{position:relative;overflow:hidden;margin:4px 0 18px;padding:22px 22px 20px;border-radius:20px;border:1.5px solid #FFD966;background:radial-gradient(130% 120% at 100% 0%,#2E4F9A 0%,#1E2B55 45%,#141B33 100%);box-shadow:0 18px 44px rgba(0,0,0,.35),0 0 26px rgba(255,217,102,.18);scroll-margin-top:80px}
 .sus::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.10) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 6s ease-in-out infinite;pointer-events:none}
@@ -244,6 +253,7 @@ function toast(msg) { const t = el("div", "toast", msg); t.setAttribute("role", 
 
 const TEXTO = "Cada lectura es un espacio de conexión espiritual, donde, a través de mi mediumnidad y las cartas, transmito los mensajes que recibo de tus guías espirituales y ancestros. Una experiencia personal, guiada con respeto, sensibilidad y dedicación.";
 let HORARIO = {}, LECTURAS = [], elegida = null, DISP = null;
+const CUPON_URL = (new URLSearchParams(location.search).get("cupon") || "").trim().slice(0, 30);
 const caja = $("#reserva");
 
 function pintarEstado(L) {
@@ -308,7 +318,30 @@ function pintarCalendario(d) {
     const pol = el("div", "politica"); pol.append(el("b", null, "Política de cancelación"), el("p", null, textoPolitica(HORARIO)));
     const ver = el("a", null, "Ver todas las políticas"); ver.href = "/politicas.html#cancelaciones"; ver.target = "_blank"; ver.rel = "noopener"; pol.append(ver);
     const acL = el("label", "acepto"), ac = el("input"); ac.type = "checkbox"; ac.name = "acepta"; acL.append(ac, el("span", null, "Leí y acepto la política de cancelación"));
-    f.append(pol, acL);
+    // Cupón de descuento
+    let cupon = null;
+    const cBox = el("div", "cupon"), cAbrir = el("button", "lnk-cupon", "🎟️ ¿Tienes un cupón de descuento?"); cAbrir.type = "button";
+    const cFila = el("div", "cupon-fila"), cIn = el("input"); cIn.type = "text"; cIn.placeholder = "Escribe tu código"; cIn.autocapitalize = "characters"; cIn.setAttribute("aria-label", "Código del cupón"); cIn.maxLength = 30;
+    const cBtn = el("button", "btn btn-line btn-sm", "Aplicar"); cBtn.type = "button";
+    const cMsg = el("p", "cupon-msg"); cMsg.hidden = true; cFila.hidden = true;
+    cFila.append(cIn, cBtn); cBox.append(cAbrir, cFila, cMsg);
+    cAbrir.onclick = () => { cAbrir.hidden = true; cFila.hidden = false; cIn.focus(); };
+    const precioTxt = () => cupon ? (cupon.final < .5 ? "Reservar gratis con mi cupón" : `Pagar ${dinero(cupon.final)} y reservar`) : `Pagar ${dinero(l.precio)} y reservar`;
+    const pintarSum = () => { sum.textContent = `${l.nombre} · ${dia.etiqueta}, ${hora.etiqueta} (${d.zona}) · ` + (cupon ? `${dinero(l.precio)} − ${dinero(cupon.descuento)} (cupón ${cupon.codigo}) = ${dinero(cupon.final)}` : dinero(l.precio)); go.textContent = precioTxt(); };
+    const aplicar = async () => {
+      if (cupon) { cupon = null; cIn.disabled = false; cIn.value = ""; cBtn.textContent = "Aplicar"; cMsg.hidden = true; pintarSum(); return; }
+      if (!cIn.value.trim()) { cIn.focus(); return; }
+      cBtn.disabled = true; cMsg.hidden = true;
+      try {
+        cupon = await api("/api/cupon", { codigo: cIn.value, email: f.email.value, lectura: slug(l.nombre) });
+        cMsg.className = "cupon-msg ok"; cMsg.textContent = `✓ Cupón ${cupon.codigo} aplicado: ${cupon.texto}`; cIn.value = cupon.codigo; cIn.disabled = true; cBtn.textContent = "Quitar";
+      } catch (e) { cupon = null; cMsg.className = "cupon-msg err"; cMsg.textContent = e.message; }
+      cMsg.hidden = false; cBtn.disabled = false; pintarSum();
+    };
+    cBtn.onclick = aplicar; cIn.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); aplicar(); } };
+    // Enlace con el cupón ya puesto (ej: /lecturas?cupon=AMIGA5, desde tu landing page)
+    if (CUPON_URL) { cAbrir.hidden = true; cFila.hidden = false; cIn.value = CUPON_URL; setTimeout(aplicar, 0); }
+    f.append(cBox, pol, acL);
     const err = el("p", "note err"); err.hidden = true;
     const go = el("button", "btn btn-solid", `Pagar ${dinero(l.precio)} y reservar`); go.type = "submit";
     f.append(err, go);
@@ -317,11 +350,16 @@ function pintarCalendario(d) {
       const v = Object.fromEntries(new FormData(f));
       try {
         if (!ac.checked) throw new Error("Para reservar, marca que aceptas la política de cancelación.");
-        const r = await api("/api/reservar", { ...v, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora });
+        const r = await api("/api/reservar", { ...v, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora, cupon: cupon ? cupon.codigo : "" });
+        if (r.gratis) {
+          const ok = el("div", "done-sus"), a = el("a", "btn btn-line", "Ver o cambiar mi cita"); a.href = r.gestion;
+          ok.append(el("h3", null, "¡Tu lectura está reservada! 🎟️"), el("p", null, `${r.fecha} a las ${r.hora} (${d.zona}), gratis con tu cupón. Te mandé la confirmación por correo y antes de tu cita te escribo por WhatsApp con el enlace de la videollamada.`), a);
+          caja.replaceChildren(ok); ok.scrollIntoView({ behavior: "smooth", block: "center" }); return;
+        }
         try { sessionStorage.setItem("reservaPendiente", r.sesion); } catch (e) {}
         location.href = r.url;
       } catch (e) {
-        err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = `Pagar ${dinero(l.precio)} y reservar`;
+        err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = precioTxt();
         if (/horario/.test(e.message)) setTimeout(cargarCalendario, 1800);
       }
     };

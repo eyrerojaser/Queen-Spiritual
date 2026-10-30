@@ -69,6 +69,13 @@ export const ESQUEMAS = {
     registroAbierto: bool(true), apertura: fecha(), fundadores: int(0, 100000, 25), precioMensual: num(0, 1000, 11.99), titulo: str(120), frase: str(400), intro: str(1500), beneficios: str(1500), foto: foto(),
     bienvenida: str(1200), mensajeMiembros: str(1500), normas: str(3000), revisarTemas: bool(false), fotosMiembros: bool(false),
   }),
+  cupones: obj({
+    cupones: lista(obj({
+      codigo: (v) => String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20),
+      tipo: uno(["monto", "porcentaje"], "monto"), valor: num(0, 10000, 5), vence: fecha(), usosMax: int(0, 100000, 0),
+      unoPorPersona: bool(true), nota: str(200), visible: bool(true),
+    }), 200, (c) => c.codigo.length >= 3 && c.valor > 0),
+  }),
   resenas: obj({
     resenas: lista(obj({ nombre: str(80), estrellas: uno(["5", "4", "3", "2", "1"], "5"), texto: str(1200), tipo: uno(["Arreglos", "Lecturas"], "Arreglos"), foto: foto(), fecha: fecha(), visible: bool(true) }), 300, (r) => r.texto),
   }),
