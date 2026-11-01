@@ -760,10 +760,10 @@ async function vistaLista(cfg) {
     const arr = doc[cfg.clave] || [];
     const mover = async (i, d) => { const a = doc[cfg.clave]; [a[i], a[i + d]] = [a[i + d], a[i]]; try { doc = await guardar(cfg.n, doc); } catch (e) { fallo(e); doc = await leer(cfg.n); } pintar(); };
     const abrir = (i) => {
-      const nuevo = i == null, val = nuevo ? cfg.nuevo() : doc[cfg.clave][i];
+      const nuevo = i == null, val0 = nuevo ? cfg.nuevo() : doc[cfg.clave][i], val = cfg.alAbrir ? cfg.alAbrir(clon(val0)) : val0;
       editar({
         titulo: nuevo ? `Agregar ${cfg.singular}` : `Editar ${cfg.singular}`, defs: typeof cfg.campos === "function" ? cfg.campos() : cfg.campos, valor: val, requeridos: cfg.requeridos || [],
-        onGuardar: async v => { const copia = clon(doc); if (nuevo) copia[cfg.clave].push(v); else copia[cfg.clave][i] = { ...copia[cfg.clave][i], ...v }; doc = await guardar(cfg.n, copia); pintar(); },
+        onGuardar: async v => { if (cfg.alGuardar) v = cfg.alGuardar(v); const copia = clon(doc); if (nuevo) copia[cfg.clave].push(v); else copia[cfg.clave][i] = { ...copia[cfg.clave][i], ...v }; doc = await guardar(cfg.n, copia); pintar(); },
         onEliminar: nuevo ? null : async () => { const copia = clon(doc); copia[cfg.clave].splice(i, 1); doc = await guardar(cfg.n, copia); pintar(); },
       });
     };
@@ -775,6 +775,8 @@ async function vistaLista(cfg) {
           h("div", { class: "nm" }, r.titulo), r.sub ? h("div", { class: "ds" }, r.sub) : null,
           h("div", null, oculto ? h("span", { class: "pill off" }, "Oculto") : null, (r.pills || []).map(([t, c]) => h("span", { class: "pill " + (c || "") }, t)))),
         h("div", { class: "ia" },
+          cfg.botonEditar ? h("button", { class: "btn btn-line btn-sm", type: "button", style: "white-space:nowrap", onclick: () => abrir(i) }, "✏️ Editar") : null,
+          cfg.botonEditar ? h("button", { class: "btn btn-line btn-sm", type: "button", style: "white-space:nowrap", onclick: async () => { if (!confirm(`¿Borrar ${cfg.singular} “${r.titulo}”? Ya no va a funcionar.`)) return; const copia = clon(doc); copia[cfg.clave].splice(i, 1); try { doc = await guardar(cfg.n, copia); } catch (e) { fallo(e); } pintar(); } }, "🗑️ Borrar") : null,
           "visible" in it || cfg.visible ? h("button", { class: "ib", type: "button", title: oculto ? "Mostrar en la página" : "Ocultar de la página", "aria-label": oculto ? "Mostrar en la página" : "Ocultar de la página", html: oculto ? ICON.eyeoff : ICON.eye, onclick: async () => { const copia = clon(doc); copia[cfg.clave][i].visible = oculto; try { doc = await guardar(cfg.n, copia); } catch (e) { fallo(e); } pintar(); } }) : null,
           h("button", { class: "ib", type: "button", "aria-label": "Subir", title: "Subir", html: ICON.up, disabled: i === 0, onclick: () => mover(i, -1) }),
           h("button", { class: "ib", type: "button", "aria-label": "Bajar", title: "Bajar", html: ICON.down, disabled: i === arr.length - 1, onclick: () => mover(i, 1) })));
@@ -794,7 +796,7 @@ const lecturas = () => vistaLista({
   n: "lecturas", clave: "lecturas", titulo: "Lecturas", singular: "lectura", lead: "Lo que el cliente ve y paga al reservar.",
   intro: "Texto de la sección (arriba de tus lecturas)",
   introFoto: "Tu foto de la sección de lecturas",
-  nuevo: () => ({ nombre: "", duracion: "45 minutos", descripcion: "", precio: 35, visible: true }),
+  nuevo: () => ({ nombre: "", duracion: "45 minutos", descripcion: "", precio: 40, visible: true }),
   requeridos: [["nombre", "Escribe el nombre de la lectura."], ["precio", "Escribe el precio."]],
   campos: [
     { k: "nombre", t: "text", label: "Nombre" },
@@ -805,6 +807,15 @@ const lecturas = () => vistaLista({
   ],
   resumen: l => ({ titulo: l.nombre, sub: [l.duracion, dinero(l.precio)].filter(Boolean).join(" · ") }),
   pie: () => h("p", { class: "muted", style: "margin-top:18px" }, "Los días y horas se cambian en ", h("a", { href: "#/calendario" }, "Mi calendario"), "."),
+  cabecera: (doc, setDoc) => {
+    const MSG = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nA la hora de tu cita te llamo por videollamada de WhatsApp al número que me dejaste. Ten tu teléfono cerca, con batería y con el sonido encendido.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
+    const t = h("textarea", { id: "msgGracias", rows: 10 }); t.value = s(doc.mensajeGracias) || MSG;
+    const b = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => { b.disabled = true; try { setDoc(await guardar("lecturas", { ...doc, mensajeGracias: t.value.trim() === MSG ? "" : t.value })); } catch (e) { fallo(e); } b.disabled = false; } }, "Guardar mensaje");
+    const r = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { t.value = MSG; } }, "Volver al mensaje original");
+    return h("details", { class: "card" }, h("summary", { style: "cursor:pointer;font-weight:700" }, "💌 Mensaje de gracias al reservar"),
+      h("p", { class: "muted", style: "margin:10px 0" }, "Le llega a tu clienta por correo apenas reserva, y también lo ve en la pantalla después de pagar. Deja una línea en blanco para separar párrafos."),
+      h("div", { class: "fld" }, t), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-top:12px" }, b, r));
+  },
 });
 
 /* ═════════ Suscripción mensual de lecturas ═════════ */
@@ -845,7 +856,7 @@ async function cupones() {
   try { USOS_CUP = (await api("/api/panel/cupones")).usos || {}; } catch (e) { USOS_CUP = {}; }
   const desc = c => c.tipo === "porcentaje" ? `${c.valor}% de descuento` : `${dinero(c.valor)} de descuento`;
   vistaLista({
-    n: "cupones", clave: "cupones", titulo: "Cupones", singular: "cupón", lead: "Códigos de descuento para tus lecturas. Tu clienta lo escribe al reservar y la página le descuenta el precio antes de pagar.",
+    n: "cupones", clave: "cupones", titulo: "Cupones", singular: "cupón", botonEditar: true, lead: "Códigos de descuento para tus lecturas. Tu clienta lo escribe al reservar y la página le descuenta el precio antes de pagar. Toca ✏️ Editar para cambiar un cupón.",
     vacio: "Todavía no tienes cupones. Crea el primero, por ejemplo AMIGA5 con $5 de descuento.",
     nuevo: () => ({ codigo: "", tipo: "monto", valor: 5, vence: "", usosMax: 0, unoPorPersona: true, nota: "", visible: true }),
     requeridos: [["codigo", "Escribe el código del cupón (mínimo 3 letras o números)."], ["valor", "Escribe cuánto descuenta."]],
@@ -854,14 +865,17 @@ async function cupones() {
       { k: "tipo", t: "seg", label: "Tipo de descuento", ops: [["monto", "$ Dólares"], ["porcentaje", "% Por ciento"]] },
       { k: "valor", t: "num", label: "¿Cuánto descuenta?", min: 0, hint: "Ej: 5 = $5 menos (o 5% si elegiste por ciento). Si el cupón cubre todo el precio, la lectura se reserva gratis sin pagar." },
       { k: "vence", t: "date", label: "Vence el (opcional)", hint: "Déjalo vacío si no vence." },
-      { k: "usosMax", t: "num", label: "¿Cuántas veces se puede usar en total?", min: 0, hint: "0 = sin límite." },
-      { k: "unoPorPersona", t: "bool", label: "Una sola vez por persona", hint: "Se revisa con el correo de la clienta." },
+      { k: "sinLimite", t: "bool", label: "Sin límite de usos", hint: "Lo pueden usar todas las clientas que quieras. Apágalo si quieres que se acabe después de cierto número." },
+      { k: "usosMax", t: "num", label: "¿Cuántas clientas en total lo pueden usar?", min: 1, ph: "Ej: 10", si: v => !v.sinLimite },
+      { k: "unoPorPersona", t: "bool", label: "1 uso por persona", hint: "Cada clienta lo puede usar una sola vez (se revisa con su correo)." },
       { k: "nota", t: "text", label: "Nota para ti (opcional)", ph: "Ej: Para las que me recomiendan" },
       { k: "visible", t: "bool", label: "Activo" },
     ],
+    alAbrir: c => ({ ...c, sinLimite: !(c.usosMax > 0), usosMax: c.usosMax > 0 ? c.usosMax : "" }),
+    alGuardar: v => { const { sinLimite, ...c } = v; c.usosMax = sinLimite ? 0 : Math.max(1, parseInt(c.usosMax, 10) || 1); return c; },
     resumen: c => {
       const u = USOS_CUP[c.codigo] || 0, vencido = c.vence && c.vence < new Date().toISOString().slice(0, 10), lleno = c.usosMax > 0 && u >= c.usosMax;
-      return { titulo: c.codigo, sub: [desc(c), c.nota].filter(Boolean).join(" · "), pills: [[`Usado ${u}${c.usosMax ? " de " + c.usosMax : ""} ${u === 1 ? "vez" : "veces"}`], c.vence ? [vencido ? "Venció" : `Vence ${fechaCorta(c.vence + "T12:00")}`, vencido ? "off" : ""] : null, lleno ? ["Agotado", "off"] : null].filter(Boolean) };
+      return { titulo: c.codigo, sub: [desc(c), c.nota].filter(Boolean).join(" · "), pills: [[`Usado ${u} ${u === 1 ? "vez" : "veces"}${c.usosMax ? ` de ${c.usosMax}` : " · sin límite"}`], c.unoPorPersona !== false ? ["1 uso por persona", "ok"] : null, c.vence ? [vencido ? "Venció" : `Vence ${fechaCorta(c.vence + "T12:00")}`, vencido ? "off" : ""] : null, lleno ? ["Agotado", "off"] : null].filter(Boolean) };
     },
     pie: () => {
       const caja = h("div", { class: "card", style: "margin-top:18px" }, h("b", null, "📩 Mandar un cupón"),

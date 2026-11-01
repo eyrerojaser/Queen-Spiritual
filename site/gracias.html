@@ -22,6 +22,9 @@ h1{font-size:clamp(2.4rem,7vw,3.4rem);margin-bottom:16px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;margin:24px 0}
 .card p{margin:0 0 6px}
 .big{font-family:"Cormorant",Georgia,serif;font-size:1.6rem;font-weight:600}
+.mensaje{border-color:#E9C46A;background:#FFFBEF}
+.mensaje p{margin:0 0 12px;line-height:1.6}
+.mensaje p:last-child{margin:0}
 </style>
 </head>
 <body>
@@ -31,6 +34,7 @@ const m = document.getElementById("m");
 const $m = n => "$" + Number(n || 0).toFixed(2).replace(/\.00$/, "");
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const id = new URLSearchParams(location.search).get("s");
+const MENSAJE = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nA la hora de tu cita te llamo por videollamada de WhatsApp al número que me dejaste. Ten tu teléfono cerca, con batería y con el sonido encendido.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
 try { sessionStorage.removeItem("reservaPendiente"); } catch (e) {}
 const volver = () => { const a = el("a", "btn btn-line", "Volver a la página"); a.href = "/"; return a; };
 async function revisar(intento = 0) {
@@ -43,10 +47,14 @@ async function revisar(intento = 0) {
   }
   if (d.tipo === "reserva") {
     const c = el("div", "card");
-    c.append(el("p", "big", d.lectura), el("p", null, `${d.fecha}, ${d.hora} (hora de Texas)`), el("p", "muted", "Por videollamada"));
-    const out = [el("h1", null, `¡Listo, ${d.nombre}!`), el("p", null, "Tu lectura quedó reservada y pagada.")];
+    c.append(el("p", "big", d.lectura), el("p", null, `${d.fecha}, ${d.hora} (hora de Texas)`), el("p", "muted", "Videollamada por WhatsApp"));
+    const out = [el("h1", null, `¡Gracias por reservar, ${d.nombre}!`), el("p", null, "Tu lectura quedó reservada y pagada.")];
     if (d.conflicto) out.push(el("p", "note err", "Alguien tomó ese mismo horario segundos antes que tú. No te preocupes: te escribiré por WhatsApp para darte otro horario o devolverte tu dinero."));
-    out.push(c, el("p", null, `Te envié la confirmación${d.email ? " a " + d.email : ""}, con el botón para cancelar o cambiar tu cita. Antes de tu cita te escribo con el enlace de la videollamada.`));
+    const msg = el("div", "card mensaje");
+    try { const L = await (await fetch("/api/contenido?n=lecturas")).json(); (String(L.mensajeGracias || "").trim() || MENSAJE).split(/\n\s*\n/).forEach(b => { const p = el("p"); b.trim().split("\n").forEach((ln, i) => { if (i) p.append(document.createElement("br")); p.append(ln); }); msg.append(p); }); } catch (e) {}
+    out.push(c);
+    if (msg.childNodes.length) out.push(msg);
+    out.push(el("p", "muted", `Te envié la confirmación${d.email ? " a " + d.email : ""}, con el botón para cancelar o cambiar tu cita.`));
     if (d.gestion) { const g = el("a", "btn btn-solid", "Administrar mi cita"); g.href = d.gestion; out.push(g, el("span", null, " ")); }
     out.push(volver());
     m.replaceChildren(...out); return;

@@ -100,23 +100,25 @@ ${pie ? `<p style="font-size:13px;line-height:1.5;color:#5e6470;margin:16px 4px 
 }
 
 // Correo al cliente sobre su cita (confirmada, cambiada o cancelada).
+export const MENSAJE_GRACIAS = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nA la hora de tu cita te llamo por videollamada de WhatsApp al número que me dejaste. Ten tu teléfono cerca, con batería y con el sonido encendido.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
+const parrafosMensaje = (t) => String(t || "").trim().split(/\n\s*\n/).map((b) => esc(b.trim()).replace(/\n/g, "<br>")).filter(Boolean);
 export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } = {}) {
   if (!r || !r.email) return false;
   const negocio = await nombreNegocio();
   const cuando = `${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)} (hora de Texas)`;
   const enlace = `${origen}/cita.html?t=${encodeURIComponent(r.token || "")}`;
-  let asunto, titulo, parrafos, boton = { texto: "Administrar mi cita", url: enlace };
+  let asunto, titulo, parrafos, pie = "Guarda este correo: el botón es tu acceso privado a tu cita.", boton = { texto: "Administrar mi cita", url: enlace };
   if (tipo === "confirmada") {
-    asunto = `Tu cita está reservada: ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
-    titulo = `¡Tu cita está reservada, ${r.nombre}!`;
-    parrafos = [`<b>${esc(r.lectura)}</b><br>${esc(cuando)}<br>Por videollamada · ${r.suscripcion ? "Incluida en tu suscripción mensual" : r.cupon && !r.precio ? `Gratis con tu cupón ${esc(r.cupon)}` : `$${esc(r.precio)} pagado${r.cupon ? ` (cupón ${esc(r.cupon)}: −$${esc(r.descuento)})` : ""}`}`,
-      "Antes de tu cita te escribo con el enlace de la videollamada.",
-      `<b>Política de cancelación:</b> ${esc(politicaTexto)}`,
-      "Si necesitas cancelar o cambiar el día, usa el botón de abajo."];
+    const L = await deps.contenido(origen, "lecturas").catch(() => ({}));
+    asunto = `Gracias por reservar con ${negocio} 🌙 · ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
+    titulo = `¡Gracias por reservar, ${r.nombre}!`;
+    parrafos = [`<span style="display:block;background:#eef2fb;border-radius:12px;padding:14px 16px"><b>${esc(r.lectura)}</b><br>📅 ${esc(cuando)}<br>📱 Videollamada por WhatsApp · ${r.suscripcion ? "Incluida en tu suscripción mensual" : r.cupon && !r.precio ? `Gratis con tu cupón ${esc(r.cupon)}` : `$${esc(r.precio)} pagado${r.cupon ? ` (cupón ${esc(r.cupon)}: −$${esc(r.descuento)})` : ""}`}</span>`,
+      ...parrafosMensaje((L && L.mensajeGracias) || MENSAJE_GRACIAS)];
+    pie = `<b>Política de cancelación:</b> ${esc(politicaTexto)}<br><br>Si necesitas cancelar o cambiar el día, usa el botón “Administrar mi cita”. Guarda este correo: ese botón es tu acceso privado a tu cita.`;
   } else if (tipo === "cambiada") {
     asunto = `Tu cita cambió: ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
     titulo = "Tu cita quedó cambiada";
-    parrafos = [`<b>${esc(r.lectura)}</b><br>Nueva fecha: ${esc(cuando)}`, "Te escribo antes de tu cita con el enlace de la videollamada."];
+    parrafos = [`<b>${esc(r.lectura)}</b><br>Nueva fecha: ${esc(cuando)}`, "A la hora de tu cita te llamo por videollamada de WhatsApp."];
   } else {
     asunto = "Tu cita fue cancelada";
     titulo = "Tu cita fue cancelada";
@@ -125,8 +127,9 @@ export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } =
       "Cuando quieras, puedes reservar otra cita en mi página."];
     boton = { texto: "Reservar otra cita", url: `${origen}/lecturas.html` };
   }
-  const html = plantilla({ negocio, titulo, parrafos, boton, pie: "Guarda este correo: el botón es tu acceso privado a tu cita." });
-  const text = `${titulo}\n\n${parrafos.map((p) => p.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "")).join("\n\n")}\n\n${boton.texto}: ${boton.url}`;
+  const html = plantilla({ negocio, titulo, parrafos, boton, pie });
+  const sinHtml = (p) => p.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  const text = `${titulo}\n\n${parrafos.map(sinHtml).join("\n\n")}\n\n${boton.texto}: ${boton.url}\n\n${sinHtml(pie)}`;
   try { return await avisosDeps.enviarCorreo({ to: r.email, subject: asunto, text, html, nombre: negocio, replyTo: process.env.AVISOS_EMAIL || process.env.GMAIL_USER }); }
   catch (e) { console.error("correo cliente", e.message); return false; }
 }
