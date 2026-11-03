@@ -247,3 +247,23 @@ CUPONES (panel > Cupones)
 - "Una sola vez por persona" se revisa con el correo. Los códigos nunca se ven en la página pública.
 - Enlace con el cupón ya puesto (para PageBloom o WhatsApp): queenspiritual.netlify.app/lecturas?cupon=AMIGA5
   El código tiene que existir también aquí en el panel > Cupones.
+
+PRIVATE READING ROOM (panel > Private Reading Room) - videollamadas propias, sin WhatsApp
+Servicio de video: Daily.co (plan gratis: 10,000 minutos-persona al mes = unas 110 lecturas de 45 min).
+Para activarlo (una sola vez):
+  1. Entra a daily.co y crea tu cuenta gratis (Sign up).
+  2. En tu cuenta de Daily: Developers > API keys > copia tu clave.
+  3. En Netlify: Site configuration > Environment variables > Add variable
+       Nombre: DAILY_API_KEY   Valor: (la clave que copiaste)
+  4. En Netlify: Deploys > Trigger deploy > Deploy site.
+Cómo se usa:
+  - "+ Nueva sala" (o "🎥 Crear sala" desde una reserva o desde la ficha de la clienta).
+  - Mándale el enlace (por correo desde el panel, copiándolo o por mensaje). Cada enlace es único.
+  - Tú entras con "🎥 Entrar a la sala". Solo tú ves el temporizador, la muñequita del aviso de 15 minutos y tus notas.
+  - "■ Finalizar sesión" cierra la videollamada para las dos y el enlace deja de funcionar.
+  - Tus notas se guardan solas en la ficha de la clienta.
+
+FICHAS DE CLIENTES (panel > Fichas de clientes)
+  - Nombre, apellido, teléfono, correo, trabajo, servicio y su situación/problemas principales.
+  - Notas de cada lectura: lo que salió en las cartas, problemas, qué se cumplió, qué queda pendiente.
+  - Se crean solas cuando creas una sala; también puedes agregarlas a mano.

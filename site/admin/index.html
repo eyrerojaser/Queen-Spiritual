@@ -200,6 +200,72 @@ dialog::backdrop{background:rgba(14,19,38,.55)}
   .dl .bd{flex:1}
   .bar nav .lnk.hide-sm{display:none}
 }
+
+/* ═════ Private Reading Room ═════ */
+body.modo-sala main{max-width:1400px;padding-top:14px}
+.rr{--rr-azul:#141B33;--rr-azul2:#24407F;--rr-oro:#D4AE52;--rr-amarillo:#FFD966}
+.rr-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rr-top .back{margin:0}
+.rr-t{flex:1;min-width:0;text-align:center}.rr-t b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.5rem;line-height:1.1}.rr-t span{font-size:.85rem;color:var(--muted)}
+.rr-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.rr-izq{position:relative}
+.rr-video{position:relative;background:radial-gradient(120% 120% at 50% 0%,#2E4F9A 0%,#1A2340 55%,#0F1428 100%);border:1.5px solid var(--rr-oro);border-radius:18px;overflow:hidden;aspect-ratio:16/10;min-height:340px;box-shadow:0 14px 40px rgba(20,27,51,.25)}
+.rr-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.rr-portada{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;padding:24px}
+.rr-portada h2{font-family:"Cormorant",Georgia,serif;font-size:2.2rem;margin:0;color:#fff}
+.rr-portada p{margin:0;color:#D9DFF0}.rr-portada small{color:#AEB8D8;margin-top:6px}
+.rr-oro{background:linear-gradient(100deg,var(--rr-amarillo),#E9B949);color:#1A2340;border:0;font-weight:700;padding:14px 22px;border-radius:999px;margin-top:10px;box-shadow:0 8px 22px rgba(255,217,102,.25);text-decoration:none}
+.rr-k{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--rr-oro);margin-bottom:8px}
+.rr-der{display:grid;gap:14px}
+.rr-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.rr-card summary{cursor:pointer;font-weight:700}
+.rr-card textarea{width:100%;min-height:180px}
+.rr-timer{background:linear-gradient(160deg,#1A2340,#24407F);color:#fff;border-color:var(--rr-oro);transition:box-shadow .4s}
+.rr-reloj{font-family:"Cormorant",Georgia,serif;font-size:4rem;font-weight:600;line-height:1;text-align:center;color:var(--rr-amarillo);font-variant-numeric:tabular-nums;margin:4px 0 10px}
+.rr-barra{height:6px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}.rr-barra i{display:block;height:100%;background:linear-gradient(90deg,var(--rr-amarillo),var(--rr-oro));transition:width .5s linear}
+.rr-est{text-align:center;font-size:.9rem;color:#D9DFF0;margin:10px 0 12px;min-height:1.2em}
+.rr-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.rr-timer .btn-line{color:#fff;border-color:rgba(255,255,255,.5);background:transparent}
+.rr-timer .btn-solid{background:var(--rr-amarillo);color:#1A2340;border-color:var(--rr-amarillo)}
+.rr-min{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:.85rem;color:#D9DFF0}
+.rr-min input{background:rgba(255,255,255,.95);color:#1A2340;padding:7px 10px}
+.rr-timer.aviso{box-shadow:0 0 0 3px var(--rr-amarillo),0 0 28px rgba(255,217,102,.55);animation:rrLatido 2.4s ease-in-out infinite}
+.rr-timer.fin .rr-reloj{color:#FFB4A8}
+.rr-aviso .rr-video{border-color:var(--rr-amarillo);box-shadow:0 0 0 2px var(--rr-amarillo),0 0 30px rgba(255,217,102,.35)}
+@keyframes rrLatido{50%{box-shadow:0 0 0 3px var(--rr-amarillo),0 0 46px rgba(255,217,102,.8)}}
+.rr-sit{white-space:pre-wrap;font-size:.92rem;margin:10px 0}
+.rr-nota{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:.88rem}.rr-nota p{margin:4px 0 0;color:var(--muted);white-space:pre-wrap}
+.lnkx{display:inline-block;margin-top:10px;font-weight:600;color:var(--blue)}
+/* Muñequita mística */
+.muneca{position:absolute;left:14px;bottom:14px;z-index:5;display:flex;align-items:flex-end;gap:6px;pointer-events:auto;max-width:calc(100% - 28px)}
+.muneca.entra{animation:mEntra .9s cubic-bezier(.2,.8,.2,1.2) both}
+.muneca-fig{width:130px;flex:none;filter:drop-shadow(0 8px 16px rgba(0,0,0,.35))}
+.muneca-svg{width:100%;height:auto;display:block}
+.muneca-svg .m-cuerpo{animation:mFlota 3.2s ease-in-out infinite;transform-origin:60px 140px}
+.muneca-svg .m-ojos{animation:mParpadea 4s infinite;transform-origin:60px 52px}
+.muneca-svg .m-bola{animation:mBrilla 2s ease-in-out infinite}
+.muneca-svg .m-chispas path{animation:mChispa 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.muneca-svg .m-chispas .c2{animation-delay:.6s}.muneca-svg .m-chispas .c3{animation-delay:1.2s}
+.muneca-svg .m-est{animation:mChispa 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.muneca-svg .e2{animation-delay:1s}
+.muneca-globo{position:relative;background:#fff;color:#1A2340;border:2px solid var(--rr-oro,#D4AE52);border-radius:16px 16px 16px 4px;padding:12px 14px;margin-bottom:60px;box-shadow:0 10px 26px rgba(0,0,0,.25);max-width:240px;animation:mGlobo .6s .5s both}
+.muneca-globo b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.15rem;line-height:1.15}
+.muneca-globo span{display:block;font-weight:700;color:#24407F;margin-top:4px}
+.muneca-x{position:absolute;top:-10px;left:114px;z-index:2;width:28px;height:28px;border-radius:50%;border:0;background:#1A2340;color:#fff;font-size:1.1rem;line-height:1;cursor:pointer}
+@keyframes mEntra{from{opacity:0;transform:translateY(40px) scale(.7)}to{opacity:1;transform:none}}
+@keyframes mGlobo{from{opacity:0;transform:translateY(8px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes mFlota{50%{transform:translateY(-6px)}}
+@keyframes mParpadea{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes mBrilla{50%{filter:brightness(1.35) drop-shadow(0 0 6px #CFE0FF)}}
+@keyframes mChispa{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.muneca,.muneca *,.rr-timer.aviso{animation:none!important}}
+@media (max-width:900px){.rr-grid{grid-template-columns:1fr}.rr-video{aspect-ratio:3/4;min-height:0;max-height:72vh}.rr-reloj{font-size:3.4rem}.muneca-fig{width:88px}.muneca-globo{margin-bottom:46px;max-width:200px}.muneca-x{left:76px}.rr-t b{font-size:1.2rem}}
+/* Fichas */
+.ficha-item{display:block;text-decoration:none;color:inherit}.ficha-item:hover{border-color:var(--blue)}
+.fi-datos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px 18px}
+.fi-dato small{display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.fi-dato span{word-break:break-word}
+.fi-acc{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.fi-sit p{white-space:pre-wrap;margin:8px 0 0}
+.fi-b{margin-top:10px}.fi-b small{display:block;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}.fi-b p{margin:3px 0 0;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -491,7 +557,7 @@ function pantallaEntrar(msg) {
 
 /* ═════════ Inicio ═════════ */
 const SECCIONES = [
-  ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
+  ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["salas", "video", "Private Reading Room", "Tus lecturas por videollamada privada"], ["fichas", "users", "Fichas de clientes", "Notas y control de cada clienta"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
   ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
   ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
   ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
@@ -563,6 +629,7 @@ async function reservas() {
       r.nota ? h("div", { class: "nota" }, r.nota) : null,
       h("div", { class: "btns" },
         link ? h("a", { class: "btn btn-solid btn-sm", href: link, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
+        conf ? null : h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => { const [nom, ...ap] = String(r.nombre || "").trim().split(/\s+/); PREFILL_SALA = { nombre: nom || r.nombre, apellido: ap.join(" "), email: r.email, telefono: r.whatsapp, servicio: r.lectura, fecha: r.fecha, hora: r.hora, reserva: r.clave }; location.hash = "#/salas"; } }, "🎥 Crear sala"),
         h("button", { class: "btn danger btn-sm", type: "button", onclick: async e => {
           if (conf) { e.target.disabled = true; try { await api("/api/reservas", { method: "POST", body: { accion: "resolver", clave: r.clave } }); toast("Listo ✓"); reservas(); } catch (er) { fallo(er); e.target.disabled = false; } return; }
           cancelarCita(r);
@@ -887,6 +954,265 @@ async function cupones() {
       return caja;
     },
   });
+}
+
+/* ═════════ Private Reading Room ═════════ */
+let LIMPIAR_SALA = null, PREFILL_SALA = null;
+const MUNECA = `<svg viewBox="0 0 120 150" class="muneca-svg" aria-hidden="true">
+  <defs><radialGradient id="mBola" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".45" stop-color="#CFE0FF"/><stop offset="1" stop-color="#6E8CE0"/></radialGradient>
+  <linearGradient id="mVestido" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E4F9A"/><stop offset="1" stop-color="#1A2340"/></linearGradient></defs>
+  <g class="m-cuerpo">
+    <path d="M60 70 C40 72 30 100 26 140 L94 140 C90 100 80 72 60 70Z" fill="url(#mVestido)" stroke="#D4AE52" stroke-width="1.5"/>
+    <path d="M40 140 Q60 128 80 140" fill="none" stroke="#D4AE52" stroke-width="1.5"/>
+    <g fill="#FFD966"><path class="m-est" d="M44 108l1.4 3 3 1.4-3 1.4-1.4 3-1.4-3-3-1.4 3-1.4z"/><path class="m-est e2" d="M74 118l1.2 2.6 2.6 1.2-2.6 1.2-1.2 2.6-1.2-2.6-2.6-1.2 2.6-1.2z"/><circle cx="58" cy="128" r="1.4"/><circle cx="66" cy="96" r="1.2"/></g>
+    <path d="M26 64 C14 70 12 92 22 104 C24 88 28 78 38 72Z" fill="#2B1E1A"/><path d="M94 64 C106 70 108 92 98 104 C96 88 92 78 82 72Z" fill="#2B1E1A"/>
+    <circle cx="60" cy="50" r="24" fill="#E9B98F"/>
+    <path d="M35 50 C34 26 50 18 60 18 C72 18 87 26 85 50 C80 38 70 32 60 32 C50 32 40 38 35 50Z" fill="#2B1E1A"/>
+    <g class="m-ojos" fill="#1A2340"><ellipse cx="51" cy="52" rx="2.6" ry="3.2"/><ellipse cx="69" cy="52" rx="2.6" ry="3.2"/></g>
+    <circle cx="46" cy="59" r="3.4" fill="#F29C9C" opacity=".45"/><circle cx="74" cy="59" r="3.4" fill="#F29C9C" opacity=".45"/>
+    <path d="M54 62 Q60 66 66 62" fill="none" stroke="#9E4B3A" stroke-width="1.8" stroke-linecap="round"/>
+    <g fill="#D4AE52" stroke="#B8902F" stroke-width=".8"><path d="M44 24 L46 12 L53 19 L60 9 L67 19 L74 12 L76 24 Z"/><circle cx="60" cy="9" r="2.4" fill="#FFD966"/></g>
+    <path d="M86 20 a7 7 0 1 0 6 11 a5.5 5.5 0 1 1 -6 -11z" fill="#FFD966" class="m-luna"/>
+    <path d="M38 96 C46 92 50 100 52 106" fill="none" stroke="#E9B98F" stroke-width="6" stroke-linecap="round"/><path d="M82 96 C74 92 70 100 68 106" fill="none" stroke="#E9B98F" stroke-width="6" stroke-linecap="round"/>
+    <circle class="m-bola" cx="60" cy="108" r="11" fill="url(#mBola)" stroke="#D4AE52" stroke-width="1.2"/>
+    <path d="M52 119 h16 l-2 4 h-12z" fill="#D4AE52"/>
+  </g>
+  <g class="m-chispas" fill="#FFD966"><path d="M14 30l1.5 3.4 3.4 1.5-3.4 1.5-1.5 3.4-1.5-3.4-3.4-1.5 3.4-1.5z"/><path class="c2" d="M106 50l1.2 2.8 2.8 1.2-2.8 1.2-1.2 2.8-1.2-2.8-2.8-1.2 2.8-1.2z"/><path class="c3" d="M100 96l1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1z"/></g>
+</svg>`;
+const mmss = s => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60), x = s % 60; return `${m}:${String(x).padStart(2, "0")}`; };
+
+async function salas() {
+  cargando();
+  const d = await api("/api/panel/salas");
+  const copiar = async (txt, msg) => { try { await navigator.clipboard.writeText(txt); toast(msg); } catch (e) { prompt("Copia este enlace:", txt); } };
+  const nodos = d.salas.length ? d.salas.map(s => {
+    const tel = String(s.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
+    const pill = s.estado === "activa" ? h("span", { class: "pill ok" }, "Lista") : s.estado === "terminada" ? h("span", { class: "pill" }, "Terminada") : h("span", { class: "pill off" }, "Venció");
+    return h("div", { class: "card mb sala-item" + (s.estado === "activa" ? "" : " hid") },
+      h("div", { class: "rw" }, h("b", null, `${s.nombre} ${s.apellido || ""}`), pill, h("span", { class: "pill" }, `⏱ ${s.duracion} min`)),
+      h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 10px" }, [s.servicio, s.cuando || "Sin fecha"].filter(Boolean).join(" · ")),
+      h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+        s.estado === "activa" ? h("a", { class: "btn btn-solid btn-sm", href: `#/sala/${s.id}` }, "🎥 Entrar a la sala") : null,
+        s.estado === "activa" ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => copiar(s.enlace, "Enlace copiado ✓ Mándaselo a tu clienta.") }, "Copiar enlace") : null,
+        s.estado === "activa" && s.email ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async e => { e.target.disabled = true; try { await api("/api/panel/salas", { method: "POST", body: { accion: "enviar", id: s.id } }); toast("Enlace enviado a " + s.email + " ✓"); } catch (er) { fallo(er); } e.target.disabled = false; } }, "Enviar por correo") : null,
+        s.estado === "activa" && t1 ? h("a", { class: "btn btn-line btn-sm", target: "_blank", rel: "noopener", href: `https://wa.me/${t1}?text=${encodeURIComponent(`Hola ${s.nombre} 💛 Este es el enlace privado para tu lectura${s.cuando ? " del " + s.cuando : ""}: ${s.enlace}\nÁbrelo a la hora de tu cita y permite la cámara y el micrófono.`)}` }, "Mandar enlace por mensaje") : null,
+        s.ficha ? h("a", { class: "btn btn-line btn-sm", href: `#/ficha/${s.ficha}` }, "📋 Ficha") : null,
+        h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { if (!confirm(`¿Borrar la sala de ${s.nombre}? El enlace dejará de funcionar. Sus notas quedan en su ficha.`)) return; try { await api("/api/panel/salas", { method: "POST", body: { accion: "borrar", id: s.id } }); toast("Borrada"); salas(); } catch (e) { fallo(e); } } }, "Borrar")));
+  }) : [h("div", { class: "empty" }, "Todavía no tienes salas. Crea una para tu próxima lectura.")];
+  marco(...cabeza("Private Reading Room", "Tus lecturas por videollamada privada, sin WhatsApp. Cada clienta recibe un enlace único y solo ve su videollamada. El temporizador, los avisos y tus notas solo los ves tú."),
+    h("button", { class: "btn btn-solid", type: "button", style: "margin-bottom:18px", onclick: () => nuevaSala() }, "+ Nueva sala"), ...nodos);
+  if (PREFILL_SALA) { const p = PREFILL_SALA; PREFILL_SALA = null; nuevaSala(p); }
+}
+
+async function nuevaSala(pre = {}) {
+  let fichas = [];
+  try { fichas = (await api("/api/panel/fichas")).fichas; } catch (e) {}
+  const v = { ficha: pre.ficha || "", nombre: "", apellido: "", email: "", telefono: "", servicio: "Lectura de cartas", fecha: "", hora: "", duracion: 45, enviarCorreo: true, ...pre };
+  const fm = formulario([
+    { k: "nombre", t: "text", label: "Nombre" },
+    { k: "apellido", t: "text", label: "Apellido" },
+    { k: "telefono", t: "tel", label: "Teléfono" },
+    { k: "email", t: "text", label: "Correo (Gmail)" },
+    { k: "servicio", t: "text", label: "Servicio", ph: "Lectura de cartas" },
+    { k: "fecha", t: "date", label: "Fecha de la cita (opcional)" },
+    { k: "hora", t: "time", label: "Hora (opcional)" },
+    { k: "duracion", t: "num", label: "Duración del temporizador (minutos)", min: 5 },
+    { k: "enviarCorreo", t: "bool", label: "Enviarle el enlace por correo ahora" },
+  ], v);
+  let fichaSel = v.ficha;
+  const sel = h("select", { "aria-label": "Clienta" }, h("option", { value: "" }, "— Clienta nueva —"), fichas.map(f => h("option", { value: f.id }, `${f.nombre} ${f.apellido || ""}${f.telefono ? " · " + f.telefono : ""}`)));
+  sel.value = fichaSel;
+  sel.onchange = () => { fichaSel = sel.value; const f = fichas.find(x => x.id === fichaSel); if (f) { const set = (k, val) => { const c = fm.campos.find(c => c.def.k === k); if (c) { const i = c.nodo.querySelector("input"); if (i) i.value = val || ""; } }; set("nombre", f.nombre); set("apellido", f.apellido); set("telefono", f.telefono); set("email", f.email); if (f.servicio) set("servicio", f.servicio); } };
+  const err = h("p", { class: "note err", hidden: true });
+  const ok = h("button", { class: "btn btn-solid", type: "button" }, "Crear sala");
+  ok.onclick = async () => {
+    const datos = { ...fm.valores(), ficha: fichaSel, reserva: pre.reserva || "" };
+    if (!String(datos.nombre || "").trim()) { err.textContent = "Escribe el nombre de la clienta."; err.hidden = false; return; }
+    ok.disabled = true; ok.textContent = "Creando…"; err.hidden = true;
+    try { const r = await api("/api/panel/salas", { method: "POST", body: { accion: "crear", datos, enviarCorreo: !!datos.enviarCorreo } }); dlg.close(); toast(r.correo ? "Sala creada ✓ Le envié el enlace por correo." : "Sala creada ✓"); salas(); }
+    catch (e) { ok.disabled = false; ok.textContent = "Crear sala"; if (!(e instanceof Salir)) { err.textContent = e.message; err.hidden = false; } }
+  };
+  dlgIn.replaceChildren(
+    h("header", null, h("h2", null, "Nueva sala privada"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, err, fichas.length ? h("div", { class: "fld" }, h("label", null, "¿Ya tiene ficha?"), sel) : null, fm.nodo),
+    h("footer", null, h("span"), h("div", { class: "r" }, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "Cancelar"), ok)));
+  dlg.showModal();
+}
+
+async function salaPrivada(id) {
+  cargando();
+  const d = await api(`/api/panel/salas?id=${encodeURIComponent(id)}`);
+  const s = d.sala;
+  // ── Temporizador (vive en tu navegador; si recargas la página, sigue donde iba) ──
+  const KEY = "qsTimer:" + s.id;
+  let T; try { T = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { T = null; }
+  if (!T) T = { total: s.duracion * 60, restante: s.duracion * 60, corriendo: false, marca: 0, avisado: false };
+  const guardarT = () => { try { localStorage.setItem(KEY, JSON.stringify(T)); } catch (e) {} };
+  const restante = () => T.corriendo ? Math.max(0, T.restante - (Date.now() - T.marca) / 1000) : T.restante;
+
+  const reloj = h("div", { class: "rr-reloj", role: "timer", "aria-live": "off" }, mmss(restante()));
+  const barra = h("div", { class: "rr-barra" }, h("i"));
+  const estadoTxt = h("div", { class: "rr-est" });
+  const minIn = h("input", { type: "number", min: 5, max: 240, value: Math.round(T.total / 60), "aria-label": "Minutos de la sesión", style: "max-width:90px" });
+  const bIni = h("button", { class: "btn btn-solid btn-sm", type: "button" }, "▶ Iniciar");
+  const bPau = h("button", { class: "btn btn-line btn-sm", type: "button" }, "⏸ Pausar");
+  const bRea = h("button", { class: "btn btn-solid btn-sm", type: "button" }, "▶ Reanudar");
+  const bRei = h("button", { class: "btn btn-line btn-sm", type: "button" }, "↺ Reiniciar");
+  const panelT = h("div", { class: "rr-card rr-timer" }, h("div", { class: "rr-k" }, "Temporizador · solo tú lo ves"), reloj, barra, estadoTxt,
+    h("div", { class: "rr-btns" }, bIni, bPau, bRea, bRei),
+    h("label", { class: "rr-min" }, "Minutos de la sesión ", minIn));
+  const muneca = h("div", { class: "muneca", hidden: true, role: "status" },
+    h("button", { class: "muneca-x", type: "button", "aria-label": "Cerrar aviso", onclick: () => { muneca.hidden = true; } }, "×"),
+    h("div", { class: "muneca-fig", html: MUNECA }),
+    h("div", { class: "muneca-globo" }, h("b", null, "Tu sesión está llegando a su final."), h("span", null, "Quedan 15 minutos ✨")));
+  let wake = null;
+  const despierto = async on => { try { if (on && "wakeLock" in navigator && !wake) wake = await navigator.wakeLock.request("screen"); if (!on && wake) { await wake.release(); wake = null; } } catch (e) {} };
+  function pintarT() {
+    const r = restante(), aviso = r <= 15 * 60 && r > 0 && T.total > 15 * 60, fin = r <= 0;
+    reloj.textContent = mmss(r);
+    barra.firstChild.style.width = Math.max(0, Math.min(100, (r / T.total) * 100)) + "%";
+    panelT.classList.toggle("aviso", aviso); panelT.classList.toggle("fin", fin);
+    vista.classList.toggle("rr-aviso", aviso || fin);
+    estadoTxt.textContent = fin ? "⏰ El tiempo de la sesión terminó" : aviso ? "✨ Quedan menos de 15 minutos" : T.corriendo ? "En curso" : (r === T.total ? "Listo para empezar" : "En pausa");
+    bIni.hidden = T.corriendo || r !== T.total; bPau.hidden = !T.corriendo; bRea.hidden = T.corriendo || r === T.total || fin; minIn.disabled = T.corriendo;
+    if (aviso && !T.avisado) { T.avisado = true; guardarT(); muneca.hidden = false; muneca.classList.remove("entra"); void muneca.offsetWidth; muneca.classList.add("entra"); setTimeout(() => { muneca.hidden = true; }, 20000); }
+    if (fin && T.corriendo) { T.corriendo = false; T.restante = 0; guardarT(); despierto(false); }
+  }
+  bIni.onclick = () => { T.total = T.restante = Math.max(5, Math.min(240, parseInt(minIn.value, 10) || s.duracion)) * 60; T.corriendo = true; T.marca = Date.now(); T.avisado = false; guardarT(); despierto(true); pintarT(); };
+  bPau.onclick = () => { T.restante = restante(); T.corriendo = false; guardarT(); despierto(false); pintarT(); };
+  bRea.onclick = () => { T.corriendo = true; T.marca = Date.now(); guardarT(); despierto(true); pintarT(); };
+  bRei.onclick = () => { if (T.corriendo && !confirm("¿Reiniciar el temporizador?")) return; T = { total: Math.max(5, Math.min(240, parseInt(minIn.value, 10) || s.duracion)) * 60, corriendo: false, marca: 0, avisado: false }; T.restante = T.total; guardarT(); despierto(false); muneca.hidden = true; pintarT(); };
+  minIn.onchange = () => { if (T.corriendo) return; const m = Math.max(5, Math.min(240, parseInt(minIn.value, 10) || 45)); minIn.value = m; if (T.restante === T.total) { T.total = T.restante = m * 60; guardarT(); pintarT(); } api("/api/panel/salas", { method: "POST", body: { accion: "duracion", id: s.id, duracion: m } }).catch(() => {}); };
+  const tick = setInterval(pintarT, 500);
+
+  // ── Notas privadas (se guardan solas en su ficha) ──
+  const notas = h("textarea", { rows: 9, placeholder: "Lo que salió en las cartas, lo que te cuenta, lo que hay que trabajar…", "aria-label": "Notas de la sesión" }); notas.value = s.notas || "";
+  const guardado = h("small", { class: "muted" }, s.notas ? "Guardado ✓" : "");
+  let tN = null;
+  const guardarNotas = async () => { clearTimeout(tN); tN = null; guardado.textContent = "Guardando…"; try { await api("/api/panel/salas", { method: "POST", body: { accion: "notas", id: s.id, notas: notas.value } }); guardado.textContent = "Guardado ✓ en su ficha"; } catch (e) { guardado.textContent = "No se pudo guardar. Revisa tu internet."; } };
+  notas.oninput = () => { guardado.textContent = "…"; clearTimeout(tN); tN = setTimeout(guardarNotas, 1500); };
+  const f = d.ficha;
+  const fichaBox = f ? h("details", { class: "rr-card" }, h("summary", null, "📋 Su ficha"),
+    f.situacion ? h("p", { class: "rr-sit" }, f.situacion) : h("p", { class: "muted" }, "Sin situación anotada todavía."),
+    f.notas.filter(n => n.sala !== s.id).slice(0, 3).map(n => h("div", { class: "rr-nota" }, h("b", null, `${n.fecha} · ${n.servicio || "Lectura"}`), h("p", null, (n.cartas || n.problemas || "").slice(0, 220)))),
+    h("a", { href: `#/ficha/${f.id}`, class: "lnkx" }, "Abrir su ficha completa →")) : null;
+
+  // ── Video ──
+  const video = h("div", { class: "rr-video" });
+  const portada = h("div", { class: "rr-portada" },
+    h("div", { class: "rr-k" }, "Private Reading Room"),
+    h("h2", null, `${s.nombre} ${s.apellido || ""}`),
+    h("p", null, [s.servicio, s.cuando].filter(Boolean).join(" · ")),
+    s.estado === "activa" ? h("button", { class: "btn rr-oro", type: "button", onclick: entrar }, "🎥 Entrar a la videollamada") : h("p", { class: "note" }, s.estado === "terminada" ? "Esta sesión ya terminó." : "Este enlace ya venció."),
+    h("small", null, "Permite la cámara y el micrófono cuando te lo pida el navegador."));
+  video.append(portada);
+  async function entrar(e) {
+    const b = e && e.currentTarget; if (b) { b.disabled = true; b.textContent = "Conectando…"; }
+    try {
+      const r = await api(`/api/panel/salas?id=${encodeURIComponent(s.id)}&entrar=1`);
+      if (!r.token) throw new Error("La sala ya no está disponible.");
+      const fr = h("iframe", { allow: "camera; microphone; fullscreen; display-capture; autoplay; clipboard-write", title: "Videollamada", src: `${s.url}?t=${encodeURIComponent(r.token)}` });
+      video.replaceChildren(fr);
+    } catch (er) { fallo(er); if (b) { b.disabled = false; b.textContent = "🎥 Entrar a la videollamada"; } }
+  }
+  const terminar = h("button", { class: "btn danger btn-sm", type: "button", onclick: async () => {
+    if (!confirm(`¿Finalizar la sesión con ${s.nombre}? La videollamada se cierra para las dos y el enlace deja de funcionar.`)) return;
+    if (tN) await guardarNotas();
+    try { await api("/api/panel/salas", { method: "POST", body: { accion: "terminar", id: s.id } }); T.corriendo = false; T.restante = restante(); guardarT(); despierto(false); video.replaceChildren(h("div", { class: "rr-portada" }, h("h2", null, "Sesión finalizada 💛"), h("p", null, "Tus notas quedaron guardadas en su ficha."), f ? h("a", { class: "btn rr-oro", href: `#/ficha/${f.id}` }, "Ver su ficha") : null)); terminar.remove(); toast("Sesión finalizada ✓"); }
+    catch (e) { fallo(e); }
+  } }, "■ Finalizar sesión");
+
+  const vista = h("div", { class: "rr" },
+    h("div", { class: "rr-top" }, h("a", { class: "back", href: "#/salas" }, "← Salas"), h("div", { class: "rr-t" }, h("b", null, `${s.nombre} ${s.apellido || ""}`), h("span", null, s.servicio)), s.estado === "activa" ? terminar : h("span")),
+    h("div", { class: "rr-grid" },
+      h("div", { class: "rr-izq" }, video, muneca),
+      h("aside", { class: "rr-der" }, panelT, h("div", { class: "rr-card" }, h("div", { class: "rr-k" }, "Mis notas · privadas"), notas, guardado), fichaBox)));
+  marco(vista);
+  document.body.classList.add("modo-sala");
+  pintarT();
+  LIMPIAR_SALA = () => { clearInterval(tick); if (tN) guardarNotas(); despierto(false); document.body.classList.remove("modo-sala"); };
+}
+
+/* ═════════ Fichas de clientes ═════════ */
+const ESTADO_NOTA = { pendiente: ["Pendiente", ""], "en-proceso": ["En proceso", ""], cumplido: ["Se cumplió ✓", "ok"], "no-cumplido": ["No se cumplió", "off"] };
+let BUSCAR_F = "";
+async function fichas() {
+  cargando();
+  const d = await api("/api/panel/fichas");
+  const caja = h("div");
+  const pintar = () => {
+    const q = BUSCAR_F.toLowerCase(), l = d.fichas.filter(f => !q || `${f.nombre} ${f.apellido} ${f.email} ${f.telefono} ${f.servicio} ${f.etiquetas}`.toLowerCase().includes(q));
+    caja.replaceChildren(l.length ? h("div", { class: "items" }, l.map(f => h("a", { class: "card mb ficha-item", href: `#/ficha/${f.id}` },
+      h("div", { class: "rw" }, h("b", null, `${f.nombre} ${f.apellido || ""}`), f.pendientes ? h("span", { class: "pill" }, `${f.pendientes} pendiente${f.pendientes === 1 ? "" : "s"}`) : null),
+      h("div", { class: "muted", style: "font-size:.9rem;margin-top:4px" }, [f.servicio, f.telefono, f.email].filter(Boolean).join(" · ")),
+      h("div", { class: "muted", style: "font-size:.85rem;margin-top:2px" }, `${f.nNotas} nota${f.nNotas === 1 ? "" : "s"}${f.ultima ? " · última " + fechaCorta(f.ultima + "T12:00") : ""}`)))) : h("div", { class: "empty" }, d.fichas.length ? "Nadie coincide con tu búsqueda." : "Todavía no tienes fichas. Se crean solas al crear una sala, o agrégalas aquí."));
+  };
+  const busca = h("input", { type: "search", placeholder: "Buscar por nombre, teléfono, correo o servicio", "aria-label": "Buscar fichas", style: "margin-bottom:14px" }); busca.value = BUSCAR_F; busca.oninput = () => { BUSCAR_F = busca.value; pintar(); };
+  pintar();
+  marco(...cabeza("Fichas de clientes", "Tu control de cada clienta: sus datos, su situación y lo que sale en cada lectura. Solo tú las ves."),
+    h("button", { class: "btn btn-solid", type: "button", style: "margin-bottom:16px", onclick: () => editarFicha(null) }, "+ Nueva ficha"), busca, caja);
+}
+function editarFicha(f, alGuardar) {
+  const v = f ? { ...f } : { nombre: "", apellido: "", telefono: "", email: "", ocupacion: "", servicio: "Lectura de cartas", situacion: "", etiquetas: "" };
+  const fm = formulario([
+    { k: "nombre", t: "text", label: "Nombre" }, { k: "apellido", t: "text", label: "Apellido" },
+    { k: "telefono", t: "tel", label: "Número de teléfono" }, { k: "email", t: "text", label: "Correo (Gmail)" },
+    { k: "ocupacion", t: "text", label: "Trabajo / ocupación (opcional)" }, { k: "servicio", t: "text", label: "Servicio", ph: "Lectura de cartas" },
+    { k: "situacion", t: "area", label: "Su situación y problemas principales", rows: 5, hint: "Lo que la trae a ti: amor, trabajo, salud, familia, bloqueos…" },
+    { k: "etiquetas", t: "text", label: "Palabras clave (opcional)", ph: "Ej: amor, trabajo, limpieza" },
+  ], v);
+  const err = h("p", { class: "note err", hidden: true }), ok = h("button", { class: "btn btn-solid", type: "button" }, "Guardar ficha");
+  ok.onclick = async () => {
+    const datos = fm.valores(); if (!String(datos.nombre || "").trim()) { err.textContent = "Escribe el nombre."; err.hidden = false; return; }
+    ok.disabled = true;
+    try { const r = await api("/api/panel/fichas", { method: "POST", body: { accion: "guardar", id: f ? f.id : undefined, ficha: datos } }); dlg.close(); toast("Ficha guardada ✓"); if (alGuardar) alGuardar(r.ficha); else location.hash = `#/ficha/${r.ficha.id}`; }
+    catch (e) { ok.disabled = false; if (!(e instanceof Salir)) { err.textContent = e.message; err.hidden = false; } }
+  };
+  const del = f ? h("button", { class: "btn danger", type: "button", onclick: async () => { if (!confirm(`¿Borrar la ficha de ${f.nombre} con todas sus notas? No se puede deshacer.`)) return; try { await api("/api/panel/fichas", { method: "POST", body: { accion: "borrar", id: f.id } }); dlg.close(); toast("Ficha borrada"); location.hash = "#/fichas"; } catch (e) { fallo(e); } } }, "Borrar") : h("span");
+  dlgIn.replaceChildren(h("header", null, h("h2", null, f ? "Editar ficha" : "Nueva ficha"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, err, fm.nodo), h("footer", null, del, h("div", { class: "r" }, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "Cancelar"), ok)));
+  dlg.showModal();
+}
+function editarNota(f, n, alGuardar) {
+  const hoy = new Date(), hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+  const v = n ? { ...n } : { fecha: hoyIso, servicio: f.servicio || "Lectura de cartas", cartas: "", problemas: "", cumplido: "", pendiente: "", estado: "pendiente" };
+  const fm = formulario([
+    { k: "fecha", t: "date", label: "Fecha" }, { k: "servicio", t: "text", label: "Servicio" },
+    { k: "cartas", t: "area", label: "Lo que salió en las cartas", rows: 5 },
+    { k: "problemas", t: "area", label: "Problemas o situación que trajo", rows: 3 },
+    { k: "cumplido", t: "area", label: "Qué se pudo hacer / qué se cumplió", rows: 3 },
+    { k: "pendiente", t: "area", label: "Qué no se pudo / qué queda pendiente", rows: 3 },
+    { k: "estado", t: "seg", label: "¿Cómo va?", ops: [["pendiente", "Pendiente"], ["en-proceso", "En proceso"], ["cumplido", "Se cumplió"], ["no-cumplido", "No se cumplió"]] },
+  ], v);
+  const ok = h("button", { class: "btn btn-solid", type: "button" }, "Guardar nota");
+  ok.onclick = async () => { ok.disabled = true; try { const r = await api("/api/panel/fichas", { method: "POST", body: { accion: "nota", id: f.id, nota: { ...fm.valores(), id: n ? n.id : undefined, sala: n ? n.sala : "" } } }); dlg.close(); toast("Nota guardada ✓"); alGuardar(r.ficha); } catch (e) { ok.disabled = false; fallo(e); } };
+  const del = n ? h("button", { class: "btn danger", type: "button", onclick: async () => { if (!confirm("¿Borrar esta nota?")) return; try { const r = await api("/api/panel/fichas", { method: "POST", body: { accion: "nota-borrar", id: f.id, nota: n.id } }); dlg.close(); alGuardar(r.ficha); } catch (e) { fallo(e); } } }, "Borrar") : h("span");
+  dlgIn.replaceChildren(h("header", null, h("h2", null, n ? "Editar nota" : "Nueva nota"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, fm.nodo), h("footer", null, del, h("div", { class: "r" }, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "Cancelar"), ok)));
+  dlg.showModal();
+}
+async function ficha(id) {
+  cargando();
+  const d = await api(`/api/panel/fichas?id=${encodeURIComponent(id)}`);
+  let f = d.ficha;
+  const pintar = () => {
+    const tel = String(f.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
+    const dato = (k, val) => val ? h("div", { class: "fi-dato" }, h("small", null, k), h("span", null, val)) : null;
+    const notasN = f.notas.length ? f.notas.map(n => { const [et, cl] = ESTADO_NOTA[n.estado] || ESTADO_NOTA.pendiente; const bloque = (t, x) => x ? h("div", { class: "fi-b" }, h("small", null, t), h("p", null, x)) : null;
+      return h("div", { class: "card mb fi-nota" }, h("div", { class: "rw" }, h("b", null, `${fechaCorta(n.fecha + "T12:00")} · ${n.servicio || "Lectura"}`), h("span", { class: "pill " + cl }, et), n.sala ? h("span", { class: "pill" }, "🎥 Sala") : null),
+        bloque("Lo que salió en las cartas", n.cartas), bloque("Problemas / situación", n.problemas), bloque("Qué se pudo hacer", n.cumplido), bloque("Qué queda pendiente", n.pendiente),
+        h("button", { class: "btn btn-line btn-sm", type: "button", style: "margin-top:8px", onclick: () => editarNota(f, n, nf => { f = nf; pintar(); }) }, "✏️ Editar nota")); }) : [h("div", { class: "empty" }, "Todavía no hay notas. Agrega lo que sale en cada lectura.")];
+    marco(h("a", { class: "back", href: "#/fichas" }, "← Fichas"), h("h1", null, `${f.nombre} ${f.apellido || ""}`),
+      h("div", { class: "card fi-datos" }, dato("Teléfono", f.telefono), dato("Correo", f.email), dato("Servicio", f.servicio), dato("Trabajo", f.ocupacion), dato("Palabras clave", f.etiquetas), dato("Cliente desde", fechaCorta(f.creada)),
+        h("div", { class: "fi-acc" }, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => editarFicha(f, nf => { f = nf; pintar(); }) }, "✏️ Editar datos"),
+          t1 ? h("a", { class: "btn btn-line btn-sm", href: `https://wa.me/${t1}`, target: "_blank", rel: "noopener" }, "WhatsApp") : null,
+          f.email ? h("a", { class: "btn btn-line btn-sm", href: `mailto:${f.email}` }, "Correo") : null,
+          h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => { PREFILL_SALA = { ficha: f.id, nombre: f.nombre, apellido: f.apellido, email: f.email, telefono: f.telefono, servicio: f.servicio || "Lectura de cartas" }; location.hash = "#/salas"; } }, "🎥 Crear sala"))),
+      h("div", { class: "card fi-sit" }, h("div", { class: "rw" }, h("b", null, "Su situación y problemas principales")), h("p", null, f.situacion || "—")),
+      h("div", { class: "rw", style: "margin:22px 0 10px;justify-content:space-between" }, h("h2", { style: "margin:0" }, "Notas de sus lecturas"), h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => editarNota(f, null, nf => { f = nf; pintar(); }) }, "+ Agregar nota")),
+      ...notasN);
+  };
+  pintar();
 }
 
 const TIPOS_ARR = ["Arreglo floral", "Centro de mesa", "Montaje de mesa"];
@@ -1657,11 +1983,13 @@ const eventos = () => vistaLista({
 });
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { salas, sala: salaPrivada, fichas, ficha, cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];
-  try { await (RUTAS[r] || inicio)(); }
+  if (LIMPIAR_SALA) { const l = LIMPIAR_SALA; LIMPIAR_SALA = null; l(); }
+  const [base, ...resto] = r.split("/");
+  try { if (resto.length && ["sala", "ficha"].includes(base)) await RUTAS[base](decodeURIComponent(resto.join("/"))); else await (RUTAS[r] || inicio)(); }
   catch (e) { if (!(e instanceof Salir)) marco(...cabeza("Algo salió mal"), h("p", { class: "note err" }, e.message), h("button", { class: "btn btn-solid", type: "button", onclick: ruta }, "Intentar de nuevo")); }
 }
 window.addEventListener("hashchange", ruta);
