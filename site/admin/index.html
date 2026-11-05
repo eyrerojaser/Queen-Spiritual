@@ -1430,9 +1430,12 @@ const negocio = () => vistaForm({
   secciones: [
     ["Portada", null, [
       { k: "nombre", t: "text", label: "Nombre del negocio" },
-      { k: "titulo", t: "text", label: "Título grande" },
-      { k: "frase", t: "area", label: "Frase debajo del título" },
-      { k: "fotoPrincipal", t: "foto", label: "Foto de la portada" },
+      { k: "portada", t: "seg", label: "¿Qué sale primero en tu página?", ops: [["lecturas", "🔮 Lecturas de cartas"], ["flores", "🌸 Flores y arreglos"]], hint: "Puedes cambiarlo cuando quieras. Lo demás de tu página sigue igual." },
+      { k: "titulo", t: "text", label: "Título grande", si: v => v.portada === "flores" },
+      { k: "frase", t: "area", label: "Frase debajo del título", si: v => v.portada === "flores" },
+      { k: "fotoPrincipal", t: "foto", label: "Foto de la portada", si: v => v.portada === "flores" },
+      { k: "lecTitulo", t: "text", label: "Título grande (lecturas)", ph: "Mensajes de tus guías y ancestros", si: v => v.portada !== "flores" },
+      { k: "lecFrase", t: "area", label: "Frase debajo del título (lecturas)", ph: "Lecturas de cartas españolas por videollamada privada…", si: v => v.portada !== "flores", hint: "Si lo dejas vacío, uso un texto listo. La foto es la de tu sección de Lecturas." },
     ]],
     ["Contacto y redes", "Escribe tu usuario o pega el enlace de tu perfil.", [
       { k: "whatsapp", t: "tel", label: "WhatsApp", ph: "15125551234", hint: "Con el 1 al principio, sin espacios." },
