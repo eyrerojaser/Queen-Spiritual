@@ -45,6 +45,36 @@
 .arch{position:relative;aspect-ratio:3/4;border-radius:999px 999px 18px 18px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .arch img{width:100%;height:100%;object-fit:cover}
 .arch::after{content:"";position:absolute;inset:10px;border-radius:999px 999px 12px 12px;border:1px solid rgba(255,255,255,.7);pointer-events:none}
+.hero-estrellas{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin:14px 0 0;padding:8px 14px;border-radius:999px;background:#FFF7DA;border:1px solid #E9C46A;color:#1A2340;text-decoration:none;font-size:.92rem;font-weight:600}
+.hero-estrellas .he-st{color:#C9A24A;letter-spacing:2px;font-size:1rem}
+.hero-estrellas .he-ver{color:#24407F}
+.hero-estrellas:hover{border-color:#C9A24A}
+.destacadas{background:linear-gradient(180deg,#1A2340,#141B33);color:#fff;padding:44px 0}
+.destacadas .kicker{color:#FFD966}
+.destacadas h2{color:#fff;margin:4px 0 6px}
+.dst-cab{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.dst-nota{color:#F2D27A;font-weight:600;letter-spacing:.02em}
+.dst-acc{display:flex;gap:8px;flex-wrap:wrap}
+.destacadas .btn-line{color:#fff;border-color:rgba(255,255,255,.55)}
+.destacadas .btn-solid{background:#FFD966;border-color:#FFD966;color:#1A2340}
+.dst-lista{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);align-items:start;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;scrollbar-width:thin}
+.dst{margin:0;scroll-snap-align:start;background:#fff;color:#23262d;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(212,174,82,.6)}
+.dst img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.dst-tx{padding:16px 18px 18px;display:flex;flex-direction:column;flex:1}
+.dst-st{color:#C9A24A;letter-spacing:2px}
+.dst blockquote{margin:8px 0 12px;font-family:"Cormorant",Georgia,serif;font-size:1.22rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.dst figcaption{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}
+.dst figcaption span{color:#24407F;background:#EEF2FB;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:600}
+@media (max-width:640px){.destacadas{padding:32px 0}.dst-lista{grid-auto-columns:82%}.dst-acc{width:100%}.dst-acc .btn{flex:1;justify-content:center}}
+.portada-lec .hero-ctas{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.portada-lec .btn-lec{display:inline-flex;align-items:center;justify-content:center;padding:15px 26px;border-radius:999px;background:linear-gradient(100deg,#FFD966,#E9B949);color:#1A2340;font-weight:700;font-size:1.05rem;text-decoration:none;box-shadow:0 8px 22px rgba(233,185,73,.35)}
+.portada-lec .btn-lec:hover{filter:brightness(1.05)}
+.portada-lec .hero .estado{margin:-12px 0 18px}
+.portada-lec .hero .estado.on{background:#EAF1FF;border:1px solid #4A8BFF;color:#24407F}
+.portada-lec .hero .estado.off{background:#FDECEC;border:1px solid #E54848;color:#9E2632}
+.portada-lec .hero .arch img{object-position:50% 22%}
+@media (max-width:820px){.portada-lec .hero .arch{order:-1;width:min(64%,260px);margin:0 auto}}
+@media (max-width:640px){.portada-lec .hero-ctas{margin:0 0 16px}.portada-lec .btn-lec{width:100%}.portada-lec .hero .btn-line{width:100%;justify-content:center}.portada-lec .hero .estado{margin:-4px 0 12px}}
 .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
 .pillars a{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 50% 0%,#2E4F9A 0%,#1A2340 75%);border:1px solid rgba(255,217,102,.45);border-radius:14px;padding:18px 20px;text-decoration:none;color:#fff;box-shadow:0 8px 22px rgba(26,35,64,.28),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .15s,box-shadow .15s,border-color .15s}
 .pillars a::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 5s ease-in-out infinite}
@@ -307,6 +337,14 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   </div>
 </div>
 
+<section class="destacadas" id="destacadas" hidden aria-labelledby="dstTit">
+  <div class="wrap">
+    <div class="dst-cab"><div><span class="kicker">Reseñas</span><h2 id="dstTit">Lo que dicen mis clientas</h2><div class="dst-nota" id="dstNota"></div></div>
+      <div class="dst-acc"><a class="btn btn-line btn-sm" href="#resenas" id="dstTodas">Ver todas</a><a class="btn btn-solid btn-sm" href="/resena.html">⭐ Deja tu reseña</a></div></div>
+    <div class="dst-lista" id="dstLista"></div>
+  </div>
+</section>
+
 <section id="arreglos">
   <div class="wrap">
     <div class="sec-head"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><p style="margin-top:18px"><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></p></div>
@@ -494,6 +532,44 @@ function verArreglo(a) {
 
 /* ───── Lecturas (la reserva con calendario está en /lecturas.html) ───── */
 const TEXTO_LEC = "Cada lectura es un espacio de conexión espiritual, donde, a través de mi mediumnidad y las cartas, transmito los mensajes que recibo de tus guías espirituales y ancestros. Una experiencia personal, guiada con respeto, sensibilidad y dedicación.";
+// Reseñas bien visibles: estrellas debajo del título y las mejores reseñas justo después de la portada.
+function resenasArriba(R, lecPrimero) {
+  const todas = (R.resenas || []).filter(r => r && s(r.texto) && r.visible !== false);
+  if (!todas.length) return;
+  const prom = todas.reduce((a, r) => a + (Math.max(1, Math.min(5, parseInt(r.estrellas, 10) || 5))), 0) / todas.length;
+  const nota = `${prom.toFixed(1)} de 5 · ${todas.length} reseña${todas.length === 1 ? "" : "s"}`;
+  const linea = el("a", "hero-estrellas"); linea.href = "#destacadas";
+  linea.append(el("span", "he-st", "★".repeat(Math.round(prom)) + "☆".repeat(5 - Math.round(prom))), el("span", null, nota), el("span", "he-ver", "Ver lo que dicen →"));
+  $("#heroTitle").after(linea);
+  const orden = [...todas].sort((a, b) => (lecPrimero ? ((b.tipo === "Lecturas") - (a.tipo === "Lecturas")) : 0) || ((parseInt(b.estrellas, 10) || 5) - (parseInt(a.estrellas, 10) || 5)) || (s(b.foto) ? 1 : 0) - (s(a.foto) ? 1 : 0));
+  const box = $("#dstLista");
+  orden.slice(0, 6).forEach(r => {
+    const n = Math.max(1, Math.min(5, parseInt(r.estrellas, 10) || 5)), c = el("figure", "dst");
+    if (s(r.foto)) { const im = el("img"); im.src = r.foto; im.alt = `Foto de ${s(r.nombre) || "una clienta"}`; im.loading = "lazy"; c.append(im); }
+    const t = el("div", "dst-tx"); t.append(el("div", "dst-st", "★".repeat(n)), el("blockquote", null, r.texto));
+    const pie = el("figcaption"); pie.append(el("b", null, s(r.nombre) || "Clienta"), el("span", null, r.tipo === "Lecturas" ? "Lectura de cartas" : "Arreglo"));
+    t.append(pie); c.append(t); box.append(c);
+  });
+  $("#dstNota").textContent = "★★★★★".slice(0, Math.round(prom)) + "  " + nota;
+  $("#dstTodas").textContent = `Ver las ${todas.length} reseñas`;
+  $("#destacadas").hidden = false;
+}
+// Portada con las lecturas primero (se elige en el panel > Negocio y contacto).
+function portadaLecturas(N, L) {
+  const ls = (L.lecturas || []).filter(l => l && l.visible !== false && Number(l.precio) > 0), pr = ls.length ? Number(ls[0].precio) : 0;
+  document.body.classList.add("portada-lec");
+  $("#heroTitle").textContent = s(N.lecTitulo) || "Mensajes de tus guías y ancestros";
+  $("#heroText").textContent = s(N.lecFrase) || "Lecturas de cartas españolas por videollamada privada. A través de mi mediumnidad te transmito los mensajes que tus guías espirituales y ancestros tienen para ti.";
+  let arch = $("#heroArch");
+  if (!arch) { arch = el("div", "arch"); arch.id = "heroArch"; const im = el("img"); im.id = "heroImg"; arch.append(im); $(".hero").append(arch); }
+  $("#heroImg").src = s(L.foto) || "/images/uploads/lectura-queen.jpg"; $("#heroImg").alt = "Queen leyendo las cartas españolas";
+  const on = L.enLinea !== false, est = el("div", "estado " + (on ? "on" : "off")); est.append(el("i"), el("span", null, on ? "Disponible para lecturas" : "No disponible ahora"));
+  const ctas = el("div", "hero-ctas");
+  const a1 = el("a", "btn-lec", pr ? `🔮 Reservar mi lectura · $${pr % 1 ? pr.toFixed(2) : pr}` : "🔮 Reservar mi lectura"); a1.href = "/lecturas.html#calendario";
+  const a2 = el("a", "btn btn-line", "Ver arreglos florales"); a2.href = "#arreglos";
+  ctas.append(a1, a2);
+  $("#heroText").after(est, ctas);
+}
 function renderLecturas(L) {
   const intro = s(L.intro);
   $("#lecIntro").textContent = !intro || /no leo las cartas de memoria/i.test(intro) ? TEXTO_LEC : intro;
@@ -650,6 +726,8 @@ function abrirSolicitud(pre) {
 Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario"].map(leer)).then(([N, A, L, P, R, SL, HO]) => {
   if (SL && typeof SL === "object" && "activo" in SL) { SOL = SL; if (s(SL.intro)) $("#solIntro").textContent = SL.intro; if (SL.activo === false) { $("#solCta").hidden = true; } }
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
+  if (N.portada !== "flores") portadaLecturas(N, L);
+  resenasArriba(R, N.portada !== "flores");
 });
 
 // Comunidad: la frase que escribes en tu panel ("Página de la comunidad")
@@ -678,6 +756,5 @@ if (location.hash === "#pedir") addEventListener("load", () => setTimeout(() => 
 </script>
 <script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 <script src="/stats.js" defer></script>
-  <script src="https://pagebloom.netlify.app/popup/comunidad-vip.js" async></script>
 </body>
 </html>
