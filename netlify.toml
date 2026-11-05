@@ -23,9 +23,3 @@
   for = "/*.webmanifest"
   [headers.values]
     Content-Type = "application/manifest+json"
-
-# Enlace corto para pedir reseñas: queenspiritual.netlify.app/resena
-[[redirects]]
-  from = "/resena"
-  to = "/resena.html"
-  status = 200

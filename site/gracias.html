@@ -34,7 +34,7 @@ const m = document.getElementById("m");
 const $m = n => "$" + Number(n || 0).toFixed(2).replace(/\.00$/, "");
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const id = new URLSearchParams(location.search).get("s");
-const MENSAJE = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nA la hora de tu cita te llamo por videollamada de WhatsApp al número que me dejaste. Ten tu teléfono cerca, con batería y con el sonido encendido.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
+const MENSAJE = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nAntes de tu cita te envío por correo el enlace de tu sala privada de videollamada. A la hora de tu cita, ábrelo desde tu teléfono o tu computadora y permite la cámara y el micrófono. No necesitas instalar nada.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
 try { sessionStorage.removeItem("reservaPendiente"); } catch (e) {}
 const volver = () => { const a = el("a", "btn btn-line", "Volver a la página"); a.href = "/"; return a; };
 async function revisar(intento = 0) {
@@ -47,7 +47,7 @@ async function revisar(intento = 0) {
   }
   if (d.tipo === "reserva") {
     const c = el("div", "card");
-    c.append(el("p", "big", d.lectura), el("p", null, `${d.fecha}, ${d.hora} (hora de Texas)`), el("p", "muted", "Videollamada por WhatsApp"));
+    c.append(el("p", "big", d.lectura), el("p", null, `${d.fecha}, ${d.hora} (hora de Texas)`), el("p", "muted", "Videollamada en tu sala privada"));
     const out = [el("h1", null, `¡Gracias por reservar, ${d.nombre}!`), el("p", null, "Tu lectura quedó reservada y pagada.")];
     if (d.conflicto) out.push(el("p", "note err", "Alguien tomó ese mismo horario segundos antes que tú. No te preocupes: te escribiré por WhatsApp para darte otro horario o devolverte tu dinero."));
     const msg = el("div", "card mensaje");

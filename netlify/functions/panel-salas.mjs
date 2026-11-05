@@ -16,7 +16,7 @@ async function correoEnlace(s, o) {
     "A la hora de tu cita, toca el botón y permite el uso de la cámara y el micrófono. Funciona desde tu teléfono o tu computadora, sin instalar nada.",
     "Busca un lugar tranquilo, con buena señal de internet, y llega con el corazón abierto. 💛",
   ];
-  const html = plantilla({ negocio, titulo: "Tu sala privada de lectura", parrafos, boton: { texto: "Entrar a mi sala", url }, pie: "Este enlace es solo para ti. No lo compartas." });
+  const html = plantilla({ negocio, titulo: "Tu sala privada de lectura", parrafos, boton: { texto: "Entrar a mi sala", url }, pie: `Si el botón no abre, copia y pega este enlace en Safari o Chrome:<br><span style="word-break:break-all;color:#24407f">${esc(url)}</span><br><br>Si este correo te llegó a Spam, márcalo como «No es spam» para que el botón funcione. Este enlace es solo para ti.` });
   await avisosDeps.enviarCorreo({ to: s.email, subject: `Tu sala privada con ${negocio}${s.fecha ? " · " + fechaBonita(s.fecha) : ""}`, text: `Tu sala privada de lectura\n\nEntra aquí a la hora de tu cita: ${url}`, html, nombre: negocio, replyTo: process.env.AVISOS_EMAIL || process.env.GMAIL_USER });
 }
 

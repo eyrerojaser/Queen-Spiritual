@@ -100,7 +100,7 @@ ${pie ? `<p style="font-size:13px;line-height:1.5;color:#5e6470;margin:16px 4px 
 }
 
 // Correo al cliente sobre su cita (confirmada, cambiada o cancelada).
-export const MENSAJE_GRACIAS = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nA la hora de tu cita te llamo por videollamada de WhatsApp al número que me dejaste. Ten tu teléfono cerca, con batería y con el sonido encendido.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
+export const MENSAJE_GRACIAS = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nAntes de tu cita te envío por correo el enlace de tu sala privada de videollamada. A la hora de tu cita, ábrelo desde tu teléfono o tu computadora y permite la cámara y el micrófono. No necesitas instalar nada.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
 const parrafosMensaje = (t) => String(t || "").trim().split(/\n\s*\n/).map((b) => esc(b.trim()).replace(/\n/g, "<br>")).filter(Boolean);
 export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } = {}) {
   if (!r || !r.email) return false;
@@ -112,13 +112,13 @@ export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } =
     const L = await deps.contenido(origen, "lecturas").catch(() => ({}));
     asunto = `Gracias por reservar con ${negocio} 🌙 · ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
     titulo = `¡Gracias por reservar, ${r.nombre}!`;
-    parrafos = [`<span style="display:block;background:#eef2fb;border-radius:12px;padding:14px 16px"><b>${esc(r.lectura)}</b><br>📅 ${esc(cuando)}<br>📱 Videollamada por WhatsApp · ${r.suscripcion ? "Incluida en tu suscripción mensual" : r.cupon && !r.precio ? `Gratis con tu cupón ${esc(r.cupon)}` : `$${esc(r.precio)} pagado${r.cupon ? ` (cupón ${esc(r.cupon)}: −$${esc(r.descuento)})` : ""}`}</span>`,
+    parrafos = [`<span style="display:block;background:#eef2fb;border-radius:12px;padding:14px 16px"><b>${esc(r.lectura)}</b><br>📅 ${esc(cuando)}<br>🎥 Videollamada en tu sala privada · ${r.suscripcion ? "Incluida en tu suscripción mensual" : r.cupon && !r.precio ? `Gratis con tu cupón ${esc(r.cupon)}` : `$${esc(r.precio)} pagado${r.cupon ? ` (cupón ${esc(r.cupon)}: −$${esc(r.descuento)})` : ""}`}</span>`,
       ...parrafosMensaje((L && L.mensajeGracias) || MENSAJE_GRACIAS)];
     pie = `<b>Política de cancelación:</b> ${esc(politicaTexto)}<br><br>Si necesitas cancelar o cambiar el día, usa el botón “Administrar mi cita”. Guarda este correo: ese botón es tu acceso privado a tu cita.`;
   } else if (tipo === "cambiada") {
     asunto = `Tu cita cambió: ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
     titulo = "Tu cita quedó cambiada";
-    parrafos = [`<b>${esc(r.lectura)}</b><br>Nueva fecha: ${esc(cuando)}`, "A la hora de tu cita te llamo por videollamada de WhatsApp."];
+    parrafos = [`<b>${esc(r.lectura)}</b><br>Nueva fecha: ${esc(cuando)}`, "Antes de tu cita te envío el enlace de tu sala privada de videollamada."];
   } else {
     asunto = "Tu cita fue cancelada";
     titulo = "Tu cita fue cancelada";

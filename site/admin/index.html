@@ -266,6 +266,32 @@ body.modo-sala main{max-width:1400px;padding-top:14px}
 .fi-acc{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
 .fi-sit p{white-space:pre-wrap;margin:8px 0 0}
 .fi-b{margin-top:10px}.fi-b small{display:block;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}.fi-b p{margin:3px 0 0;white-space:pre-wrap}
+
+/* ═════ Barra superior azul con categorías ═════ */
+.bar{background:linear-gradient(180deg,#1A2340,#141B33);border-bottom:0;box-shadow:0 6px 18px rgba(20,27,51,.18)}
+.bar .in{padding:10px 18px}
+.bar .logo{display:flex;align-items:center;gap:10px;color:#fff}
+.bar .logo small{color:#F2D27A}
+.logo-c{width:34px;height:34px;border-radius:9px;flex:none;background:#24407F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23F2D27A'%3E%3Cpath d='M12 42 9 22l12 9 11-15 11 15 12-9-3 20z'/%3E%3Ccircle cx='9' cy='20' r='3.2'/%3E%3Ccircle cx='32' cy='14' r='3.4'/%3E%3Ccircle cx='55' cy='20' r='3.2'/%3E%3Crect x='12' y='46' width='40' height='5' rx='1'/%3E%3C/g%3E%3C/svg%3E") center/70% no-repeat;box-shadow:0 0 0 1px rgba(242,210,122,.55)}
+.bar .lnk{color:#fff;border-color:rgba(255,255,255,.35);background:transparent}
+.bar .lnk:hover{border-color:#F2D27A;color:#F2D27A}
+.cats-w{border-top:1px solid rgba(212,174,82,.45)}
+.cats{max-width:1080px;margin:0 auto;padding:0 10px;display:flex;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cats::-webkit-scrollbar{display:none}
+.cats a{position:relative;flex:none;color:#fff;text-decoration:none;font-weight:600;font-size:.93rem;letter-spacing:.02em;padding:12px 18px;white-space:nowrap}
+.cats a + a::before{content:"";position:absolute;left:0;top:50%;height:18px;margin-top:-9px;width:1px;background:#D4AE52}
+.cats a:hover{color:#FFD966}
+.cats a.on{color:#FFD966}
+.cats a.on::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#FFD966}
+.cat-sec{margin:30px 0 0}
+.cat-cab{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);padding:0 0 10px;margin:0 0 14px;border-bottom:1.5px solid #D4AE52}
+.cat-cab .ico{background:#1A2340;color:#F2D27A}
+.cat-cab b{display:block;font-family:"Cormorant",Georgia,serif;font-size:1.6rem;line-height:1.1}
+.cat-cab span{font-size:.88rem;color:var(--muted)}
+.cat-cab > div{flex:1;min-width:0}
+.cat-ver{font-weight:700;font-size:.88rem;color:var(--blue)}
+.cat-cab:hover .cat-ver{color:#B8902F}
+@media (max-width:640px){.cats a{padding:11px 14px;font-size:.88rem}.cat-cab b{font-size:1.35rem}}
 </style>
 </head>
 <body>
@@ -522,18 +548,29 @@ function editar({ titulo, defs, valor, requeridos = [], onGuardar, onEliminar })
 
 /* ═════════ Estructura de pantallas ═════════ */
 const app = $("#app");
+function catActual() {
+  const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0], [base, sub] = r.split("/");
+  if (base === "c") return sub; if (!base) return "inicio";
+  return (CAT_DE[base] || {}).id || "";
+}
 function marco(...contenido) {
+  const act = catActual();
+  const nav = h("nav", { class: "cats", "aria-label": "Categorías del panel" },
+    [["inicio", "Inicio", "#/"], ...CATS.map(c => [c.id, c.nombre, `#/c/${c.id}`])].map(([id, t, href]) => h("a", { href, class: id === act ? "on" : null, "aria-current": id === act ? "page" : null }, t)));
   app.replaceChildren(
-    h("div", { class: "bar" }, h("div", { class: "in" },
-      h("a", { class: "logo", href: "#/" }, "Queen Spiritual", h("small", null, "Panel")),
-      h("nav", null,
-        h("a", { class: "lnk hide-sm", href: "/", target: "_blank", rel: "noopener" }, "Ver mi página"),
-        h("button", { class: "lnk", type: "button", onclick: salir }, "Salir")))),
+    h("div", { class: "bar" },
+      h("div", { class: "in" },
+        h("a", { class: "logo", href: "#/" }, h("span", { class: "logo-c", "aria-hidden": "true" }), h("span", null, "Queen Spiritual", h("small", null, "Panel"))),
+        h("nav", { class: "acc" },
+          h("a", { class: "lnk hide-sm", href: "/", target: "_blank", rel: "noopener" }, "Ver mi página"),
+          h("button", { class: "lnk", type: "button", onclick: salir }, "Salir"))),
+      h("div", { class: "cats-w" }, nav)),
     h("main", null, ...contenido));
   window.scrollTo(0, 0);
+  const on = nav.querySelector(".on"); if (on && on.scrollIntoView) on.scrollIntoView({ block: "nearest", inline: "center" });
 }
 const cargando = () => marco(h("p", { class: "spin" }, "Cargando…"));
-const cabeza = (titulo, lead) => [h("a", { class: "back", href: "#/" }, "← Inicio"), h("h1", null, titulo), lead ? h("p", { class: "lead" }, lead) : null];
+const cabeza = (titulo, lead) => { const c = CATS.find(x => x.id === catActual()); return [h("a", { class: "back", href: c ? `#/c/${c.id}` : "#/" }, c ? `← ${c.nombre}` : "← Inicio"), h("h1", null, titulo), lead ? h("p", { class: "lead" }, lead) : null]; };
 async function salir() { try { await fetch("/api/panel/entrar", { method: "DELETE", headers: { "x-panel": "1" } }); } catch (e) {} for (const k in cache) delete cache[k]; pantallaEntrar(); }
 
 /* ═════════ Entrada ═════════ */
@@ -556,15 +593,19 @@ function pantallaEntrar(msg) {
 }
 
 /* ═════════ Inicio ═════════ */
-const SECCIONES = [
-  ["Tu día", [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["salas", "video", "Private Reading Room", "Tus lecturas por videollamada privada"], ["fichas", "users", "Fichas de clientes", "Notas y control de cada clienta"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]]],
-  ["Tus números", [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]]],
-  ["Comunidad Queen Spiritual", [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]]],
-  ["Tu página", [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["tienda", "bag", "Queen Shop", "Tus productos"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]]],
-  ["Tu cuenta", [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]]],
+const CATS = [
+  { id: "agenda", nombre: "Agenda", ico: "cal", desc: "Citas, sala privada y fichas de tus clientas", tiles: [["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["salas", "video", "Private Reading Room", "Tus lecturas por videollamada privada"], ["fichas", "users", "Fichas de clientes", "Notas y control de cada clienta"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]] },
+  { id: "pedidos", nombre: "Pedidos", ico: "bouquet", desc: "Arreglos, solicitudes y entregas", tiles: [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"]] },
+  { id: "ventas", nombre: "Ventas", ico: "bag", desc: "Queen Shop, cupones y suscripciones", tiles: [["tienda", "bag", "Queen Shop", "Tus productos"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"]] },
+  { id: "comunidad-c", nombre: "Comunidad", ico: "users", desc: "Publicaciones, miembros y encuentros", tiles: [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]] },
+  { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
+  { id: "numeros", nombre: "Números", ico: "chart", desc: "Visitas y ventas", tiles: [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]] },
+  { id: "cuenta", nombre: "Cuenta", ico: "key", desc: "Contraseña y correos", tiles: [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]] },
 ];
-async function inicio() {
-  cargando();
+const SECCIONES = CATS.map(c => [c.nombre, c.tiles]);
+const CAT_DE = Object.fromEntries(CATS.flatMap(c => c.tiles.map(t => [t[0], c])));
+CAT_DE.sala = CAT_DE.salas; CAT_DE.ficha = CAT_DE.fichas;
+async function datosPanel() {
   const [res, hor, tie, arr, sol, enc, lec] = await Promise.all([api("/api/reservas"), leer("horario"), leer("tienda"), leer("arreglos"), api("/api/panel/solicitudes"), api("/api/panel/encargos"), leer("lecturas")]);
   const rvp = await api("/api/panel/resenas").catch(() => ({ pendientes: [] }));
   const com = await api("/api/panel/comunidad?vista=resumen").catch(() => null);
@@ -588,13 +629,29 @@ async function inicio() {
     } : {}),
     resenas: rvp.pendientes.length ? { badge: rvp.pendientes.length, sub: `${rvp.pendientes.length} por aprobar` } : {},
   };
+  return { extra, lec };
+}
+const mosaicos = (ts, extra) => h("div", { class: "tiles" }, ts.map(([id, ic, t, d]) => {
+  const x = extra[id] || {};
+  return h("a", { class: "tile", href: "#/" + id }, ico(ic), h("div", null, h("b", null, t), h("span", null, x.sub || d), x.pill ? h("em", { class: "pill " + x.pill[1], style: "font-style:normal" }, x.pill[0]) : null), x.badge ? h("i", { class: "badge", "aria-label": `${x.badge} pendientes`, style: "font-style:normal" }, x.badge) : null);
+}));
+const pendientesDe = (c, extra) => c.tiles.reduce((a, [id]) => a + ((extra[id] && extra[id].badge) || 0), 0);
+async function inicio() {
+  cargando();
+  const { extra, lec } = await datosPanel();
   marco(
-    h("h1", null, "Hola 👋"), h("p", { class: "lead" }, "Todo lo de tu página, en un solo lugar. Los cambios se ven al momento."),
+    h("h1", null, "Hola 👋"), h("p", { class: "lead" }, "Todo lo de tu página, en un solo lugar. Elige una categoría arriba o entra directo aquí abajo."),
     tarjetaEstado(lec), tarjetaInstalar(), tarjetaAvisos(),
-    SECCIONES.map(([g, ts]) => [h("div", { class: "group" }, g), h("div", { class: "tiles" }, ts.map(([id, ic, t, d]) => {
-      const x = extra[id] || {};
-      return h("a", { class: "tile", href: "#/" + id }, ico(ic), h("div", null, h("b", null, t), h("span", null, x.sub || d), x.pill ? h("em", { class: "pill " + x.pill[1], style: "font-style:normal" }, x.pill[0]) : null), x.badge ? h("i", { class: "badge", "aria-label": `${x.badge} pendientes`, style: "font-style:normal" }, x.badge) : null);
-    }))]));
+    CATS.map(c => { const n = pendientesDe(c, extra); return h("section", { class: "cat-sec" },
+      h("a", { class: "cat-cab", href: `#/c/${c.id}` }, ico(c.ico), h("div", null, h("b", null, c.nombre), h("span", null, c.desc)), n ? h("i", { class: "badge", style: "font-style:normal;position:static" }, n) : null, h("em", { class: "cat-ver", style: "font-style:normal" }, "Ver →")),
+      mosaicos(c.tiles, extra)); }));
+}
+async function categoria(id) {
+  const c = CATS.find(x => x.id === id);
+  if (!c) return inicio();
+  cargando();
+  const { extra } = await datosPanel();
+  marco(h("a", { class: "back", href: "#/" }, "← Inicio"), h("h1", null, c.nombre), h("p", { class: "lead" }, c.desc + "."), mosaicos(c.tiles, extra));
 }
 
 // Botón ON / OFF: lo que ven tus clientes en Lecturas (azul = disponible, rojo = no disponible)
@@ -875,7 +932,7 @@ const lecturas = () => vistaLista({
   resumen: l => ({ titulo: l.nombre, sub: [l.duracion, dinero(l.precio)].filter(Boolean).join(" · ") }),
   pie: () => h("p", { class: "muted", style: "margin-top:18px" }, "Los días y horas se cambian en ", h("a", { href: "#/calendario" }, "Mi calendario"), "."),
   cabecera: (doc, setDoc) => {
-    const MSG = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nA la hora de tu cita te llamo por videollamada de WhatsApp al número que me dejaste. Ten tu teléfono cerca, con batería y con el sonido encendido.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
+    const MSG = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nAntes de tu cita te envío por correo el enlace de tu sala privada de videollamada. A la hora de tu cita, ábrelo desde tu teléfono o tu computadora y permite la cámara y el micrófono. No necesitas instalar nada.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
     const t = h("textarea", { id: "msgGracias", rows: 10 }); t.value = s(doc.mensajeGracias) || MSG;
     const b = h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async () => { b.disabled = true; try { setDoc(await guardar("lecturas", { ...doc, mensajeGracias: t.value.trim() === MSG ? "" : t.value })); } catch (e) { fallo(e); } b.disabled = false; } }, "Guardar mensaje");
     const r = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { t.value = MSG; } }, "Volver al mensaje original");
@@ -994,6 +1051,7 @@ async function salas() {
       h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
         s.estado === "activa" ? h("a", { class: "btn btn-solid btn-sm", href: `#/sala/${s.id}` }, "🎥 Entrar a la sala") : null,
         s.estado === "activa" ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => copiar(s.enlace, "Enlace copiado ✓ Mándaselo a tu clienta.") }, "Copiar enlace") : null,
+        s.estado === "activa" ? h("a", { class: "btn btn-line btn-sm", href: s.enlace, target: "_blank", rel: "noopener" }, "👁 Probar como clienta") : null,
         s.estado === "activa" && s.email ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async e => { e.target.disabled = true; try { await api("/api/panel/salas", { method: "POST", body: { accion: "enviar", id: s.id } }); toast("Enlace enviado a " + s.email + " ✓"); } catch (er) { fallo(er); } e.target.disabled = false; } }, "Enviar por correo") : null,
         s.estado === "activa" && t1 ? h("a", { class: "btn btn-line btn-sm", target: "_blank", rel: "noopener", href: `https://wa.me/${t1}?text=${encodeURIComponent(`Hola ${s.nombre} 💛 Este es el enlace privado para tu lectura${s.cuando ? " del " + s.cuando : ""}: ${s.enlace}\nÁbrelo a la hora de tu cita y permite la cámara y el micrófono.`)}` }, "Mandar enlace por mensaje") : null,
         s.ficha ? h("a", { class: "btn btn-line btn-sm", href: `#/ficha/${s.ficha}` }, "📋 Ficha") : null,
@@ -1311,7 +1369,7 @@ const resenas = () => vistaLista({
     const box = h("div");
     const copiar = (url, msg) => async () => { try { await navigator.clipboard.writeText(url); toast(msg); } catch (e) { prompt("Copia este enlace:", url); } };
     const wa = (url, txt) => "https://wa.me/?text=" + encodeURIComponent(txt + " " + url);
-    const uA = location.origin + "/resena", uL = location.origin + "/resena?tipo=lectura";
+    const uA = location.origin + "/resena.html", uL = location.origin + "/resena.html?tipo=lectura";
     const caja = (u, t) => { const i = h("input", { type: "text", readonly: true, "aria-label": t, style: "font-size:15px;font-weight:600;color:var(--blue);background:var(--bg)" }); i.value = u; i.onclick = () => i.select(); return h("div", { class: "fld", style: "margin:0 0 10px" }, h("label", null, t), i); };
     box.append(h("div", { class: "card", style: "margin-bottom:14px;border-color:var(--gold)" },
       h("b", null, "📩 Tu enlace para pedir reseñas"),
@@ -1983,13 +2041,13 @@ const eventos = () => vistaLista({
 });
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { salas, sala: salaPrivada, fichas, ficha, cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { c: categoria, salas, sala: salaPrivada, fichas, ficha, cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];
   if (LIMPIAR_SALA) { const l = LIMPIAR_SALA; LIMPIAR_SALA = null; l(); }
   const [base, ...resto] = r.split("/");
-  try { if (resto.length && ["sala", "ficha"].includes(base)) await RUTAS[base](decodeURIComponent(resto.join("/"))); else await (RUTAS[r] || inicio)(); }
+  try { if (resto.length && ["sala", "ficha", "c"].includes(base)) await RUTAS[base](decodeURIComponent(resto.join("/"))); else await (RUTAS[r] || inicio)(); }
   catch (e) { if (!(e instanceof Salir)) marco(...cabeza("Algo salió mal"), h("p", { class: "note err" }, e.message), h("button", { class: "btn btn-solid", type: "button", onclick: ruta }, "Intentar de nuevo")); }
 }
 window.addEventListener("hashchange", ruta);
