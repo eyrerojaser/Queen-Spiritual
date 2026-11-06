@@ -1,6 +1,6 @@
 // La clienta entra a su sala con su enlace único (solo ve la videollamada).
 import { json, manejar, texto, Fallo } from "../lib/comun.mjs";
-import { st, tokenDaily, igual, estadoSala } from "../lib/sala.mjs";
+import { st, tokenDaily, igual, estadoSala, asegurarRoom } from "../lib/sala.mjs";
 import { limite } from "../lib/comunidad.mjs";
 
 export default manejar(async (req, ctx) => {
@@ -11,8 +11,12 @@ export default manejar(async (req, ctx) => {
   if (!s || !k || !igual(k, s.llave)) throw new Fallo(404, "Este enlace no es válido. Revisa que lo copiaste completo.");
   const estado = estadoSala(s);
   if (estado !== "activa") throw new Fallo(410, estado === "terminada" ? "Esta sesión ya terminó. ¡Gracias por tu visita! 💛" : "Este enlace ya venció. Escríbeme para darte uno nuevo.");
-  const base = { nombre: s.nombre, servicio: s.servicio, fecha: s.fecha, hora: s.hora };
+  const grupo = s.tipo === "grupo";
+  const base = { nombre: s.nombre, servicio: s.servicio, fecha: s.fecha, hora: s.hora, grupo };
   if (!u.searchParams.get("entrar")) return json(base);
-  return json({ ...base, url: s.url, token: await tokenDaily(s, { duena: false, nombre: `${s.nombre} ${s.apellido || ""}`.trim() }) });
+  const quien = grupo ? texto(u.searchParams.get("nombre"), 60) : `${s.nombre} ${s.apellido || ""}`.trim();
+  if (grupo && !quien) throw new Fallo(400, "Escribe tu nombre para entrar.");
+  await asegurarRoom(s);
+  return json({ ...base, url: s.url, token: await tokenDaily(s, { duena: false, nombre: quien }) });
 });
 export const config = { path: "/api/sala" };

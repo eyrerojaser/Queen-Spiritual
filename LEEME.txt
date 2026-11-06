@@ -274,3 +274,10 @@ Súbela en DOS partes (cada una con su "Commit changes"):
   1) La carpeta "netlify" + netlify.toml + package.json + package-lock.json + LEEME.txt
   2) La carpeta "site"
 Después revisa en GitHub que existan site/sala.html y site/resena.html.
+
+SALA DE GRUPO Y ENCUENTROS EN TU SALA (sin Zoom)
+- Comunidad > Encuentros en vivo: en "¿Dónde será?" elige "🎥 Mi sala Queen". Solo entran tus miembros.
+  La sala se abre 30 minutos antes; tú entras con "🎥 Entrar a la sala". Los correos llevan el botón "Entrar a la sala".
+  Los encuentros viejos que tenían enlace de Zoom siguen en Zoom (puedes cambiarlos).
+- Agenda > Private Reading Room > "👥 Nueva sala de grupo": un solo enlace para todos (cada quien escribe su nombre).
+- Temporizador de grupo: 40 minutos de entrada (lo cambias cuando quieras).

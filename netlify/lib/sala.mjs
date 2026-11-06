@@ -33,7 +33,7 @@ export async function crearSalaDaily(s) {
   const room = await daily("POST", "/rooms", {
     name: `qs-${s.id.toLowerCase().replace(/[^a-z0-9-]/g, "")}-${crypto.randomBytes(3).toString("hex")}`,
     privacy: "private",
-    properties: { exp, eject_at_room_exp: true, max_participants: 4, enable_prejoin_ui: true, enable_chat: true, enable_screenshare: false, enable_knocking: false, lang: "es" },
+    properties: { exp, eject_at_room_exp: true, max_participants: Math.min(200, Math.max(2, s.max || 4)), enable_prejoin_ui: true, enable_chat: true, enable_screenshare: false, enable_knocking: false, lang: "es" },
   });
   return { room: room.name, url: room.url, exp };
 }
@@ -49,3 +49,21 @@ export async function borrarSalaDaily(s) { if (s && s.room) await daily("DELETE"
 
 export const enlaceClienta = (s, o) => `${o}/sala.html?s=${encodeURIComponent(s.id)}&k=${encodeURIComponent(s.llave)}`;
 export const estadoSala = (s) => s.terminada ? "terminada" : (s.exp && s.exp < ahoraS() ? "vencida" : "activa");
+
+// La videollamada se crea en Daily cuando alguien entra por primera vez (así sirve aunque cambies la fecha).
+export async function asegurarRoom(s) {
+  if (s.room && (!s.exp || s.exp > ahoraS() + 600)) return s;
+  Object.assign(s, await crearSalaDaily(s));
+  await st().setJSON(`s/${s.id}`, s);
+  return s;
+}
+// Sala de grupo de un encuentro de la Comunidad (una por encuentro).
+export async function salaDeEncuentro(e) {
+  const id = "enc-" + String(e.id).replace(/[^\w-]/g, "").slice(0, 30);
+  let s = await st().get(`s/${id}`, { type: "json" });
+  const datos = { nombre: e.tema || "Encuentro de la Comunidad", servicio: "Encuentro de la Comunidad", fecha: e.fecha, hora: e.hora };
+  if (!s) s = { id, llave: nuevaLlave(), tipo: "grupo", encuentro: e.id, apellido: "", email: "", telefono: "", ficha: "", duracion: 40, max: 50, notas: "", creada: deps.ahora().toISOString(), ...datos };
+  else if (s.fecha !== e.fecha || s.hora !== e.hora || s.nombre !== datos.nombre) { if (s.room && s.fecha !== e.fecha) { await borrarSalaDaily(s); s.room = ""; s.url = ""; s.exp = 0; } Object.assign(s, datos); delete s.terminada; }
+  await st().setJSON(`s/${s.id}`, s);
+  return s;
+}

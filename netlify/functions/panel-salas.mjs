@@ -1,7 +1,8 @@
 // Panel: Private Reading Room (crear salas, entrar como anfitriona, notas, terminar).
 import { deps, json, manejar, origen, texto, Fallo, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
-import { st, nuevoId, nuevaLlave, crearSalaDaily, tokenDaily, borrarSalaDaily, enlaceClienta, estadoSala } from "../lib/sala.mjs";
+import { st, nuevoId, nuevaLlave, crearSalaDaily, tokenDaily, borrarSalaDaily, enlaceClienta, estadoSala, asegurarRoom, salaDeEncuentro } from "../lib/sala.mjs";
+import { leerDoc } from "../lib/comunidad.mjs";
 import { fichaPara, leerFicha, guardarNotaEnFicha } from "../lib/fichas.mjs";
 import { avisosDeps, plantilla, nombreNegocio, esc } from "../lib/avisos.mjs";
 
@@ -29,7 +30,7 @@ export default manejar(async (req) => {
       const s = await leer(id);
       const ficha = s.ficha ? await leerFicha(s.ficha) : null;
       const out = { sala: publica(s, o), ficha: ficha ? { id: ficha.id, nombre: ficha.nombre, apellido: ficha.apellido, situacion: ficha.situacion, notas: ficha.notas.slice(0, 5) } : null };
-      if (u.searchParams.get("entrar") && estadoSala(s) === "activa") out.token = await tokenDaily(s, { duena: true, nombre: "Queen" });
+      if (u.searchParams.get("entrar") && estadoSala(s) === "activa") { await asegurarRoom(s); out.token = await tokenDaily(s, { duena: true, nombre: "Queen" }); out.sala = publica(s, o); }
       return json(out);
     }
     const lista = [];
@@ -40,6 +41,20 @@ export default manejar(async (req) => {
   if (req.method !== "POST") throw new Fallo(405, "Método no permitido.");
   const b = await req.json().catch(() => ({}));
 
+  if (b.accion === "encuentro-sala") {
+    const doc = await leerDoc("encuentros", { lista: [] }), e = doc.lista.find((x) => x.id === b.encuentro);
+    if (!e) throw new Fallo(404, "Ese encuentro ya no existe.");
+    return json({ id: (await salaDeEncuentro(e)).id });
+  }
+  if (b.accion === "crear-grupo") {
+    const d = b.datos || {}, nombre = texto(d.nombre, 120);
+    if (!nombre) throw new Fallo(400, "Escribe el nombre de la reunión.");
+    const s = { id: nuevoId(), llave: nuevaLlave(), tipo: "grupo", ficha: "", nombre, apellido: "", email: "", telefono: "", servicio: "Sala de grupo",
+      fecha: /^\d{4}-\d{2}-\d{2}$/.test(d.fecha || "") ? d.fecha : "", hora: /^\d{2}:\d{2}$/.test(d.hora || "") ? d.hora : "",
+      duracion: Math.min(240, Math.max(5, parseInt(d.duracion, 10) || 40)), max: Math.min(200, Math.max(2, parseInt(d.max, 10) || 50)), notas: "", creada: deps.ahora().toISOString() };
+    await st().setJSON(`s/${s.id}`, s);
+    return json({ sala: publica(s, o) });
+  }
   if (b.accion === "crear") {
     const d = b.datos || {};
     const nombre = texto(d.nombre, 60);

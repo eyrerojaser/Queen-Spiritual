@@ -450,10 +450,12 @@ function tarjetaEncuentro(e, compacta) {
   const tx = el("div");
   if (compacta) { tx.append(el("h4", null, e.tema || "Encuentro de la comunidad"), el("p", null, `${e.etiqueta} · hora de Texas`)); }
   else {
-    tx.append(el("span", "et", e.estado === "envivo" ? "En vivo ahora" : "Próximo encuentro por Zoom"), el("h2", null, e.tema || "Encuentro de la comunidad"), el("span", "cuando", `${e.etiqueta} · hora de Texas`));
+    tx.append(el("span", "et", e.estado === "envivo" ? "En vivo ahora" : e.lugar === "sala" ? "Próximo encuentro en vivo" : "Próximo encuentro por Zoom"), el("h2", null, e.tema || "Encuentro de la comunidad"), el("span", "cuando", `${e.etiqueta} · hora de Texas`));
   }
   const acc = el("div", "acc");
-  if (e.zoom) { const z = el("a", "btn " + (compacta ? "btn-solid btn-sm" : "btn-oro"), e.estado === "envivo" ? "Entrar ahora a Zoom" : "Entrar a Zoom"); z.href = e.zoom; z.target = "_blank"; z.rel = "noopener"; if (e.estado === "envivo" && !compacta) { const v = el("span", "vivo"); v.append(el("i"), "En vivo"); acc.append(v); } acc.append(z); }
+  if (e.lugar === "sala" && e.estado !== "pasado") { const z = el("a", "btn " + (compacta ? "btn-solid btn-sm" : "btn-oro"), e.estado === "envivo" ? "Entrar ahora a la sala" : "Entrar a la sala"); z.href = `/sala.html?e=${encodeURIComponent(e.id)}`; if (e.estado === "envivo" && !compacta) { const v = el("span", "vivo"); v.append(el("i"), "En vivo"); acc.append(v); } acc.append(z); if (e.estado !== "envivo" && !compacta) acc.append(el("span", "zoomdatos", "La sala se abre 30 minutos antes.")); }
+  else if (e.lugar === "sala") {}
+  else if (e.zoom) { const z = el("a", "btn " + (compacta ? "btn-solid btn-sm" : "btn-oro"), e.estado === "envivo" ? "Entrar ahora a Zoom" : "Entrar a Zoom"); z.href = e.zoom; z.target = "_blank"; z.rel = "noopener"; if (e.estado === "envivo" && !compacta) { const v = el("span", "vivo"); v.append(el("i"), "En vivo"); acc.append(v); } acc.append(z); }
   else acc.append(el("span", compacta ? "muted" : "zoomdatos", "El enlace de Zoom aparecerá aquí antes del encuentro."));
   if (e.grabacion) { const g = el("a", "btn btn-line btn-sm", "▶ Ver grabación"); g.href = e.grabacion; g.target = "_blank"; g.rel = "noopener"; acc.append(g); }
   if (e.estado !== "pasado") { const cal = el("button", "btn " + (compacta ? "btn-line btn-sm" : "btn-claro btn-sm"), "📅 A mi calendario"); cal.type = "button"; cal.onclick = () => ics(e); acc.append(cal); }

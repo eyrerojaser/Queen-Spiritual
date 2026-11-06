@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { avisarme } from "../lib/avisos.mjs";
-import { st, requireMiembro, leerMiembro, publico, leerDoc, estadoEncuentro, etiquetaEncuentro, limite, lugares, abierta, salio, fechaPublicada, guardarFotoMiembro, CATEGORIAS, huellaM, correoMiembro } from "../lib/comunidad.mjs";
+import { st, requireMiembro, leerMiembro, publico, leerDoc, estadoEncuentro, etiquetaEncuentro, limite, lugares, abierta, salio, fechaPublicada, guardarFotoMiembro, CATEGORIAS, huellaM, correoMiembro , lugarDe } from "../lib/comunidad.mjs";
 import { esc } from "../lib/avisos.mjs";
 
 const nombreCorto = (m) => `${m.nombre} ${(m.apellido || "").slice(0, 1)}.`.trim();
@@ -11,7 +11,7 @@ const clave = () => `${deps.ahora().toISOString().replace(/[:.]/g, "-")}_${crypt
 
 async function encuentros(conEnlace) {
   const doc = await leerDoc("encuentros", { recordar: true, lista: [] }), ahora = ahoraLocal();
-  const lista = doc.lista.filter((e) => e.fecha).map((e) => ({ ...e, estado: estadoEncuentro(e, ahora), etiqueta: etiquetaEncuentro(e), fechaBonita: fechaBonita(e.fecha), horaBonita: horaBonita(e.hora) }))
+  const lista = doc.lista.filter((e) => e.fecha).map((e) => ({ ...e, lugar: lugarDe(e), estado: estadoEncuentro(e, ahora), etiqueta: etiquetaEncuentro(e), fechaBonita: fechaBonita(e.fecha), horaBonita: horaBonita(e.hora) }))
     .sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
   const prox = lista.filter((e) => e.estado !== "pasado"), pasados = lista.filter((e) => e.estado === "pasado").reverse().slice(0, 12);
   const limpiar = (e) => conEnlace ? e : { fecha: e.fecha, hora: e.hora, etiqueta: e.etiqueta, tema: e.tema, estado: e.estado };

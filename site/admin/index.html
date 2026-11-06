@@ -597,7 +597,7 @@ const CATS = [
   { id: "agenda", nombre: "Agenda", ico: "cal", desc: "Citas, sala privada y fichas de tus clientas", tiles: [["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["salas", "video", "Private Reading Room", "Tus lecturas por videollamada privada"], ["fichas", "users", "Fichas de clientes", "Notas y control de cada clienta"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]] },
   { id: "pedidos", nombre: "Pedidos", ico: "bouquet", desc: "Arreglos, solicitudes y entregas", tiles: [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"]] },
   { id: "ventas", nombre: "Ventas", ico: "bag", desc: "Queen Shop, cupones y suscripciones", tiles: [["tienda", "bag", "Queen Shop", "Tus productos"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"]] },
-  { id: "comunidad-c", nombre: "Comunidad", ico: "users", desc: "Publicaciones, miembros y encuentros", tiles: [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["encuentros", "video", "Encuentros por Zoom", "Cada 15 días"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]] },
+  { id: "comunidad-c", nombre: "Comunidad", ico: "users", desc: "Publicaciones, miembros y encuentros", tiles: [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["encuentros", "video", "Encuentros en vivo", "Cada 15 días, en tu sala o por Zoom"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]] },
   { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
   { id: "numeros", nombre: "Números", ico: "chart", desc: "Visitas y ventas", tiles: [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]] },
   { id: "cuenta", nombre: "Cuenta", ico: "key", desc: "Contraseña y correos", tiles: [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]] },
@@ -1046,22 +1046,38 @@ async function salas() {
     const tel = String(s.telefono || "").replace(/\D/g, ""), t1 = tel.length === 10 ? "1" + tel : tel;
     const pill = s.estado === "activa" ? h("span", { class: "pill ok" }, "Lista") : s.estado === "terminada" ? h("span", { class: "pill" }, "Terminada") : h("span", { class: "pill off" }, "Venció");
     return h("div", { class: "card mb sala-item" + (s.estado === "activa" ? "" : " hid") },
-      h("div", { class: "rw" }, h("b", null, `${s.nombre} ${s.apellido || ""}`), pill, h("span", { class: "pill" }, `⏱ ${s.duracion} min`)),
+      h("div", { class: "rw" }, h("b", null, `${s.nombre} ${s.apellido || ""}`), pill, s.tipo === "grupo" ? h("span", { class: "pill" }, s.encuentro ? "👥 Encuentro de la Comunidad" : `👥 Grupo · hasta ${s.max}`) : null, h("span", { class: "pill" }, `⏱ ${s.duracion} min`)),
       h("div", { class: "muted", style: "font-size:.9rem;margin:4px 0 10px" }, [s.servicio, s.cuando || "Sin fecha"].filter(Boolean).join(" · ")),
       h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
         s.estado === "activa" ? h("a", { class: "btn btn-solid btn-sm", href: `#/sala/${s.id}` }, "🎥 Entrar a la sala") : null,
-        s.estado === "activa" ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => copiar(s.enlace, "Enlace copiado ✓ Mándaselo a tu clienta.") }, "Copiar enlace") : null,
-        s.estado === "activa" ? h("a", { class: "btn btn-line btn-sm", href: s.enlace, target: "_blank", rel: "noopener" }, "👁 Probar como clienta") : null,
+        s.estado === "activa" && !s.encuentro ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => copiar(s.enlace, s.tipo === "grupo" ? "Enlace copiado ✓ Compártelo con tu grupo." : "Enlace copiado ✓ Mándaselo a tu clienta.") }, "Copiar enlace") : null,
+        s.estado === "activa" && !s.encuentro ? h("a", { class: "btn btn-line btn-sm", href: s.enlace, target: "_blank", rel: "noopener" }, "👁 Probar como clienta") : null,
         s.estado === "activa" && s.email ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async e => { e.target.disabled = true; try { await api("/api/panel/salas", { method: "POST", body: { accion: "enviar", id: s.id } }); toast("Enlace enviado a " + s.email + " ✓"); } catch (er) { fallo(er); } e.target.disabled = false; } }, "Enviar por correo") : null,
         s.estado === "activa" && t1 ? h("a", { class: "btn btn-line btn-sm", target: "_blank", rel: "noopener", href: `https://wa.me/${t1}?text=${encodeURIComponent(`Hola ${s.nombre} 💛 Este es el enlace privado para tu lectura${s.cuando ? " del " + s.cuando : ""}: ${s.enlace}\nÁbrelo a la hora de tu cita y permite la cámara y el micrófono.`)}` }, "Mandar enlace por mensaje") : null,
         s.ficha ? h("a", { class: "btn btn-line btn-sm", href: `#/ficha/${s.ficha}` }, "📋 Ficha") : null,
         h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { if (!confirm(`¿Borrar la sala de ${s.nombre}? El enlace dejará de funcionar. Sus notas quedan en su ficha.`)) return; try { await api("/api/panel/salas", { method: "POST", body: { accion: "borrar", id: s.id } }); toast("Borrada"); salas(); } catch (e) { fallo(e); } } }, "Borrar")));
   }) : [h("div", { class: "empty" }, "Todavía no tienes salas. Crea una para tu próxima lectura.")];
   marco(...cabeza("Private Reading Room", "Tus lecturas por videollamada privada, sin WhatsApp. Cada clienta recibe un enlace único y solo ve su videollamada. El temporizador, los avisos y tus notas solo los ves tú."),
-    h("button", { class: "btn btn-solid", type: "button", style: "margin-bottom:18px", onclick: () => nuevaSala() }, "+ Nueva sala"), ...nodos);
+    h("div", { style: "display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px" }, h("button", { class: "btn btn-solid", type: "button", onclick: () => nuevaSala() }, "+ Nueva sala (lectura)"), h("button", { class: "btn btn-line", type: "button", onclick: () => nuevaSalaGrupo() }, "👥 Nueva sala de grupo")), ...nodos);
   if (PREFILL_SALA) { const p = PREFILL_SALA; PREFILL_SALA = null; nuevaSala(p); }
 }
 
+function nuevaSalaGrupo() {
+  const v = { nombre: "", fecha: "", hora: "", duracion: 40, max: 50 };
+  const fm = formulario([
+    { k: "nombre", t: "text", label: "Nombre de la reunión", ph: "Ej: Taller de cartas, Meditación de luna llena" },
+    { k: "fecha", t: "date", label: "Fecha (opcional)" }, { k: "hora", t: "time", label: "Hora (opcional)" },
+    { k: "duracion", t: "num", label: "Temporizador (minutos)", min: 5 },
+    { k: "max", t: "num", label: "Máximo de personas", min: 2, hint: "Hasta 200. Cada persona que entra gasta minutos de tu plan de Daily." },
+  ], v);
+  const err = h("p", { class: "note err", hidden: true }), ok = h("button", { class: "btn btn-solid", type: "button" }, "Crear sala de grupo");
+  ok.onclick = async () => { const datos = fm.valores(); if (!String(datos.nombre || "").trim()) { err.textContent = "Escribe el nombre de la reunión."; err.hidden = false; return; } ok.disabled = true;
+    try { await api("/api/panel/salas", { method: "POST", body: { accion: "crear-grupo", datos } }); dlg.close(); toast("Sala de grupo creada ✓ Copia el enlace y compártelo."); salas(); } catch (e) { ok.disabled = false; if (!(e instanceof Salir)) { err.textContent = e.message; err.hidden = false; } } };
+  dlgIn.replaceChildren(h("header", null, h("h2", null, "Nueva sala de grupo"), h("button", { class: "x", type: "button", "aria-label": "Cerrar", onclick: () => dlg.close() }, "×")),
+    h("div", { class: "bd" }, h("p", { class: "muted", style: "margin-top:0" }, "Un solo enlace para todas las personas. Cada una escribe su nombre al entrar. Para los encuentros de la Comunidad usa mejor Encuentros en vivo: ahí solo entran tus miembros."), err, fm.nodo),
+    h("footer", null, h("span"), h("div", { class: "r" }, h("button", { class: "btn btn-line", type: "button", onclick: () => dlg.close() }, "Cancelar"), ok)));
+  dlg.showModal();
+}
 async function nuevaSala(pre = {}) {
   let fichas = [];
   try { fichas = (await api("/api/panel/fichas")).fichas; } catch (e) {}
@@ -1144,10 +1160,10 @@ async function salaPrivada(id) {
   const tick = setInterval(pintarT, 500);
 
   // ── Notas privadas (se guardan solas en su ficha) ──
-  const notas = h("textarea", { rows: 9, placeholder: "Lo que salió en las cartas, lo que te cuenta, lo que hay que trabajar…", "aria-label": "Notas de la sesión" }); notas.value = s.notas || "";
+  const notas = h("textarea", { rows: 9, placeholder: s.tipo === "grupo" ? "Notas del encuentro: temas, preguntas, ideas para el próximo…" : "Lo que salió en las cartas, lo que te cuenta, lo que hay que trabajar…", "aria-label": "Notas de la sesión" }); notas.value = s.notas || "";
   const guardado = h("small", { class: "muted" }, s.notas ? "Guardado ✓" : "");
   let tN = null;
-  const guardarNotas = async () => { clearTimeout(tN); tN = null; guardado.textContent = "Guardando…"; try { await api("/api/panel/salas", { method: "POST", body: { accion: "notas", id: s.id, notas: notas.value } }); guardado.textContent = "Guardado ✓ en su ficha"; } catch (e) { guardado.textContent = "No se pudo guardar. Revisa tu internet."; } };
+  const guardarNotas = async () => { clearTimeout(tN); tN = null; guardado.textContent = "Guardando…"; try { await api("/api/panel/salas", { method: "POST", body: { accion: "notas", id: s.id, notas: notas.value } }); guardado.textContent = s.ficha ? "Guardado ✓ en su ficha" : "Guardado ✓"; } catch (e) { guardado.textContent = "No se pudo guardar. Revisa tu internet."; } };
   notas.oninput = () => { guardado.textContent = "…"; clearTimeout(tN); tN = setTimeout(guardarNotas, 1500); };
   const f = d.ficha;
   const fichaBox = f ? h("details", { class: "rr-card" }, h("summary", null, "📋 Su ficha"),
@@ -1169,7 +1185,8 @@ async function salaPrivada(id) {
     try {
       const r = await api(`/api/panel/salas?id=${encodeURIComponent(s.id)}&entrar=1`);
       if (!r.token) throw new Error("La sala ya no está disponible.");
-      const fr = h("iframe", { allow: "camera; microphone; fullscreen; display-capture; autoplay; clipboard-write", title: "Videollamada", src: `${s.url}?t=${encodeURIComponent(r.token)}` });
+      if (r.sala && r.sala.url) s.url = r.sala.url;
+      const fr = h("iframe", { allow: "camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *", title: "Videollamada", src: `${s.url}?t=${encodeURIComponent(r.token)}` });
       video.replaceChildren(fr);
     } catch (er) { fallo(er); if (b) { b.disabled = false; b.textContent = "🎥 Entrar a la videollamada"; } }
   }
@@ -1837,7 +1854,7 @@ async function encuentros() {
   const guardarTodo = async (msg) => { try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-guardar", recordar, recordarHora, lista } }); toast(msg || "Guardado ✓"); encuentros(); } catch (e) { fallo(e); } };
   // Crear varios cada 15 días
   const hoy = new Date(); hoy.setDate(hoy.getDate() + 1);
-  const ser = { desde: "", hora: "19:00", tema: "", zoom: "", clave: "", cantidad: 6, cada: 15 };
+  const ser = { desde: "", hora: "19:00", tema: "", lugar: "sala", zoom: "", clave: "", cantidad: 6, cada: 15 };
   const elegida = h("p", { class: "muted", style: "margin:6px 0 0" }, "Toca el día del primer encuentro.");
   const cal = Mes({ min: `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`, max: `${hoy.getFullYear() + 1}-12-31`, tipo: () => "libre", seleccion: f => ser.desde === f, alTocar: f => { ser.desde = f; elegida.textContent = "Primer encuentro: " + new Date(f + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" }); } });
   const inp = (k, ph, type = "text") => { const i = h("input", { type, placeholder: ph }); i.value = ser[k]; i.oninput = () => ser[k] = i.value; return i; };
@@ -1850,24 +1867,28 @@ async function encuentros() {
     h("div", { class: "f" },
       h("div", { class: "fld" }, h("div", { class: "lab" }, "Primer encuentro"), cal.el, elegida),
       h("div", { class: "fld" }, h("div", { class: "lab" }, "Hora (Texas)"), selHora(ser.hora, v => ser.hora = v)),
-      h("div", { class: "fld" }, h("label", null, "Enlace de Zoom"), inp("zoom", "https://us02web.zoom.us/j/…", "url"), h("div", { class: "hint" }, "Si usas la misma reunión de Zoom siempre, pégala aquí y sirve para todos.")),
-      h("div", { class: "fld" }, h("label", null, "Código de acceso de Zoom (opcional)"), inp("clave", "Ej: 123456")),
+      (() => { const zf = h("div", { class: "fld", hidden: true }, h("label", null, "Enlace de Zoom"), inp("zoom", "https://us02web.zoom.us/j/…", "url")), cf = h("div", { class: "fld", hidden: true }, h("label", null, "Código de acceso de Zoom (opcional)"), inp("clave", "Ej: 123456"));
+        const g = h("div", { class: "seg", role: "group", "aria-label": "Dónde" }, [["sala", "🎥 Mi sala Queen (sin Zoom)"], ["zoom", "Zoom"]].map(([v, t]) => { const b = h("button", { type: "button", "aria-pressed": String(ser.lugar === v), onclick: () => { ser.lugar = v; g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); zf.hidden = cf.hidden = v !== "zoom"; } }, t); return b; }));
+        return [h("div", { class: "fld" }, h("div", { class: "lab" }, "¿Dónde será?"), g, h("div", { class: "hint" }, "Tu sala Queen: sin límite de 40 minutos, solo entran tus miembros y el temporizador empieza en 40 minutos.")), zf, cf]; })(),
       h("div", { class: "fld" }, h("label", null, "Tema (opcional)"), inp("tema", "Ej: Encuentro de la comunidad")),
       h("div", { class: "fld" }, h("label", null, "¿Cuántos encuentros crear?"), (() => { const i = h("input", { type: "number", min: 1, max: 26 }); i.value = ser.cantidad; i.oninput = () => ser.cantidad = i.value; return i; })(), h("div", { class: "hint" }, "6 encuentros = unos 3 meses."))),
     h("div", { style: "margin-top:16px" }, crear));
   const fila = (e, i) => {
     const pasado = e.estado === "pasado";
-    const z = h("input", { type: "url", placeholder: "Enlace de Zoom", "aria-label": "Enlace de Zoom" }); z.value = e.zoom || ""; z.oninput = () => e.zoom = z.value;
+    e.lugar = e.lugar || (e.zoom ? "zoom" : "sala");
+    const z = h("input", { type: "url", placeholder: "Enlace de Zoom", "aria-label": "Enlace de Zoom", hidden: e.lugar !== "zoom" }); z.value = e.zoom || ""; z.oninput = () => e.zoom = z.value;
+    const lug = h("select", { "aria-label": "Dónde será", style: "width:auto" }, h("option", { value: "sala" }, "🎥 Mi sala Queen"), h("option", { value: "zoom" }, "Zoom")); lug.value = e.lugar; lug.onchange = () => { e.lugar = lug.value; z.hidden = e.lugar !== "zoom"; };
     const t = h("input", { type: "text", placeholder: "Tema", "aria-label": "Tema" }); t.value = e.tema || ""; t.oninput = () => e.tema = t.value;
     const g = h("input", { type: "url", placeholder: "Enlace de la grabación (opcional)", "aria-label": "Grabación" }); g.value = e.grabacion || ""; g.oninput = () => e.grabacion = g.value;
     const f = h("input", { type: "date", "aria-label": "Fecha" }); f.value = e.fecha; f.onchange = () => e.fecha = f.value;
     return h("div", { class: "card enc" + (pasado ? " hid" : "") },
       h("div", { class: "rw" }, h("b", null, e.etiqueta || "Nuevo encuentro"), e.estado === "envivo" ? h("span", { class: "pill ok" }, "En vivo ahora") : pasado ? h("span", { class: "pill" }, "Pasado") : null, e.recordado ? h("span", { class: "pill" }, "Recordatorio enviado") : null, e.recordadoHora ? h("span", { class: "pill" }, "Aviso 1 hora antes enviado") : null, e.enviado ? h("span", { class: "pill ok" }, "Enlace enviado") : null),
-      h("div", { class: "enc-g" }, f, selHora(e.hora, v => e.hora = v), t, z, pasado ? g : null),
+      h("div", { class: "enc-g" }, f, selHora(e.hora, v => e.hora = v), t, lug, z, pasado ? g : null),
       h("div", { style: "display:flex;gap:8px;margin-top:10px;flex-wrap:wrap" },
         h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => guardarTodo() }, "Guardar"),
+        !pasado && e.lugar === "sala" && e.id ? h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async ev => { const bt = ev.currentTarget; bt.disabled = true; try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-guardar", recordar, recordarHora, lista } }); const r = await api("/api/panel/salas", { method: "POST", body: { accion: "encuentro-sala", encuentro: e.id } }); location.hash = `#/sala/${r.id}`; } catch (er) { fallo(er); bt.disabled = false; } } }, "🎥 Entrar a la sala") : null,
         pasado ? null : h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async ev => {
-          if (!confirm("¿Mandar ahora el enlace de Zoom por correo a todos tus miembros?")) return;
+          if (!confirm("¿Mandar ahora el enlace del encuentro por correo a todos tus miembros?")) return;
           const bt = ev.currentTarget; bt.disabled = true;
           try { const r = await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentro-enviar", id: e.id } }); toast(`📩 Enlace enviado a ${r.enviados} miembro${r.enviados === 1 ? "" : "s"}.`); encuentros(); } catch (er) { fallo(er); bt.disabled = false; }
         } }, e.enviado ? "📩 Enviar enlace otra vez" : "📩 Enviar enlace ahora"),
@@ -1876,9 +1897,9 @@ async function encuentros() {
   const prox = lista.filter(e => e.estado !== "pasado"), pas = lista.filter(e => e.estado === "pasado").reverse();
   const sw = h("input", { type: "checkbox", checked: recordar, role: "switch" }); sw.onchange = () => { recordar = sw.checked; guardarTodo(sw.checked ? "Recordatorios activados ✓" : "Recordatorios apagados"); };
   const sw2 = h("input", { type: "checkbox", checked: recordarHora, role: "switch" }); sw2.onchange = () => { recordarHora = sw2.checked; guardarTodo(sw2.checked ? "Aviso 1 hora antes activado ✓" : "Aviso 1 hora antes apagado"); };
-  marco(...cabeza("Encuentros por Zoom", "Tus encuentros con la comunidad. Los miembros ven el enlace en su área y pueden agregarlo a su calendario."),
-    h("div", { class: "card" }, h("h2", null, "Envío automático del enlace"), h("p", { class: "sub" }, "Tus miembros reciben el enlace de Zoom por correo, sin que tengas que mandarlo uno por uno."),
-      h("label", { class: "sw" }, h("span", null, "Un día antes", h("small", null, "A las 8 de la mañana, con el enlace de Zoom.")), sw),
+  marco(...cabeza("Encuentros en vivo", "Tus encuentros con la comunidad, en tu propia sala (sin Zoom) o por Zoom si lo prefieres. Los miembros entran desde su área o desde el correo."),
+    h("div", { class: "card" }, h("h2", null, "Envío automático del enlace"), h("p", { class: "sub" }, "Tus miembros reciben el enlace por correo, sin que tengas que mandarlo uno por uno."),
+      h("label", { class: "sw" }, h("span", null, "Un día antes", h("small", null, "A las 8 de la mañana, con el enlace para entrar.")), sw),
       h("label", { class: "sw", style: "margin-top:8px" }, h("span", null, "1 hora antes", h("small", null, "Otro correo con el enlace, justo antes de empezar.")), sw2)),
     h("h2", { class: "sec-t" }, `Próximos (${prox.length})`), prox.length ? prox.map(e => fila(e, lista.indexOf(e))) : h("div", { class: "empty", style: "margin-bottom:16px" }, "No tienes encuentros próximos. Créalos abajo."),
     serie,

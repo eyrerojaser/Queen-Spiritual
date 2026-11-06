@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { deps, json, manejar, origen, texto, Fallo, ahoraLocal, minutos, fechaBonita, horaBonita } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
 import { esc } from "../lib/avisos.mjs";
-import { st, leerDoc, guardarDoc, limpiarPost, limpiarEncuentro, estadoEncuentro, etiquetaEncuentro, correoATodos, correoMiembro, salio, correoPublicacion, fechaPublicada, CATEGORIAS, correoEncuentro } from "../lib/comunidad.mjs";
+import { st, leerDoc, guardarDoc, limpiarPost, limpiarEncuentro, estadoEncuentro, etiquetaEncuentro, correoATodos, correoMiembro, salio, correoPublicacion, fechaPublicada, CATEGORIAS, correoEncuentro , lugarDe } from "../lib/comunidad.mjs";
 
 const sumarDias = (f, n) => new Date((minutos(f) + n * 1440) * 60000).toISOString().slice(0, 10);
 async function todos(prefijo) {
@@ -163,7 +163,7 @@ export default manejar(async (req) => {
     case "encuentro-enviar": {
       const doc = await leerDoc("encuentros", { recordar: true, lista: [] }), e = doc.lista.find((x) => x.id === b.id);
       if (!e) throw new Fallo(404, "Ese encuentro ya no existe.");
-      if (!e.zoom) throw new Fallo(400, "Primero pega el enlace de Zoom de este encuentro y toca Guardar.");
+      if (lugarDe(e) === "zoom" && !e.zoom) throw new Fallo(400, "Primero pega el enlace de Zoom de este encuentro y toca Guardar.");
       const n = await correoEncuentro(e, "ahora", o);
       e.enviado = deps.ahora().toISOString(); await guardarDoc("encuentros", doc);
       return json({ ok: true, enviados: n });
@@ -172,7 +172,7 @@ export default manejar(async (req) => {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(b.desde || "")) throw new Fallo(400, "Elige la fecha del primer encuentro.");
       const n = Math.min(26, Math.max(1, parseInt(b.cantidad, 10) || 6)), cada = Math.min(60, Math.max(1, parseInt(b.cada, 10) || 15));
       const doc = await leerDoc("encuentros", { recordar: true, lista: [] });
-      const nuevos = Array.from({ length: n }, (_, i) => limpiarEncuentro({ fecha: sumarDias(b.desde, i * cada), hora: b.hora, tema: b.tema, zoom: b.zoom, clave: b.clave }));
+      const nuevos = Array.from({ length: n }, (_, i) => limpiarEncuentro({ fecha: sumarDias(b.desde, i * cada), hora: b.hora, tema: b.tema, lugar: b.lugar, zoom: b.zoom, clave: b.clave }));
       doc.lista = [...doc.lista.filter((e) => !nuevos.some((x) => x.fecha === e.fecha)), ...nuevos];
       await guardarDoc("encuentros", doc);
       return json({ ok: true, creados: nuevos.map((e) => fechaBonita(e.fecha)) });

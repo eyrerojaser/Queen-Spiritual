@@ -221,10 +221,12 @@ export async function avisarProgramadas(origen = "") {
   if (hechos.length) await guardarDoc("publicaciones", doc);
   return hechos;
 }
+// Dónde es el encuentro: "sala" (tu sala propia) o "zoom". Los viejos con enlace de Zoom siguen en Zoom.
+export const lugarDe = (e) => (e && e.lugar ? (e.lugar === "zoom" ? "zoom" : "sala") : (e && e.zoom ? "zoom" : "sala"));
 export function limpiarEncuentro(e, antes = {}) {
   const fecha = /^\d{4}-\d{2}-\d{2}$/.test(e.fecha || "") ? e.fecha : "";
   const hora = /^([01]\d|2[0-3]):[0-5]\d$/.test(e.hora || "") ? e.hora : "19:00";
-  return { id: antes.id || texto(e.id, 20) || id(), fecha, hora, tema: texto(e.tema, 160), zoom: url(e.zoom), clave: texto(e.clave, 60), notas: texto(e.notas, 1500), grabacion: url(e.grabacion), recordado: antes.recordado || "", recordadoHora: antes.recordadoHora || "", enviado: antes.enviado || "" };
+  return { id: antes.id || texto(e.id, 20) || id(), fecha, hora, tema: texto(e.tema, 160), lugar: lugarDe(e), zoom: url(e.zoom), clave: texto(e.clave, 60), notas: texto(e.notas, 1500), grabacion: url(e.grabacion), recordado: antes.recordado || "", recordadoHora: antes.recordadoHora || "", enviado: antes.enviado || "" };
 }
 export const DURACION_ENCUENTRO = 90; // minutos que se muestra "en vivo"
 export function estadoEncuentro(e, ahora = ahoraLocal()) {
@@ -238,6 +240,7 @@ export const etiquetaEncuentro = (e) => `${fechaBonita(e.fecha)} a las ${horaBon
 // Correo con el enlace de Zoom a todos los miembros con acceso (sin agregar contactos uno por uno).
 export async function correoEncuentro(e, tipo, origen = "") {
   const sitio = origen || process.env.URL || "";
+  if (lugarDe(e) === "sala") return correoEncuentroSala(e, tipo, sitio);
   const asuntos = { manana: `🌙 Mañana: encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}`, hora: `⏰ En 1 hora: encuentro de la Comunidad por Zoom`, ahora: `🔔 Encuentro de la Comunidad por Zoom${e.tema ? " · " + e.tema : ""}` };
   const titulos = { manana: "Te espero mañana en nuestro encuentro", hora: "Nos vemos en una hora 🌙", ahora: "Aquí tienes el enlace de nuestro encuentro" };
   const parrafos = [
@@ -249,6 +252,21 @@ export async function correoEncuentro(e, tipo, origen = "") {
   ].filter(Boolean);
   return correoATodos({ asunto: asuntos[tipo] || asuntos.ahora, titulo: titulos[tipo] || titulos.ahora, parrafos, soloConAcceso: true,
     boton: e.zoom ? { texto: "Entrar a Zoom", url: e.zoom } : sitio ? { texto: "Ir a la comunidad", url: `${sitio}/comunidad.html` } : null });
+}
+
+// Encuentro en tu sala propia (sin Zoom): el botón lleva a la sala, solo para miembros.
+async function correoEncuentroSala(e, tipo, sitio) {
+  const asuntos = { manana: `🌙 Mañana: encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}`, hora: "⏰ En 1 hora: encuentro de la Comunidad", ahora: `🔔 Encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}` };
+  const titulos = { manana: "Te espero mañana en nuestro encuentro", hora: "Nos vemos en una hora 🌙", ahora: "Aquí tienes la entrada a nuestro encuentro" };
+  const url = sitio ? `${sitio}/sala.html?e=${encodeURIComponent(e.id)}` : "";
+  const parrafos = [
+    `Nuestro encuentro es el <b>${esc(etiquetaEncuentro(e))}</b> (hora de Texas), por videollamada en nuestra sala privada de la Comunidad.`,
+    e.tema ? `Tema: <b>${esc(e.tema)}</b>` : "",
+    "La sala se abre 30 minutos antes. Entra desde tu teléfono o tu computadora, sin instalar nada, y permite la cámara y el micrófono.",
+    url ? `Si el botón no abre, copia este enlace en Safari o Chrome: <span style="word-break:break-all">${esc(url)}</span>` : "",
+    e.notas ? esc(e.notas) : "",
+  ].filter(Boolean);
+  return correoATodos({ asunto: asuntos[tipo] || asuntos.ahora, titulo: titulos[tipo] || titulos.ahora, parrafos, soloConAcceso: true, boton: url ? { texto: "Entrar a la sala", url } : null });
 }
 
 // Recordatorio el día antes (8 am) y, si lo dejas prendido, 1 hora antes. Siempre con el enlace.
