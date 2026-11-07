@@ -128,9 +128,11 @@ export async function limite(ip, tipo, max, minutosVentana = 60) {
 }
 
 // Enlace para entrar sin contraseña (válido 30 minutos, se usa una sola vez).
-export async function enlaceEntrada(clave, origen) {
+// A dónde regresar después de entrar (solo la sala de un encuentro).
+export const volverValido = (v) => (/^\/sala\.html\?e=[\w-]{1,40}$/.test(v || "") ? v : "");
+export async function enlaceEntrada(clave, origen, volver = "") {
   const t = crypto.randomBytes(24).toString("base64url");
-  await st().setJSON(`tok/${t}`, { k: clave, exp: Date.now() + 30 * 60000 });
+  await st().setJSON(`tok/${t}`, { k: clave, exp: Date.now() + 30 * 60000, volver: volverValido(volver) });
   return `${origen}/api/comunidad/entrar?t=${t}`;
 }
 export async function usarEnlace(t) {
@@ -139,6 +141,11 @@ export async function usarEnlace(t) {
   if (!r) return null;
   await s.delete(`tok/${t}`);
   return r.exp > Date.now() ? r.k : null;
+}
+export async function leerEnlace(t) {
+  if (!/^[\w-]{20,60}$/.test(t || "")) return {};
+  const r = await st().get(`tok/${t}`, { type: "json" });
+  return r || {};
 }
 
 export async function correoMiembro(m, { asunto, titulo, parrafos, boton, pie }) {

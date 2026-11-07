@@ -340,12 +340,13 @@ function bienvenida(prox) {
   const reg = el("section", "registro"); reg.id = "registro";
   const lado = el("div", "lado"); lado.append(el("span", "kicker", "Cómo funciona"), el("h2", null, "Únete en un minuto"));
   const pasos = el("div", "pasos");
-  [["Te registras gratis", "Solo tu nombre, apellido, correo y teléfono."], ["Entras al momento", "Conversas, compartes lo que sabes y aprendes de los demás."], ["Nos vemos por Zoom", "Cada 15 días, con recordatorio a tu correo."]].forEach(([b, t]) => { const d = el("div"); const x = el("span"); x.append(el("b", null, b), t); d.append(x); pasos.append(d); });
+  [["Te registras gratis", "Solo tu nombre, apellido, correo y teléfono."], ["Entras al momento", "Conversas, compartes lo que sabes y aprendes de los demás."], ["Nos vemos en vivo", "Cada 15 días, con recordatorio a tu correo."]].forEach(([b, t]) => { const d = el("div"); const x = el("span"); x.append(el("b", null, b), t); d.append(x); pasos.append(d); });
   lado.append(pasos);
   const caja = el("div", "caja"); caja.id = "caja";
   reg.append(caja, lado); cuerpo.append(reg);
   app.replaceChildren(hero, cuerpo);
-  modo(new URLSearchParams(location.search).get("enlace") === "vencido" ? "entrar" : "registro");
+  modo(new URLSearchParams(location.search).get("enlace") === "vencido" || VOLVER ? "entrar" : "registro");
+  if (VOLVER) { toast("Entra con tu correo y te llevo a la sala del encuentro 🌙"); setTimeout(() => { const c = document.getElementById("registro"); if (c) c.scrollIntoView({ behavior: "smooth" }); }, 300); }
   if (new URLSearchParams(location.search).get("enlace") === "vencido") toast("Ese enlace ya venció o ya se usó. Pide uno nuevo con tu correo.");
 }
 
@@ -390,8 +391,8 @@ function modo(cual) {
     ev.preventDefault(); err.hidden = true; go.disabled = true;
     const v = Object.fromEntries(new FormData(f));
     try {
-      const r = await api("/api/comunidad/entrar", { body: v });
-      if (r.enviado) { caja.replaceChildren(el("h2", null, "Revisa tu correo 💌"), el("p", null, `Te mandé un enlace a ${v.email}. Tócalo para entrar (dura 30 minutos).`), el("p", "muted", "Si no lo ves en unos minutos, búscalo en Spam o Promociones y márcalo como “No es spam”. Así te llegan bien los próximos avisos.")); return; }
+      const r = await api("/api/comunidad/entrar", { body: { ...v, volver: VOLVER } });
+      if (r.enviado) { caja.replaceChildren(el("h2", null, "Revisa tu correo 💌"), el("p", null, VOLVER ? `Te mandé un enlace a ${v.email}. Tócalo y entras directo a la sala del encuentro (dura 30 minutos).` : `Te mandé un enlace a ${v.email}. Tócalo para entrar (dura 30 minutos).`), el("p", "muted", "Si no lo ves en unos minutos, búscalo en Spam o Promociones y márcalo como “No es spam”. Así te llegan bien los próximos avisos.")); return; }
       if (r.pedirTelefono) { telL.hidden = false; telL.querySelector("input").focus(); go.textContent = "Entrar"; go.disabled = false; return; }
       await iniciar(true);
     } catch (e) { err.textContent = e.message; err.hidden = false; go.disabled = false; }
@@ -698,6 +699,7 @@ function pantallaPago(m) {
   const out = el("button", "lnk", "Salir"); out.type = "button"; out.style.marginTop = "14px"; out.onclick = async () => { try { await api("/api/comunidad/entrar", { method: "DELETE" }); } catch (e) {} location.href = "/comunidad.html"; };
   c.append(err, b, el("br"), out); w.append(c); app.replaceChildren(w);
 }
+const VOLVER = (() => { const v = new URLSearchParams(location.search).get("volver") || ""; return /^\/sala\.html\?e=[\w-]{1,40}$/.test(v) ? v : ""; })();
 async function iniciar(recienEntro) {
   const pago = new URLSearchParams(location.search).get("pago");
   if (pago) {
@@ -707,6 +709,7 @@ async function iniciar(recienEntro) {
   }
   try {
     D = await api("/api/comunidad");
+    if (VOLVER) { location.replace(VOLVER); return; }
     const h = location.hash.replace("#", ""); if (["conversaciones", "publicaciones", "encuentros", "preguntas"].includes(h)) TAB = h;
     area(); if (recienEntro) window.scrollTo(0, 0);
   } catch (e) {

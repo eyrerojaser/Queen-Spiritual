@@ -57,7 +57,7 @@ function mensaje(titulo, texto) { caja.replaceChildren(el("span", "kick", "Queen
   if (!E && (!S || !K)) return mensaje("Enlace incompleto", "Revisa que copiaste el enlace completo que te mandé.");
   let d;
   try { d = await pedir(); } catch (e) {
-    if (E && [401, 402, 403].includes(e.status)) { mensaje("Entra a tu cuenta", "Este encuentro es solo para miembros de la Comunidad Queen Spiritual. Entra a tu cuenta y vuelve a abrir este enlace."); const a = el("a", "entrar", "Entrar a la Comunidad"); a.href = "/comunidad.html"; a.style.display = "block"; a.style.textDecoration = "none"; caja.append(a); return; }
+    if (E && [401, 402, 403].includes(e.status)) { mensaje("Entra a tu cuenta", "Este encuentro es solo para miembros de la Comunidad Queen Spiritual. Entra con tu correo y te traigo de vuelta a la sala."); const a = el("a", "entrar", "Entrar con mi correo"); a.href = "/comunidad.html?volver=" + encodeURIComponent("/sala.html?e=" + E); a.style.display = "block"; a.style.textDecoration = "none"; caja.append(a); return; }
     return mensaje(e.status === 410 ? "Gracias por tu visita" : "No se pudo abrir", e.message);
   }
   const ul = el("ul", "tips");
