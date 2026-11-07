@@ -1868,8 +1868,8 @@ async function encuentros() {
       h("div", { class: "fld" }, h("div", { class: "lab" }, "Primer encuentro"), cal.el, elegida),
       h("div", { class: "fld" }, h("div", { class: "lab" }, "Hora (Texas)"), selHora(ser.hora, v => ser.hora = v)),
       (() => { const zf = h("div", { class: "fld", hidden: true }, h("label", null, "Enlace de Zoom"), inp("zoom", "https://us02web.zoom.us/j/…", "url")), cf = h("div", { class: "fld", hidden: true }, h("label", null, "Código de acceso de Zoom (opcional)"), inp("clave", "Ej: 123456"));
-        const g = h("div", { class: "seg", role: "group", "aria-label": "Dónde" }, [["sala", "🎥 Mi sala Queen (sin Zoom)"], ["zoom", "Zoom"]].map(([v, t]) => { const b = h("button", { type: "button", "aria-pressed": String(ser.lugar === v), onclick: () => { ser.lugar = v; g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); zf.hidden = cf.hidden = v !== "zoom"; } }, t); return b; }));
-        return [h("div", { class: "fld" }, h("div", { class: "lab" }, "¿Dónde será?"), g, h("div", { class: "hint" }, "Tu sala Queen: sin límite de 40 minutos, solo entran tus miembros y el temporizador empieza en 40 minutos.")), zf, cf]; })(),
+        const g = h("div", { class: "seg", role: "group", "aria-label": "Dónde" }, [["sala", "🎥 Videollamada en mi página"], ["zoom", "Zoom (con enlace de Zoom)"]].map(([v, t]) => { const b = h("button", { type: "button", "aria-pressed": String(ser.lugar === v), onclick: () => { ser.lugar = v; g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); zf.hidden = cf.hidden = v !== "zoom"; } }, t); return b; }));
+        return [h("div", { class: "fld" }, h("div", { class: "lab" }, "¿Dónde será?"), g, h("div", { class: "hint" }, "Videollamada en mi página: es como Zoom pero dentro de tu página. No necesitas Zoom ni pegar ningún enlace, no tiene límite de 40 minutos y solo entran tus miembros.")), zf, cf]; })(),
       h("div", { class: "fld" }, h("label", null, "Tema (opcional)"), inp("tema", "Ej: Encuentro de la comunidad")),
       h("div", { class: "fld" }, h("label", null, "¿Cuántos encuentros crear?"), (() => { const i = h("input", { type: "number", min: 1, max: 26 }); i.value = ser.cantidad; i.oninput = () => ser.cantidad = i.value; return i; })(), h("div", { class: "hint" }, "6 encuentros = unos 3 meses."))),
     h("div", { style: "margin-top:16px" }, crear));
@@ -1877,7 +1877,7 @@ async function encuentros() {
     const pasado = e.estado === "pasado";
     e.lugar = e.lugar || (e.zoom ? "zoom" : "sala");
     const z = h("input", { type: "url", placeholder: "Enlace de Zoom", "aria-label": "Enlace de Zoom", hidden: e.lugar !== "zoom" }); z.value = e.zoom || ""; z.oninput = () => e.zoom = z.value;
-    const lug = h("select", { "aria-label": "Dónde será", style: "width:auto" }, h("option", { value: "sala" }, "🎥 Mi sala Queen"), h("option", { value: "zoom" }, "Zoom")); lug.value = e.lugar; lug.onchange = () => { e.lugar = lug.value; z.hidden = e.lugar !== "zoom"; };
+    const lug = h("select", { "aria-label": "Dónde será", style: "width:auto" }, h("option", { value: "sala" }, "🎥 Videollamada en mi página"), h("option", { value: "zoom" }, "Zoom")); lug.value = e.lugar; lug.onchange = () => { e.lugar = lug.value; z.hidden = e.lugar !== "zoom"; };
     const t = h("input", { type: "text", placeholder: "Tema", "aria-label": "Tema" }); t.value = e.tema || ""; t.oninput = () => e.tema = t.value;
     const g = h("input", { type: "url", placeholder: "Enlace de la grabación (opcional)", "aria-label": "Grabación" }); g.value = e.grabacion || ""; g.oninput = () => e.grabacion = g.value;
     const f = h("input", { type: "date", "aria-label": "Fecha" }); f.value = e.fecha; f.onchange = () => e.fecha = f.value;
