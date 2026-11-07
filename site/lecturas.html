@@ -89,12 +89,14 @@ body{background:var(--night);color:var(--night-ink)}
 .agenda .mes-flecha{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
 .agenda .mes-dsem{color:#F2D27A}
 .agenda .mes-dia{color:#fff}
-.agenda .mes-dia.t-libre{background:rgba(255,255,255,.14);color:#FFD966;border-color:rgba(255,255,255,.3)}
-.agenda .mes-dia.t-libre:hover{border-color:#FFD966}
-.agenda .mes-dia.t-fuera,.agenda .mes-dia.t-lleno{color:#fff;opacity:.38}
+.agenda .mes-dia.t-libre{background:linear-gradient(160deg,rgba(255,217,102,.30),rgba(255,217,102,.10));color:#FFE58F;border-color:rgba(255,217,102,.75);box-shadow:0 0 10px rgba(255,217,102,.45),inset 0 0 6px rgba(255,217,102,.2);text-shadow:0 0 8px rgba(255,217,102,.6);animation:brillo 2.6s ease-in-out infinite}
+.agenda .mes-dia.t-libre:hover{border-color:#FFD966;box-shadow:0 0 16px rgba(255,217,102,.7)}
+@keyframes brillo{0%,100%{box-shadow:0 0 8px rgba(255,217,102,.35),inset 0 0 6px rgba(255,217,102,.15)}50%{box-shadow:0 0 16px rgba(255,217,102,.65),inset 0 0 8px rgba(255,217,102,.25)}}
+@media (prefers-reduced-motion:reduce){.agenda .mes-dia.t-libre{animation:none}}
+.agenda .mes-dia.t-fuera,.agenda .mes-dia.t-lleno{color:#fff;opacity:.85}
 .agenda .mes-dia[aria-pressed="true"]{background:#FFD966;color:#1A2340;border-color:#FFD966}
 .agenda .mes-ley{color:#D9DFF0}
-.agenda .mes-ley i{background:rgba(255,255,255,.14);border-color:#FFD966}
+.agenda .mes-ley i{background:rgba(255,217,102,.3);border-color:#FFD966;box-shadow:0 0 6px rgba(255,217,102,.6)}
 .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .slot{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:12px;font:inherit;font-weight:600;padding:10px 6px;cursor:pointer}
 .slot:hover{border-color:#FFD966}
