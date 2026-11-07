@@ -160,6 +160,7 @@ progress{width:100%;height:8px}
 .wed-top b{font-size:1.05rem}
 .wed-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .wed-btns .lnk{font-size:.85rem;padding:6px 12px}
+.card > .mes{border:0;padding:0;background:none;box-shadow:none;max-width:none}
 .mes-cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .mes-cab b{font-size:1.1rem}
 .mes-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
@@ -1661,19 +1662,16 @@ async function calendario() {
         e.e.forEach(x => acc.push(h("div", { class: "blk" }, hora(x.desde, v => { x.desde = v; repintar(); }), h("span", { class: "muted" }, "a"), hora(x.hasta, v => { x.hasta = v; repintar(); }))));
         acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { for (let i = especiales.length - 1; i >= 0; i--) if (especiales[i].fecha === fechaSel) especiales.splice(i, 1); repintar(); } }, "Volver a mi horario normal"));
         acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.push({ fecha: fechaSel, motivo: "" }); repintar(); } }, "Cerrar este día"));
-      } else {
-        if (e.t === "on") acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.push({ fecha: fechaSel, motivo: "" }); repintar(); } }, "Cerrar este día"));
-        acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { especiales.push({ fecha: fechaSel, desde: "10:00", hasta: "14:00" }); repintar(); } }, e.t === "on" ? "Cambiar horario solo este día" : "Abrir este día"));
-      }
+      } else if (e.t === "on") acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.push({ fecha: fechaSel, motivo: "" }); repintar(); } }, "Cerrar este día"));
     }
     const det = h("div", { class: "md-det" },
       h("div", { class: "md-det-top" }, h("b", null, titulo[0].toUpperCase() + titulo.slice(1)), h("span", { class: "pill md-p-" + e.t }, e.t === "on" ? `Trabajo ${e.lbl}` : e.t === "extra" ? `Día extra ${e.lbl}` : e.lbl)),
       lista.length ? h("div", { class: "md-citas" }, lista) : h("p", { class: "muted", style: "margin:6px 0 0" }, "Sin citas este día."),
       acc.length ? h("div", { class: "md-acc" }, acc) : null);
-    const ley = h("div", { class: "mes-ley" }, [["on", "Trabajo"], ["off", "Libre"], ["bloq", "Cerrado"], ["extra", "Día extra"]].map(([k, t]) => h("span", null, h("i", { class: "ly-" + k }), t)), h("span", null, h("i", { class: "ly-c" }), "Citas"));
+    const ley = h("div", { class: "mes-ley" }, [["on", "Trabajo"], ["off", "Libre"], ["bloq", "Cerrado"], ...(especiales.some(x => x.fecha) ? [["extra", "Día extra"]] : [])].map(([k, t]) => h("span", null, h("i", { class: "ly-" + k }), t)), h("span", null, h("i", { class: "ly-c" }), "Citas"));
     mes.replaceChildren(cab, grid, ley, det);
   };
-  const repintar = () => { pintarMes(); listaC.pintar(); listaE.pintar(); };
+  const repintar = () => { pintarMes(); listaC.pintar(); };
   const listaFechas = (arr, conHoras, vacio, boton) => {
     const caja = h("div", { class: "lst" });
     const pintar = () => caja.replaceChildren(
@@ -1686,7 +1684,7 @@ async function calendario() {
       h("div", null, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { arr.push(conHoras ? { fecha: "", desde: "10:00", hasta: "14:00" } : { fecha: "", motivo: "" }); pintar(); } }, boton)));
     caja.pintar = pintar; pintar(); return caja;
   };
-  const listaC = listaFechas(cerrados, false, "No tienes días bloqueados.", "+ Bloquear un día"), listaE = listaFechas(especiales, true, "No tienes días extra.", "+ Agregar día extra");
+  const listaC = listaFechas(cerrados, false, "No tienes días cerrados.", "+ Cerrar un día");
   pintarSemana(); pintarMes();
   const err = h("p", { class: "note err", hidden: true });
   const b = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
@@ -1698,12 +1696,11 @@ async function calendario() {
     try { await guardar("horario", { ...gen.valores(), semana: semana2, cerrados: cerrados.filter(c => c.fecha), especiales: especiales.filter(e => e.fecha) }); } catch (e) { fallo(e); }
     b.disabled = false;
   } }, "Guardar calendario");
-  marco(...cabeza("Mi calendario", "Cuándo te pueden reservar una lectura. Aquí pones tu horario normal; cada clienta lo ve en su propia hora (Florida, California…)."),
+  marco(...cabeza("Mi calendario"),
+    h("div", { class: "card" }, mes),
+    h("div", { class: "card" }, h("h2", null, "Mi semana"), h("p", { class: "sub" }, "Toca un día para cambiar tu horario."), semana),
+    h("div", { class: "card" }, h("h2", null, "Días cerrados"), h("p", { class: "sub" }, "Vacaciones o días libres. Ese día no se puede reservar."), listaC),
     h("div", { class: "card" }, h("h2", null, "General"), gen.nodo),
-    h("div", { class: "card" }, h("h2", null, "Mi mes"), h("p", { class: "sub" }, "Toca un día para ver tus citas, bloquearlo o abrirlo."), mes),
-    h("div", { class: "card" }, h("h2", null, "Mi semana"), h("p", { class: "sub" }, "Los días y horas que trabajas normalmente. Toca un día para cambiarlo."), semana),
-    h("div", { class: "card" }, h("h2", null, "Días que NO trabajo"), h("p", { class: "sub" }, "Vacaciones, compromisos o días libres. Ese día no se puede reservar."), listaC),
-    h("div", { class: "card" }, h("h2", null, "Días extra que SÍ trabajo"), h("p", { class: "sub" }, "Para abrir un día que normalmente no trabajas o cambiar el horario de una fecha."), listaE),
     err, h("div", { class: "save-bar" }, b));
 }
 
