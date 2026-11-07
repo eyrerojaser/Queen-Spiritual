@@ -236,6 +236,10 @@ body.modo-sala main{max-width:1400px;padding-top:14px}
 .rr-sit{white-space:pre-wrap;font-size:.92rem;margin:10px 0}
 .rr-nota{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:.88rem}.rr-nota p{margin:4px 0 0;color:var(--muted);white-space:pre-wrap}
 .lnkx{display:inline-block;margin-top:10px;font-weight:600;color:var(--blue)}
+.rr-otra{background:none;border:0;color:#FFD966;font:inherit;font-weight:600;font-size:.9rem;text-decoration:underline;cursor:pointer;margin-top:6px}
+.rr-vbar{display:flex;justify-content:flex-end;margin:8px 0 0}
+.rr-vbar button{background:#1A2340;color:#FFD966;border:1px solid #D4AE52;border-radius:999px;padding:8px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+@media (max-width:900px){body.modo-sala main{padding-left:8px;padding-right:8px}.rr-video{aspect-ratio:auto;height:calc(100dvh - 190px);min-height:420px;max-height:none;border-radius:14px}.rr-vbar{justify-content:center}}
 /* Muñequita mística */
 .muneca{position:absolute;left:14px;bottom:14px;z-index:5;display:flex;align-items:flex-end;gap:6px;pointer-events:auto;max-width:calc(100% - 28px)}
 .muneca.entra{animation:mEntra .9s cubic-bezier(.2,.8,.2,1.2) both}
@@ -258,7 +262,7 @@ body.modo-sala main{max-width:1400px;padding-top:14px}
 @keyframes mBrilla{50%{filter:brightness(1.35) drop-shadow(0 0 6px #CFE0FF)}}
 @keyframes mChispa{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
 @media (prefers-reduced-motion:reduce){.muneca,.muneca *,.rr-timer.aviso{animation:none!important}}
-@media (max-width:900px){.rr-grid{grid-template-columns:1fr}.rr-video{aspect-ratio:3/4;min-height:0;max-height:72vh}.rr-reloj{font-size:3.4rem}.muneca-fig{width:88px}.muneca-globo{margin-bottom:46px;max-width:200px}.muneca-x{left:76px}.rr-t b{font-size:1.2rem}}
+@media (max-width:900px){.rr-grid{grid-template-columns:1fr}.rr-reloj{font-size:3.4rem}.muneca-fig{width:88px}.muneca-globo{margin-bottom:46px;max-width:200px}.muneca-x{left:76px}.rr-t b{font-size:1.2rem}}
 /* Fichas */
 .ficha-item{display:block;text-decoration:none;color:inherit}.ficha-item:hover{border-color:var(--blue)}
 .fi-datos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px 18px}
@@ -1178,17 +1182,28 @@ async function salaPrivada(id) {
     h("h2", null, `${s.nombre} ${s.apellido || ""}`),
     h("p", null, [s.servicio, s.cuando].filter(Boolean).join(" · ")),
     s.estado === "activa" ? h("button", { class: "btn rr-oro", type: "button", onclick: entrar }, "🎥 Entrar a la videollamada") : h("p", { class: "note" }, s.estado === "terminada" ? "Esta sesión ya terminó." : "Este enlace ya venció."),
+    s.estado === "activa" ? h("button", { class: "rr-otra", type: "button", onclick: e => entrar(e, true) }, "Abrir la videollamada en otra pestaña (pantalla completa)") : null,
     h("small", null, "Permite la cámara y el micrófono cuando te lo pida el navegador."));
   video.append(portada);
-  async function entrar(e) {
-    const b = e && e.currentTarget; if (b) { b.disabled = true; b.textContent = "Conectando…"; }
+  async function entrar(e, aparte) {
+    const b = e && e.currentTarget, antes = b && b.textContent;
+    // La pestaña se abre al tocar (si se abre después, el navegador la bloquea).
+    const ventana = aparte ? window.open("about:blank", "_blank") : null;
+    if (b) { b.disabled = true; b.textContent = "Conectando…"; }
     try {
       const r = await api(`/api/panel/salas?id=${encodeURIComponent(s.id)}&entrar=1`);
       if (!r.token) throw new Error("La sala ya no está disponible.");
       if (r.sala && r.sala.url) s.url = r.sala.url;
-      const fr = h("iframe", { allow: "camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *", title: "Videollamada", src: `${s.url}?t=${encodeURIComponent(r.token)}` });
-      video.replaceChildren(fr);
-    } catch (er) { fallo(er); if (b) { b.disabled = false; b.textContent = "🎥 Entrar a la videollamada"; } }
+      const url = `${s.url}?t=${encodeURIComponent(r.token)}`;
+      if (aparte) {
+        if (ventana) ventana.location.href = url; else location.href = url;
+        video.replaceChildren(h("div", { class: "rr-portada" }, h("h2", null, "Videollamada abierta en otra pestaña"), h("p", null, "Aquí sigues teniendo tu temporizador y tus notas."), h("button", { class: "btn rr-oro", type: "button", onclick: () => { const w = window.open(url, "_blank"); if (!w) location.href = url; } }, "Volver a abrir la videollamada")));
+        return;
+      }
+      const fr = h("iframe", { allow: "camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *", allowfullscreen: "", title: "Videollamada", src: url });
+      const bar = h("div", { class: "rr-vbar" }, h("button", { type: "button", onclick: () => { const w = window.open(url, "_blank"); if (!w) location.href = url; } }, "⛶ Pantalla completa (otra pestaña)"));
+      video.replaceChildren(fr); video.after(bar);
+    } catch (er) { if (ventana) ventana.close(); fallo(er); if (b) { b.disabled = false; b.textContent = antes; } }
   }
   const terminar = h("button", { class: "btn danger btn-sm", type: "button", onclick: async () => {
     if (!confirm(`¿Finalizar la sesión con ${s.nombre}? La videollamada se cierra para las dos y el enlace deja de funcionar.`)) return;
