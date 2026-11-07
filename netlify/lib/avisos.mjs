@@ -8,7 +8,7 @@
 import crypto from "node:crypto";
 import webpush from "web-push";
 import nodemailer from "nodemailer";
-import { deps, texto, fechaBonita, horaBonita } from "./comun.mjs";
+import { deps, texto, fechaBonita, horaBonita , cuandoCliente, partesCliente } from "./comun.mjs";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -105,18 +105,18 @@ const parrafosMensaje = (t) => String(t || "").trim().split(/\n\s*\n/).map((b) =
 export async function correoCita(tipo, r, { origen, politicaTexto, reembolso } = {}) {
   if (!r || !r.email) return false;
   const negocio = await nombreNegocio();
-  const cuando = `${fechaBonita(r.fecha)} a las ${horaBonita(r.hora)} (hora de Texas)`;
+  const cuando = cuandoCliente(r.fecha, r.hora, r.zona), pc = partesCliente(r.fecha, r.hora, r.zona);
   const enlace = `${origen}/cita.html?t=${encodeURIComponent(r.token || "")}`;
   let asunto, titulo, parrafos, pie = "Guarda este correo: el botón es tu acceso privado a tu cita.", boton = { texto: "Administrar mi cita", url: enlace };
   if (tipo === "confirmada") {
     const L = await deps.contenido(origen, "lecturas").catch(() => ({}));
-    asunto = `Gracias por reservar con ${negocio} 🌙 · ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
+    asunto = `Gracias por reservar con ${negocio} 🌙 · ${pc.fecha}, ${pc.hora}`;
     titulo = `¡Gracias por reservar, ${r.nombre}!`;
     parrafos = [`<span style="display:block;background:#eef2fb;border-radius:12px;padding:14px 16px"><b>${esc(r.lectura)}</b><br>📅 ${esc(cuando)}<br>🎥 Videollamada en tu sala privada · ${r.suscripcion ? "Incluida en tu suscripción mensual" : r.cupon && !r.precio ? `Gratis con tu cupón ${esc(r.cupon)}` : `$${esc(r.precio)} pagado${r.cupon ? ` (cupón ${esc(r.cupon)}: −$${esc(r.descuento)})` : ""}`}</span>`,
       ...parrafosMensaje((L && L.mensajeGracias) || MENSAJE_GRACIAS)];
     pie = `<b>Política de cancelación:</b> ${esc(politicaTexto)}<br><br>Si necesitas cancelar o cambiar el día, usa el botón “Administrar mi cita”. Guarda este correo: ese botón es tu acceso privado a tu cita.`;
   } else if (tipo === "cambiada") {
-    asunto = `Tu cita cambió: ${fechaBonita(r.fecha)}, ${horaBonita(r.hora)}`;
+    asunto = `Tu cita cambió: ${pc.fecha}, ${pc.hora}`;
     titulo = "Tu cita quedó cambiada";
     parrafos = [`<b>${esc(r.lectura)}</b><br>Nueva fecha: ${esc(cuando)}`, "Antes de tu cita te envío el enlace de tu sala privada de videollamada."];
   } else {

@@ -1,5 +1,5 @@
 // Panel: Private Reading Room (crear salas, entrar como anfitriona, notas, terminar).
-import { deps, json, manejar, origen, texto, Fallo, fechaBonita, horaBonita } from "../lib/comun.mjs";
+import { deps, json, manejar, origen, texto, Fallo, fechaBonita, horaBonita, cuandoCliente } from "../lib/comun.mjs";
 import { requireAdmin } from "../lib/panel.mjs";
 import { st, nuevoId, nuevaLlave, crearSalaDaily, tokenDaily, borrarSalaDaily, enlaceClienta, estadoSala, asegurarRoom, salaDeEncuentro } from "../lib/sala.mjs";
 import { leerDoc } from "../lib/comunidad.mjs";
@@ -13,7 +13,7 @@ async function correoEnlace(s, o) {
   if (!s.email) throw new Fallo(400, "Esta clienta no tiene correo. Copia el enlace y mándaselo por mensaje.");
   const negocio = await nombreNegocio(), url = enlaceClienta(s, o);
   const parrafos = [
-    `Hola ${esc(s.nombre)}, este es el enlace privado para tu ${esc(s.servicio || "lectura")}${s.fecha ? ` del <b>${esc(fechaBonita(s.fecha))}${s.hora ? " a las " + esc(horaBonita(s.hora)) : ""}</b> (hora de Texas)` : ""}.`,
+    `Hola ${esc(s.nombre)}, este es el enlace privado para tu ${esc(s.servicio || "lectura")}${s.fecha ? (s.hora ? ` del <b>${esc(cuandoCliente(s.fecha, s.hora, s.zona))}</b>` : ` del <b>${esc(fechaBonita(s.fecha))}</b>`) : ""}.`,
     "A la hora de tu cita, toca el botón y permite el uso de la cámara y el micrófono. Funciona desde tu teléfono o tu computadora, sin instalar nada.",
     "Busca un lugar tranquilo, con buena señal de internet, y llega con el corazón abierto. 💛",
   ];

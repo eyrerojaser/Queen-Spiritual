@@ -92,7 +92,7 @@ export const slug = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, 
 export const origen = (req) => new URL(req.url).origin;
 export const texto = (v, max = 200) => String(v ?? "").trim().slice(0, max);
 
-// ───────── Fechas: todo se maneja en hora de Texas (America/Chicago) ─────────
+// ───────── Fechas: se guardan en la hora de Queen (centro, America/Chicago); cada clienta las ve en su hora ─────────
 export const TZ = "America/Chicago";
 const DIAS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -114,6 +114,27 @@ const diaSemana = (fecha) => DIAS[new Date(minutos(fecha) * 60000).getUTCDay()];
 export const fechaBonita = (fecha) => { const dt = new Date(minutos(fecha) * 60000); return `${DIAS_BONITOS[dt.getUTCDay()]} ${dt.getUTCDate()} de ${MESES[dt.getUTCMonth()]}`; };
 export const horaBonita = (hora) => { const [h, m] = hora.split(":").map(Number); return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "am" : "pm"}`; };
 const esHora = (h) => /^\d{2}:\d{2}$/.test(String(h || ""));
+// ───────── La hora de cada clienta (Florida, Texas, California…) ─────────
+const desfase = (z, ms) => {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: z, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
+  return (Date.UTC(+p.year, p.month - 1, +p.day, +p.hour % 24, +p.minute) - Math.floor(ms / 60000) * 60000) / 60000;
+};
+export const zonaValida = (z) => { z = String(z || "").slice(0, 64); if (!/^[A-Za-z]+(\/[A-Za-z0-9_+-]+){1,2}$/.test(z)) return ""; try { new Intl.DateTimeFormat("en", { timeZone: z }); return z; } catch { return ""; } };
+// fecha y hora de Queen (centro) → la misma cita en otra zona
+export function enZona(fecha, hora, zona) {
+  const base = minutos(fecha, hora) * 60000;
+  let utc = base - desfase(TZ, base) * 60000; utc = base - desfase(TZ, utc) * 60000;
+  const d = new Date(utc + desfase(zona, utc) * 60000).toISOString();
+  return { fecha: d.slice(0, 10), hora: d.slice(11, 16) };
+}
+// Fecha y hora de la cita como la ve la clienta. Sin zona conocida: hora del centro y la de Florida.
+export function partesCliente(fecha, hora, zona) {
+  const z = zonaValida(zona);
+  if (z && z !== TZ) { const x = enZona(fecha, hora, z); return { fecha: fechaBonita(x.fecha), hora: horaBonita(x.hora), nota: "tu hora" }; }
+  if (z) return { fecha: fechaBonita(fecha), hora: horaBonita(hora), nota: "" };
+  return { fecha: fechaBonita(fecha), hora: horaBonita(hora), nota: `hora del centro · ${horaBonita(enZona(fecha, hora, "America/New_York").hora)} en Florida` };
+}
+export const cuandoCliente = (fecha, hora, zona) => { const p = partesCliente(fecha, hora, zona); return `${p.fecha} a las ${p.hora}${p.nota ? ` (${p.nota})` : ""}`; };
 const soloFecha = (f) => String(f || "").slice(0, 10);
 
 function horasEntre(desde, hasta, dur) {
@@ -178,7 +199,7 @@ export async function confirmarReserva(store, sesion) {
   const datos = {
     estado: "pagada", sesion: sesion.id, pago: typeof sesion.payment_intent === "string" ? sesion.payment_intent : (sesion.payment_intent && sesion.payment_intent.id) || "",
     fecha: m.fecha, hora: m.hora, lectura: m.lectura,
-    nombre: m.nombre, whatsapp: m.whatsapp, email: (sesion.customer_details && sesion.customer_details.email) || m.email || "",
+    zona: zonaValida(m.zona), nombre: m.nombre, whatsapp: m.whatsapp, email: (sesion.customer_details && sesion.customer_details.email) || m.email || "",
     nota: m.nota || "", precio: (sesion.amount_total || 0) / 100, pagada: deps.ahora().toISOString(),
     ...(m.cupon ? { cupon: m.cupon, descuento: Number(m.descuento) || 0 } : {}),
     token: crypto.randomBytes(18).toString("base64url"), cambios: 0,

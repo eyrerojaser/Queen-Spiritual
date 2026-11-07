@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/estilo.css">
+<script src="/hora.js"></script>
 <script src="/mes.js"></script>
 <style>
 main{max-width:560px;margin:0 auto;padding:36px 20px 80px}
@@ -49,7 +50,7 @@ async function cargar(aviso) {
   let d;
   try { d = await api(); } catch (e) { m.replaceChildren(el("h1", null, "No encontré tu cita"), el("p", "muted", e.message)); return; }
   const c = el("div", "card");
-  c.append(el("p", "big", d.lectura), el("p", null, `${cap(d.fechaBonita)} a las ${d.horaBonita} (hora de Texas)`), el("p", "muted", `Por videollamada · $${d.precio} pagado`));
+  c.append(el("p", "big", d.lectura), el("p", null, (window.Hora ? cap(Hora.cuando(d.fecha, d.hora)) + " (tu hora)" : `${cap(d.fechaBonita)} a las ${d.horaBonita}`)), el("p", "muted", `Por videollamada · $${d.precio} pagado`));
   const out = [el("h1", null, d.estado === "cancelada" ? "Tu cita fue cancelada" : `Hola, ${d.nombre}`)];
   if (aviso) out.push(el("p", "note ok", aviso));
   if (d.estado === "cancelada") { c.prepend(el("span", "pill off", "Cancelada")); out.push(c, el("p", "muted", d.reembolso ? `Te devolví $${d.reembolso} a tu tarjeta.` : "Esta cancelación no tuvo reembolso.")); const a = el("a", "btn btn-solid", "Reservar otra cita"); a.href = "/lecturas.html"; out.push(a); m.replaceChildren(...out); return; }
@@ -82,6 +83,7 @@ function cancelar(d) {
 function cambiar(d) {
   if (!d.dias || !d.dias.length) { m.replaceChildren(el("h1", null, "Cambiar cita"), el("p", "muted", "Por ahora no hay otros horarios disponibles. Intenta más tarde o contáctame.")); return; }
   let dia = null, hora = null;
+  if (window.Hora) d.dias.forEach(x => x.horas.forEach(h => { h.etiqueta = Hora.hora(x.fecha, h.hora); }));
   const porFecha = new Map(d.dias.map(x => [x.fecha, x]));
   const slots = el("div", "slots"), conf = el("div"), err = el("p", "note err"); err.hidden = true;
   const cal = Mes({ min: d.dias[0].fecha, max: d.dias[d.dias.length - 1].fecha, mesInicial: d.fecha >= d.dias[0].fecha ? d.fecha : d.dias[0].fecha,

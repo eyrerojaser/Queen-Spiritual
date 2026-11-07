@@ -25,6 +25,7 @@
 <link rel="apple-touch-icon" href="/iconos/apple-touch-icon.png">
 <meta name="theme-color" content="#1A2340">
 <link rel="stylesheet" href="/estilo.css">
+<script src="/hora.js"></script>
 <script src="/mes.js"></script>
 <script src="/politicas.js"></script>
 <script src="/resenas.js"></script>
@@ -280,6 +281,7 @@ async function cargarCalendario() {
   try { DISP = await api("/api/disponibilidad"); } catch (e) { return sinCalendario("No pude cargar el calendario en este momento."); }
   if (!DISP.activas) return sinCalendario("Por ahora no estoy tomando reservas en línea.");
   if (!DISP.dias.length) return sinCalendario("No me quedan horarios disponibles en las próximas semanas.");
+  if (window.Hora) { DISP.dias.forEach(x => x.horas.forEach(h => { h.etiqueta = Hora.hora(x.fecha, h.hora); })); DISP.zona = "tu hora"; DISP.zonaNombre = Hora.nombre(); }
   pintarCalendario(DISP);
 }
 function sinCalendario(msg) {
@@ -352,10 +354,10 @@ function pintarCalendario(d) {
       const v = Object.fromEntries(new FormData(f));
       try {
         if (!ac.checked) throw new Error("Para reservar, marca que aceptas la política de cancelación.");
-        const r = await api("/api/reservar", { ...v, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora, cupon: cupon ? cupon.codigo : "" });
+        const r = await api("/api/reservar", { ...v, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora, cupon: cupon ? cupon.codigo : "", zona: window.Hora ? Hora.zona : "" });
         if (r.gratis) {
           const ok = el("div", "done-sus"), a = el("a", "btn btn-line", "Ver o cambiar mi cita"); a.href = r.gestion;
-          ok.append(el("h3", null, "¡Tu lectura está reservada! 🎟️"), el("p", null, `${r.fecha} a las ${r.hora} (${d.zona}), gratis con tu cupón. Te mandé la confirmación por correo. Antes de tu cita te envío el enlace de tu sala privada de videollamada.`), a);
+          ok.append(el("h3", null, "¡Tu lectura está reservada! 🎟️"), el("p", null, `${window.Hora ? Hora.cuando(dia.fecha, hora.hora) + " (tu hora)" : r.fecha + " a las " + r.hora}, gratis con tu cupón. Te mandé la confirmación por correo. Antes de tu cita te envío el enlace de tu sala privada de videollamada.`), a);
           caja.replaceChildren(ok); ok.scrollIntoView({ behavior: "smooth", block: "center" }); return;
         }
         try { sessionStorage.setItem("reservaPendiente", r.sesion); } catch (e) {}
@@ -383,9 +385,9 @@ function pintarCalendario(d) {
       if (!ac.checked) { err.textContent = "Para reservar, marca que aceptas la política de cancelación."; err.hidden = false; return; }
       go.disabled = true; go.textContent = "Reservando…";
       try {
-        const r = await api("/api/reservar", { t: SUS.t, nota: nota.value, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora });
+        const r = await api("/api/reservar", { t: SUS.t, nota: nota.value, acepta: true, lectura: slug(l.nombre), fecha: dia.fecha, hora: hora.hora, zona: window.Hora ? Hora.zona : "" });
         const ok = el("div", "done-sus"), a = el("a", "btn btn-line", "Ver o cambiar mi cita"); a.href = r.gestion;
-        ok.append(el("h3", null, "¡Tu lectura está reservada! 🔮"), el("p", null, `${r.fecha} a las ${r.hora} (${d.zona}). Te mandé la confirmación por correo. Antes de tu cita te envío el enlace de tu sala privada de videollamada.`), a);
+        ok.append(el("h3", null, "¡Tu lectura está reservada! 🔮"), el("p", null, `${window.Hora ? Hora.cuando(dia.fecha, hora.hora) + " (tu hora)" : r.fecha + " a las " + r.hora}. Te mandé la confirmación por correo. Antes de tu cita te envío el enlace de tu sala privada de videollamada.`), a);
         caja.replaceChildren(ok); ok.scrollIntoView({ behavior: "smooth", block: "center" });
         DISP = null; cargarSus(false);
       } catch (e) {
@@ -397,7 +399,7 @@ function pintarCalendario(d) {
     setTimeout(() => sum.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }
   const agenda = el("div", "agenda");
-  agenda.append(el("p", "step", "1. Toca el día que quieras"), cal.el, el("p", "step", "2. Elige la hora"), slots, el("p", "muted", `Todos los horarios son en ${d.zona}.`));
+  agenda.append(el("p", "step", "1. Toca el día que quieras"), cal.el, el("p", "step", "2. Elige la hora"), slots, el("p", "muted", d.zonaNombre ? `Los horarios ya aparecen en tu hora (${d.zonaNombre}).` : "Los horarios aparecen en tu hora."));
   caja.replaceChildren(agenda, next);
   slots.append(el("span", "muted", "Primero toca un día en el calendario.")); slots.lastChild.style.gridColumn = "1/-1";
 }

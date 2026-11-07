@@ -1,7 +1,7 @@
 // Comunidad Queen Spiritual: miembros, sesión sin contraseña (enlace por correo), publicaciones, comentarios,
 // preguntas y encuentros por Zoom. Todo vive en el almacén "comunidad" de Netlify Blobs.
 import crypto from "node:crypto";
-import { deps, Fallo, texto, ahoraLocal, minutos, fechaBonita, horaBonita } from "./comun.mjs";
+import { deps, Fallo, texto, ahoraLocal, minutos, fechaBonita, horaBonita, cuandoCliente } from "./comun.mjs";
 import { avisosDeps, plantilla, esc, nombreNegocio } from "./avisos.mjs";
 
 export const st = () => deps.store("comunidad");
@@ -204,7 +204,7 @@ function limpiarProgramado(x) {
   if (!x || !/^\d{4}-\d{2}-\d{2}$/.test(x.fecha || "")) return null;
   return { fecha: x.fecha, hora: /^([01]\d|2[0-3]):[0-5]\d$/.test(x.hora || "") ? x.hora : "09:00" };
 }
-// ¿Ya salió la publicación? (las programadas salen solas a su fecha y hora de Texas)
+// ¿Ya salió la publicación? (las programadas salen solas a su fecha y hora, hora del centro)
 export function salio(p, ahora = ahoraLocal()) { return !p.programado || minutos(p.programado.fecha, p.programado.hora) <= ahora.min; }
 // Fecha real en que salió (para "hace 2 días" y para ordenar).
 export function fechaPublicada(p, ahora = ahoraLocal()) {
@@ -251,7 +251,7 @@ export async function correoEncuentro(e, tipo, origen = "") {
   const asuntos = { manana: `🌙 Mañana: encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}`, hora: `⏰ En 1 hora: encuentro de la Comunidad por Zoom`, ahora: `🔔 Encuentro de la Comunidad por Zoom${e.tema ? " · " + e.tema : ""}` };
   const titulos = { manana: "Te espero mañana en nuestro encuentro", hora: "Nos vemos en una hora 🌙", ahora: "Aquí tienes el enlace de nuestro encuentro" };
   const parrafos = [
-    `Nuestro encuentro por Zoom es el <b>${esc(etiquetaEncuentro(e))}</b> (hora de Texas).`,
+    `Nuestro encuentro por Zoom es el <b>${esc(cuandoCliente(e.fecha, e.hora, ""))}</b>.`,
     e.tema ? `Tema: <b>${esc(e.tema)}</b>` : "",
     e.zoom ? `Enlace para entrar: <a href="${esc(e.zoom)}">${esc(e.zoom)}</a>` : "El enlace para entrar está en tu área de miembros.",
     e.clave ? `Código de acceso: <b>${esc(e.clave)}</b>` : "",
@@ -267,7 +267,7 @@ async function correoEncuentroSala(e, tipo, sitio) {
   const titulos = { manana: "Te espero mañana en nuestro encuentro", hora: "Nos vemos en una hora 🌙", ahora: "Aquí tienes la entrada a nuestro encuentro" };
   const url = sitio ? `${sitio}/sala.html?e=${encodeURIComponent(e.id)}` : "";
   const parrafos = [
-    `Nuestro encuentro es el <b>${esc(etiquetaEncuentro(e))}</b> (hora de Texas), por videollamada en nuestra sala privada de la Comunidad.`,
+    `Nuestro encuentro es el <b>${esc(cuandoCliente(e.fecha, e.hora, ""))}</b>, por videollamada en nuestra sala privada de la Comunidad.`,
     e.tema ? `Tema: <b>${esc(e.tema)}</b>` : "",
     "La sala se abre 30 minutos antes. Entra desde tu teléfono o tu computadora, sin instalar nada, y permite la cámara y el micrófono.",
     url ? `Si el botón no abre, copia este enlace en Safari o Chrome: <span style="word-break:break-all">${esc(url)}</span>` : "",

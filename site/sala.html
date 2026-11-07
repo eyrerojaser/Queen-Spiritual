@@ -47,6 +47,7 @@ h1{font-family:"Cormorant",Georgia,serif;font-size:2.4rem;line-height:1.05;margi
 <main class="zona" id="zona">
   <div class="bienvenida"><div class="caja" id="caja"><p class="sub">Abriendo tu sala…</p></div></div>
 </main>
+<script src="/hora.js"></script>
 <script>
 const q = new URLSearchParams(location.search), S = q.get("s") || "", K = q.get("k") || "", E = q.get("e") || "";
 const caja = document.getElementById("caja"), zona = document.getElementById("zona");
@@ -79,7 +80,7 @@ function mensaje(titulo, texto) { caja.replaceChildren(el("span", "kick", "Queen
   // En una sala de grupo cada persona escribe su nombre (así lo ven las demás).
   let nom = null;
   if (d.grupo) { const L = document.createElement("label"); L.className = "tu-nombre"; L.append(el("span", null, "Tu nombre")); nom = document.createElement("input"); nom.type = "text"; nom.maxLength = 60; nom.autocomplete = "name"; nom.placeholder = "Así te verán en la videollamada"; try { nom.value = localStorage.getItem("qsNombre") || ""; } catch (e) {} L.append(nom); ul.after(L); }
-  if (E) caja.replaceChildren(el("span", "kick", "Encuentro de la Comunidad"), el("h1", null, `Hola, ${d.nombre} 💛`), el("p", "sub", `${d.tema} · ${d.etiqueta} (hora de Texas)`), aviso, ul, b, directo, err);
+  if (E) caja.replaceChildren(el("span", "kick", "Encuentro de la Comunidad"), el("h1", null, `Hola, ${d.nombre} 💛`), el("p", "sub", `${d.tema} · ${window.Hora && d.hora ? Hora.cuando(d.fecha, d.hora) + " (tu hora)" : d.etiqueta}`), aviso, ul, b, directo, err);
   else if (d.grupo) caja.replaceChildren(el("span", "kick", "Sala de grupo · Queen Spiritual"), el("h1", null, d.nombre), el("p", "sub", "Bienvenida 💛"), aviso, ul, nom.parentNode, b, directo, err);
   else caja.replaceChildren(el("span", "kick", "Tu sala privada de lectura"), el("h1", null, `Hola, ${d.nombre} 💛`), el("p", "sub", d.servicio || "Lectura de cartas"), aviso, ul, b, directo, err);
   const conectar = async (modo, btn, texto) => {

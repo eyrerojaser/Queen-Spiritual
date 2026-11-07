@@ -318,6 +318,8 @@ body.modo-sala main{max-width:1400px;padding-top:14px}
 
 /* ═════ Barra superior azul con categorías ═════ */
 .bar{background:linear-gradient(180deg,#1A2340,#141B33);border-bottom:0;box-shadow:0 6px 18px rgba(20,27,51,.18)}
+/* iPhone: que la barra no quede debajo de la hora y la batería */
+.bar{padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 .bar .in{padding:10px 18px}
 .bar .logo{display:flex;align-items:center;gap:10px;color:#fff}
 .bar .logo small{color:#F2D27A}
@@ -1696,7 +1698,7 @@ async function calendario() {
     try { await guardar("horario", { ...gen.valores(), semana: semana2, cerrados: cerrados.filter(c => c.fecha), especiales: especiales.filter(e => e.fecha) }); } catch (e) { fallo(e); }
     b.disabled = false;
   } }, "Guardar calendario");
-  marco(...cabeza("Mi calendario", "Cuándo te pueden reservar una lectura. Todas las horas son de Texas."),
+  marco(...cabeza("Mi calendario", "Cuándo te pueden reservar una lectura. Aquí pones tu horario normal; cada clienta lo ve en su propia hora (Florida, California…)."),
     h("div", { class: "card" }, h("h2", null, "General"), gen.nodo),
     h("div", { class: "card" }, h("h2", null, "Mi mes"), h("p", { class: "sub" }, "Toca un día para ver tus citas, bloquearlo o abrirlo."), mes),
     h("div", { class: "card" }, h("h2", null, "Mi semana"), h("p", { class: "sub" }, "Los días y horas que trabajas normalmente. Toca un día para cambiarlo."), semana),
@@ -1806,7 +1808,7 @@ async function estadisticas() {
     h("tbody", null, d.productos.map(p => h("tr", null, h("td", null, p.titulo), h("td", null, numero(p.vistas)), h("td", null, numero(p.carrito)), h("td", null, numero(p.vendidos)), h("td", null, dinero(p.ingresos))))))) : h("p", { class: "muted", style: "margin:0" }, "Todavía no hay visitas a productos en este período.");
   const ventas = listaBarras([["Lecturas", V.lecturas], ["Queen Shop", V.tienda], ["Arreglos personalizados", V.arreglos]].map(([k, v]) => ({ k, v, etq: dinero(v) })).filter(f => f.v > 0), "Todavía no hay ventas en este período.");
   const total = T.visitas;
-  marco(...cabeza("Estadísticas", `Toda tu página, del ${new Date(d.desde + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })} al ${new Date(d.hasta + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })}. Hora de Texas.`),
+  marco(...cabeza("Estadísticas", `Toda tu página, del ${new Date(d.desde + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })} al ${new Date(d.hasta + "T12:00").toLocaleDateString("es", { day: "numeric", month: "long" })}. Hora del centro.`),
     rango, kpis,
     h("div", { class: "card" }, h("h2", null, "Visitas por día"), h("p", { class: "sub" }, "Toca una barra para ver el número de ese día."), total ? barrasDia(d.porDia) : h("p", { class: "muted", style: "margin:0" }, "Todavía no hay visitas en este período. Se empiezan a contar desde que subes esta versión.")),
     h("div", { class: "dos" },
@@ -1882,7 +1884,7 @@ function editarPost(p, alGuardar) {
     ...(yaSalio && p.programado ? [] : yaSalio ? [] : [
       { k: "programar", t: "bool", label: "🕒 Programar para otro día", hint: "Déjala lista hoy y sale sola el día y la hora que elijas." },
       { k: "pfecha", t: "date", label: "Día en que sale", min: hoyIso, si: v => v.programar },
-      { k: "phora", t: "select", label: "Hora (Texas)", ops: HORAS_E.map(x => [x, horaBon(x)]), si: v => v.programar },
+      { k: "phora", t: "select", label: "Hora", ops: HORAS_E.map(x => [x, horaBon(x)]), si: v => v.programar },
     ]),
     ...(p.avisado ? [] : [{ k: "avisar", t: "bool", label: "Avisar a los miembros por correo", hint: "Si la programas, el aviso sale cuando se publique." }]),
   ], p);
@@ -1992,7 +1994,7 @@ async function encuentros() {
   const serie = h("div", { class: "card" }, h("h2", null, "Crear encuentros cada 15 días"), h("p", { class: "sub" }, "Eliges el primero y se crean los siguientes solos. Después puedes cambiar cualquiera."),
     h("div", { class: "f" },
       h("div", { class: "fld" }, h("div", { class: "lab" }, "Primer encuentro"), cal.el, elegida),
-      h("div", { class: "fld" }, h("div", { class: "lab" }, "Hora (Texas)"), selHora(ser.hora, v => ser.hora = v)),
+      h("div", { class: "fld" }, h("div", { class: "lab" }, "Hora"), selHora(ser.hora, v => ser.hora = v)),
       (() => { const zf = h("div", { class: "fld", hidden: true }, h("label", null, "Enlace de Zoom"), inp("zoom", "https://us02web.zoom.us/j/…", "url")), cf = h("div", { class: "fld", hidden: true }, h("label", null, "Código de acceso de Zoom (opcional)"), inp("clave", "Ej: 123456"));
         const g = h("div", { class: "seg", role: "group", "aria-label": "Dónde" }, [["sala", "🎥 Videollamada en mi página"], ["zoom", "Zoom (con enlace de Zoom)"]].map(([v, t]) => { const b = h("button", { type: "button", "aria-pressed": String(ser.lugar === v), onclick: () => { ser.lugar = v; g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); zf.hidden = cf.hidden = v !== "zoom"; } }, t); return b; }));
         return [h("div", { class: "fld" }, h("div", { class: "lab" }, "¿Dónde será?"), g, h("div", { class: "hint" }, "Videollamada en mi página: es como Zoom pero dentro de tu página. No necesitas Zoom ni pegar ningún enlace, no tiene límite de 40 minutos y solo entran tus miembros.")), zf, cf]; })(),
@@ -2013,7 +2015,7 @@ async function encuentros() {
       h("div", { style: "display:flex;gap:8px;margin-top:10px;flex-wrap:wrap" },
         h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: () => guardarTodo() }, "Guardar"),
         !pasado && e.lugar === "sala" && e.id ? h("button", { class: "btn btn-solid btn-sm", type: "button", onclick: async ev => { const bt = ev.currentTarget; bt.disabled = true; try { await api("/api/panel/comunidad", { method: "POST", body: { accion: "encuentros-guardar", recordar, recordarHora, lista } }); const r = await api("/api/panel/salas", { method: "POST", body: { accion: "encuentro-sala", encuentro: e.id } }); location.hash = `#/sala/${r.id}`; } catch (er) { fallo(er); bt.disabled = false; } } }, "🎥 Entrar a la sala") : null,
-        !pasado && e.lugar === "sala" && e.id ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { const u = `${location.origin}/sala.html?e=${encodeURIComponent(e.id)}`, msg = `🌙 Encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}\n${e.etiqueta || ""} (hora de Texas)\nEntra aquí (la sala se abre 30 minutos antes): ${u}`; try { await navigator.clipboard.writeText(msg); toast("Enlace copiado ✓ Pégalo en tu grupo de WhatsApp."); } catch (er) { prompt("Copia este enlace:", u); } } }, "🔗 Copiar enlace") : null,
+        !pasado && e.lugar === "sala" && e.id ? h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { const u = `${location.origin}/sala.html?e=${encodeURIComponent(e.id)}`, msg = `🌙 Encuentro de la Comunidad${e.tema ? " · " + e.tema : ""}\n${e.etiqueta || ""}${e.hora ? ` (hora del centro · ${((h, m) => `${(h % 12) || 12}:${m} ${h < 12 ? "am" : "pm"}`)((Number(e.hora.slice(0, 2)) + 1) % 24, e.hora.slice(3, 5))} en Florida)` : ""}\nEntra aquí (la sala se abre 30 minutos antes): ${u}`; try { await navigator.clipboard.writeText(msg); toast("Enlace copiado ✓ Pégalo en tu grupo de WhatsApp."); } catch (er) { prompt("Copia este enlace:", u); } } }, "🔗 Copiar enlace") : null,
         pasado ? null : h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async ev => {
           if (!confirm("¿Mandar ahora el enlace del encuentro por correo a todos tus miembros?")) return;
           const bt = ev.currentTarget; bt.disabled = true;

@@ -29,6 +29,7 @@ h1{font-size:clamp(2.4rem,7vw,3.4rem);margin-bottom:16px}
 </head>
 <body>
 <main id="m"><p class="muted">Confirmando tu pago…</p></main>
+<script src="/hora.js"></script>
 <script>
 const m = document.getElementById("m");
 const $m = n => "$" + Number(n || 0).toFixed(2).replace(/\.00$/, "");
@@ -37,6 +38,7 @@ const id = new URLSearchParams(location.search).get("s");
 const MENSAJE = "Gracias por reservar tu lectura con Queen Spiritual. Es un honor para mí acompañarte en este espacio de conexión espiritual.\n\nAntes de tu cita te envío por correo el enlace de tu sala privada de videollamada. A la hora de tu cita, ábrelo desde tu teléfono o tu computadora y permite la cámara y el micrófono. No necesitas instalar nada.\n\nPara prepararte: busca un lugar tranquilo donde puedas estar a solas y con buena señal de internet. Llega con el corazón abierto para recibir los mensajes de tus guías espirituales y ancestros.\n\nCon cariño y bendiciones,\nQueen 👑";
 try { sessionStorage.removeItem("reservaPendiente"); } catch (e) {}
 const volver = () => { const a = el("a", "btn btn-line", "Volver a la página"); a.href = "/"; return a; };
+const cap1 = t => t ? t[0].toUpperCase() + t.slice(1) : t;
 async function revisar(intento = 0) {
   let d;
   try { const r = await fetch("/api/pedido?s=" + encodeURIComponent(id || "")); d = await r.json(); if (!r.ok) throw new Error(d.error); }
@@ -47,7 +49,7 @@ async function revisar(intento = 0) {
   }
   if (d.tipo === "reserva") {
     const c = el("div", "card");
-    c.append(el("p", "big", d.lectura), el("p", null, `${d.fecha}, ${d.hora} (hora de Texas)`), el("p", "muted", "Videollamada en tu sala privada"));
+    c.append(el("p", "big", d.lectura), el("p", null, window.Hora && d.fechaR ? cap1(Hora.cuando(d.fechaR, d.horaR)) + " (tu hora)" : `${d.fecha}, ${d.hora}`), el("p", "muted", "Videollamada en tu sala privada"));
     const out = [el("h1", null, `¡Gracias por reservar, ${d.nombre}!`), el("p", null, "Tu lectura quedó reservada y pagada.")];
     if (d.conflicto) out.push(el("p", "note err", "Alguien tomó ese mismo horario segundos antes que tú. No te preocupes: te escribiré por WhatsApp para darte otro horario o devolverte tu dinero."));
     const msg = el("div", "card mensaje");

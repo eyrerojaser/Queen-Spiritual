@@ -39,7 +39,7 @@ export default manejar(async (req) => {
   if (m.tipo === "reserva") {
     const r = await confirmarReserva(deps.store(), s);
     await trasPagoReserva(r, origen(req));
-    return json({ pagado: true, tipo: "reserva", lectura: m.lectura, nombre: m.nombre, fecha: fechaBonita(r && !r.conflicto ? r.fecha : m.fecha), hora: horaBonita(r && !r.conflicto ? r.hora : m.hora), conflicto: !!(r && r.conflicto), email: (r && r.email) || "", gestion: r && r.token ? `/cita.html?t=${encodeURIComponent(r.token)}` : "" });
+    return json({ pagado: true, tipo: "reserva", lectura: m.lectura, nombre: m.nombre, fecha: fechaBonita(r && !r.conflicto ? r.fecha : m.fecha), hora: horaBonita(r && !r.conflicto ? r.hora : m.hora), fechaR: r && !r.conflicto ? r.fecha : m.fecha, horaR: r && !r.conflicto ? r.hora : m.hora, conflicto: !!(r && r.conflicto), email: (r && r.email) || "", gestion: r && r.token ? `/cita.html?t=${encodeURIComponent(r.token)}` : "" });
   }
   return json({ pagado: true });
 });

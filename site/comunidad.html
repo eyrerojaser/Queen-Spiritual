@@ -251,6 +251,7 @@ footer{padding:28px 0 40px;border-top:1px solid var(--line);color:var(--muted);f
 
 <footer><div class="wrap pie"><span id="footText"></span><nav class="pie-links" aria-label="Políticas"><a href="/politicas.html#privacidad">Privacidad</a><a href="/politicas.html">Todas las políticas</a></nav></div></footer>
 
+<script src="/hora.js"></script>
 <script>
 const $ = q => document.querySelector(q);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -449,9 +450,9 @@ function tarjetaEncuentro(e, compacta) {
   const c = el("div", compacta ? "e-item" : "encuentro"), f = fechaObj(e.fecha);
   const dia = el("div", "dia"); dia.append(el("small", null, DIAS[f.getDay()]), el("b", null, String(f.getDate())), el("small", null, MESES[f.getMonth()]));
   const tx = el("div");
-  if (compacta) { tx.append(el("h4", null, e.tema || "Encuentro de la comunidad"), el("p", null, `${e.etiqueta} · hora de Texas`)); }
+  if (compacta) { tx.append(el("h4", null, e.tema || "Encuentro de la comunidad"), el("p", null, window.Hora && e.hora ? `${Hora.cuando(e.fecha, e.hora)} · tu hora` : e.etiqueta)); }
   else {
-    tx.append(el("span", "et", e.estado === "envivo" ? "En vivo ahora" : e.lugar === "sala" ? "Próximo encuentro en vivo" : "Próximo encuentro por Zoom"), el("h2", null, e.tema || "Encuentro de la comunidad"), el("span", "cuando", `${e.etiqueta} · hora de Texas`));
+    tx.append(el("span", "et", e.estado === "envivo" ? "En vivo ahora" : e.lugar === "sala" ? "Próximo encuentro en vivo" : "Próximo encuentro por Zoom"), el("h2", null, e.tema || "Encuentro de la comunidad"), el("span", "cuando", window.Hora && e.hora ? `${Hora.cuando(e.fecha, e.hora)} · tu hora` : e.etiqueta));
   }
   const acc = el("div", "acc");
   if (e.lugar === "sala" && e.estado !== "pasado") { const z = el("a", "btn " + (compacta ? "btn-solid btn-sm" : "btn-oro"), e.estado === "envivo" ? "Entrar ahora a la sala" : "Entrar a la sala"); z.href = `/sala.html?e=${encodeURIComponent(e.id)}`; if (e.estado === "envivo" && !compacta) { const v = el("span", "vivo"); v.append(el("i"), "En vivo"); acc.append(v); } acc.append(z); if (e.estado !== "envivo" && !compacta) acc.append(el("span", "zoomdatos", "La sala se abre 30 minutos antes.")); }
