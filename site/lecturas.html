@@ -448,7 +448,7 @@ function pintarCalendario(d) {
   }
   const agenda = el("div", "agenda");
   const gi = el("div", "gitana"); gi.innerHTML = GITANA; agenda.append(gi);
-  agenda.append(el("p", "step", "1. Toca el día que quieras"), cal.el, el("p", "step", "2. Elige la hora"), slots, el("p", "muted", d.zonaNombre ? `Los horarios ya aparecen en tu hora (${d.zonaNombre}).` : "Los horarios aparecen en tu hora."));
+  agenda.append(el("p", "step", "1. Toca el día que quieras"), cal.el, el("p", "step", "2. Elige la hora"), slots);
   caja.replaceChildren(agenda, next);
   slots.append(el("span", "muted", "Primero toca un día en el calendario.")); slots.lastChild.style.gridColumn = "1/-1";
 }
