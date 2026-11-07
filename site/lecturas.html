@@ -538,7 +538,7 @@ async function iniciarSus(L) {
 $("#rvBtn").onclick = () => Resenas.abrir("Lecturas");
 leer("resenas").then(R => {
   const l = (R.resenas || []).filter(r => r && s(r.texto) && r.visible !== false && r.tipo === "Lecturas");
-  $("#rvLec").replaceChildren(l.length ? Resenas.tarjetas(l) : el("p", "empty", "Sé la primera persona en contar cómo fue tu lectura."));
+  $("#rvLec").replaceChildren(...(l.length ? [Resenas.tarjetas(l)] : []));
   const base = l.length ? l : (R.resenas || []).filter(r => r && s(r.texto) && r.visible !== false);
   if (base.length) {
     const prom = base.reduce((a, r) => a + Math.max(1, Math.min(5, parseInt(r.estrellas, 10) || 5)), 0) / base.length;
