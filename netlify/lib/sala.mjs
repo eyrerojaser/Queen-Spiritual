@@ -6,6 +6,7 @@ import { deps, Fallo, texto } from "./comun.mjs";
 export const st = () => deps.store("salas");
 const API = "https://api.daily.co/v1";
 
+// Compartir pantalla: solo tú (la dueña); las clientas y miembros no.
 // Llamada a la API de Daily (las pruebas la reemplazan con deps.daily).
 export async function daily(metodo, ruta, cuerpo) {
   if (deps.daily) return deps.daily(metodo, ruta, cuerpo);
@@ -33,14 +34,14 @@ export async function crearSalaDaily(s) {
   const room = await daily("POST", "/rooms", {
     name: `qs-${s.id.toLowerCase().replace(/[^a-z0-9-]/g, "")}-${crypto.randomBytes(3).toString("hex")}`,
     privacy: "private",
-    properties: { exp, eject_at_room_exp: true, max_participants: Math.min(200, Math.max(2, s.max || 4)), enable_prejoin_ui: true, enable_chat: true, enable_screenshare: false, enable_knocking: false, lang: "es" },
+    properties: { exp, eject_at_room_exp: true, max_participants: Math.min(200, Math.max(2, s.max || 4)), enable_prejoin_ui: true, enable_chat: true, enable_screenshare: true, enable_knocking: false, lang: "es" },
   });
   return { room: room.name, url: room.url, exp };
 }
 
 export async function tokenDaily(s, { duena, nombre }) {
   const exp = Math.min(s.exp || vencimiento(s), ahoraS() + 6 * 3600);
-  const d = await daily("POST", "/meeting-tokens", { properties: { room_name: s.room, user_name: texto(nombre, 60) || (duena ? "Queen" : "Clienta"), is_owner: !!duena, exp, start_video_off: false, start_audio_off: false } });
+  const d = await daily("POST", "/meeting-tokens", { properties: { room_name: s.room, user_name: texto(nombre, 60) || (duena ? "Queen" : "Clienta"), is_owner: !!duena, exp, start_video_off: false, start_audio_off: false, enable_screenshare: !!duena } });
   if (!d.token) throw new Fallo(502, "No se pudo abrir la videollamada. Intenta de nuevo.");
   return d.token;
 }
