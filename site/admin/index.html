@@ -1517,6 +1517,10 @@ const negocio = () => vistaForm({
       { k: "lecTitulo", t: "text", label: "Título grande (lecturas)", ph: "Mensajes de tus guías y ancestros", si: v => v.portada !== "flores" },
       { k: "lecFrase", t: "area", label: "Frase debajo del título (lecturas)", ph: "Lecturas de cartas españolas por videollamada privada…", si: v => v.portada !== "flores", hint: "Si lo dejas vacío, uso un texto listo. La foto es la de tu sección de Lecturas." },
     ]],
+    ["Pop-up (PageBloom)", "El anuncio que sale al entrar a tu página. Lo creas en PageBloom y pegas aquí su código.", [
+      { k: "popup", t: "area", label: "Código del pop-up", ph: '<script src="https://pagebloom.netlify.app/popup/…js" async><\/script>', hint: "En PageBloom copia el código para pegar en tu página. Para quitar el pop-up, borra esto y guarda." },
+      { k: "popupDonde", t: "seg", label: "¿Dónde sale?", ops: [["inicio", "Solo en el inicio"], ["todas", "En todas las páginas"]] },
+    ]],
     ["Contacto y redes", "Escribe tu usuario o pega el enlace de tu perfil.", [
       { k: "whatsapp", t: "tel", label: "WhatsApp", ph: "15125551234", hint: "Con el 1 al principio, sin espacios." },
       { k: "telefono", t: "tel", label: "Teléfono para llamadas", hint: "Si es el mismo del WhatsApp, déjalo vacío." },
