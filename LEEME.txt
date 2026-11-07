@@ -281,3 +281,14 @@ SALA DE GRUPO Y ENCUENTROS EN TU SALA (sin Zoom)
   Los encuentros viejos que tenían enlace de Zoom siguen en Zoom (puedes cambiarlos).
 - Agenda > Private Reading Room > "👥 Nueva sala de grupo": un solo enlace para todos (cada quien escribe su nombre).
 - Temporizador de grupo: 40 minutos de entrada (lo cambias cuando quieras).
+
+────────────────────────────────────────
+QUÉ NO SE BORRA CUANDO SE SUBEN CAMBIOS
+────────────────────────────────────────
+Todo lo que guardas desde tu panel queda guardado aparte del código y nunca se borra al subir
+una versión nueva de la página: lecturas y precios, horario y calendario, cupones, suscripciones,
+reservas, fichas de clientas, reseñas, tienda, Comunidad, textos, fotos y el pop-up de PageBloom
+(Mi página → Negocio y contacto → Pop-up).
+
+Lo único que se puede perder es lo que se pega a mano dentro de los archivos en GitHub.
+Por eso: pop-ups, promociones y anuncios van siempre en el panel, nunca pegados en el código.
