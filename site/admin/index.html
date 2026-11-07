@@ -149,6 +149,51 @@ progress{width:100%;height:8px}
 .empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center}
 /* calendario */
 .wk{display:grid;gap:10px}
+.wtiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--muted);font:inherit;cursor:pointer;min-height:66px;justify-content:center}
+.wt .wt-d{font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+.wt .wt-h{font-size:.68rem;line-height:1.2;text-align:center}
+.wt.on{background:var(--blue-soft);color:var(--blue);border-color:color-mix(in srgb,var(--blue) 35%,var(--line))}
+.wt.sel{outline:2px solid var(--gold);outline-offset:1px}
+.wed{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px}
+.wed-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.wed-top b{font-size:1.05rem}
+.wed-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.wed-btns .lnk{font-size:.85rem;padding:6px 12px}
+.mes-cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mes-cab b{font-size:1.1rem}
+.mes-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.mes-ds{text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding-bottom:2px}
+.md{position:relative;aspect-ratio:1/1;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--muted);font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:5px 6px;text-align:left}
+.md.vacio{border:0;background:none;cursor:default}
+.md-n{font-weight:700;font-size:.9rem}
+.md-l{font-size:.6rem;line-height:1.1;font-weight:600;max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap}
+.md.on{background:var(--blue-soft);color:var(--blue);border-color:color-mix(in srgb,var(--blue) 30%,var(--line))}
+.md.bloq{background:color-mix(in srgb,#C0392B 10%,var(--bg));color:#B03A2E;border-color:color-mix(in srgb,#C0392B 30%,var(--line))}
+.md.extra{background:color-mix(in srgb,var(--gold) 16%,var(--bg));color:var(--ink);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.md.pasado{opacity:.45}
+.md.hoy .md-n{background:var(--blue);color:#fff;border-radius:999px;padding:0 6px;margin-left:-3px}
+.md.sel{outline:2px solid var(--gold);outline-offset:1px}
+.md-c{position:absolute;top:4px;right:4px;min-width:18px;height:18px;border-radius:999px;background:var(--gold);color:#fff;font-size:.68rem;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.mes-ley{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font-size:.78rem;color:var(--muted)}
+.mes-ley span{display:inline-flex;align-items:center;gap:6px}
+.mes-ley i{width:12px;height:12px;border-radius:4px;border:1px solid var(--line);background:var(--bg)}
+.mes-ley .ly-on{background:var(--blue-soft);border-color:var(--blue)}
+.mes-ley .ly-bloq{background:color-mix(in srgb,#C0392B 14%,var(--bg));border-color:#C0392B}
+.mes-ley .ly-extra{background:color-mix(in srgb,var(--gold) 22%,var(--bg));border-color:var(--gold)}
+.mes-ley .ly-c{background:var(--gold);border-color:var(--gold);border-radius:999px}
+.md-det{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px}
+.md-det-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.md-p-on{background:var(--blue-soft);color:var(--blue)}
+.md-p-off{background:var(--bg);color:var(--muted)}
+.md-p-bloq{background:color-mix(in srgb,#C0392B 12%,var(--bg));color:#B03A2E}
+.md-p-extra{background:color-mix(in srgb,var(--gold) 18%,var(--bg));color:var(--ink)}
+.md-citas{display:grid;gap:6px;margin-top:10px}
+.md-cita{display:flex;gap:10px;font-size:.92rem}
+.md-cita b{min-width:78px;color:var(--blue)}
+.md-acc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.md-acc .blk{margin:0;width:100%}
+@media (max-width:520px){.md{padding:4px}.md-l{font-size:.55rem}.md-n{font-size:.82rem}.wt .wt-h{font-size:.6rem}.wt{padding:8px 1px}}
 .wd{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
 .wd:last-child{border-bottom:0}
 .wd .dn{display:flex;align-items:center;gap:10px;font-weight:700;padding-top:8px}
@@ -1535,7 +1580,7 @@ async function categorias() {
 const DIAS = [["lunes", "Lunes"], ["martes", "Martes"], ["miercoles", "Miércoles"], ["jueves", "Jueves"], ["viernes", "Viernes"], ["sabado", "Sábado"], ["domingo", "Domingo"]];
 async function calendario() {
   cargando();
-  const doc = await leer("horario");
+  const [doc, res] = await Promise.all([leer("horario"), api("/api/reservas").catch(() => null)]);
   const sem = Object.fromEntries(DIAS.map(([d]) => [d, (doc.semana || []).filter(b => b.dia === d).map(b => ({ desde: b.desde, hasta: b.hasta }))]));
   let cerrados = clon(doc.cerrados || []), especiales = clon(doc.especiales || []);
   const gen = formulario([
@@ -1551,31 +1596,96 @@ async function calendario() {
     const i = h("select", { "aria-label": "Hora", style: "width:auto;min-width:122px" }, lista.map(x => h("option", { value: x, selected: x === v }, bonita(x))));
     i.onchange = () => on(i.value); return i;
   };
-  const semana = h("div", { class: "wk" });
-  const pintarSemana = () => semana.replaceChildren(...DIAS.map(([d, nombre]) => {
-    const bl = sem[d], abierto = bl.length > 0;
+  // Mi semana: 7 cuadros (uno por día). Tocas un día y abajo editas su horario.
+  const corta = x => { let [H, M] = x.split(":").map(Number); const ap = H < 12 ? "a" : "p"; H = H % 12 || 12; return `${H}${M ? ":" + String(M).padStart(2, "0") : ""}${ap}`; };
+  const rango = bl => bl.map(b => `${corta(b.desde)}–${corta(b.hasta)}`).join(" · ");
+  let diaSel = (DIAS.find(([d]) => sem[d].length) || DIAS[0])[0];
+  const semana = h("div", { class: "wk2" });
+  const pintarSemana = () => {
+    const tiles = h("div", { class: "wtiles", role: "tablist", "aria-label": "Días de la semana" }, DIAS.map(([d, nombre]) => {
+      const on = sem[d].length > 0;
+      return h("button", { type: "button", role: "tab", "aria-selected": String(d === diaSel), class: "wt" + (on ? " on" : "") + (d === diaSel ? " sel" : ""), onclick: () => { diaSel = d; pintarSemana(); } },
+        h("span", { class: "wt-d" }, nombre.slice(0, 3)), h("span", { class: "wt-h" }, on ? rango(sem[d]) : "Libre"));
+    }));
+    const [d, nombre] = DIAS.find(([x]) => x === diaSel), bl = sem[d], abierto = bl.length > 0;
     const sw = h("input", { type: "checkbox", checked: abierto, role: "switch", "aria-label": `${nombre}: trabajo` });
-    sw.onchange = () => { sem[d] = sw.checked ? [{ desde: "06:00", hasta: "20:00" }] : []; pintarSemana(); };
-    const lado = abierto ? h("div", null, bl.map((b, i) => h("div", { class: "blk" }, hora(b.desde, v => b.desde = v), h("span", { class: "muted" }, "a"), hora(b.hasta, v => b.hasta = v),
-        bl.length > 1 ? h("button", { class: "ib", type: "button", "aria-label": "Quitar horario", onclick: () => { bl.splice(i, 1); pintarSemana(); } }, "×") : null)),
-      h("button", { class: "lnk", type: "button", style: "font-size:.85rem;padding:6px 12px", onclick: () => { bl.push({ desde: "16:00", hasta: "19:00" }); pintarSemana(); } }, "+ Otro horario ese día"),
-      h("button", { class: "lnk", type: "button", style: "font-size:.85rem;padding:6px 12px", onclick: () => { DIAS.forEach(([o]) => { sem[o] = bl.map(x => ({ ...x })); }); pintarSemana(); toast("Listo: los 7 días tienen este horario. Toca Guardar calendario."); } }, "Usar este horario todos los días"))
-      : h("div", { class: "closed" }, "No trabajo");
-    return h("div", { class: "wd" }, h("label", { class: "dn sw", style: "justify-content:flex-start" }, sw, nombre), lado);
-  }));
-  pintarSemana();
+    sw.onchange = () => { sem[d] = sw.checked ? [{ desde: "10:00", hasta: "18:00" }] : []; pintarSemana(); pintarMes(); };
+    const cambio = () => { semana.querySelectorAll(".wt.sel .wt-h").forEach(x => x.textContent = rango(bl)); pintarMes(); };
+    const editor = h("div", { class: "wed" },
+      h("div", { class: "wed-top" }, h("b", null, nombre), h("label", { class: "sw", style: "gap:10px" }, h("span", null, abierto ? "Trabajo" : "No trabajo"), sw)),
+      abierto ? h("div", null, bl.map((b, i) => h("div", { class: "blk" }, hora(b.desde, v => { b.desde = v; cambio(); }), h("span", { class: "muted" }, "a"), hora(b.hasta, v => { b.hasta = v; cambio(); }),
+          bl.length > 1 ? h("button", { class: "ib", type: "button", "aria-label": "Quitar horario", onclick: () => { bl.splice(i, 1); pintarSemana(); pintarMes(); } }, "×") : null)),
+        h("div", { class: "wed-btns" },
+          h("button", { class: "lnk", type: "button", onclick: () => { bl.push({ desde: "16:00", hasta: "19:00" }); pintarSemana(); pintarMes(); } }, "+ Otro horario ese día"),
+          h("button", { class: "lnk", type: "button", onclick: () => { DIAS.forEach(([o]) => { sem[o] = bl.map(x => ({ ...x })); }); pintarSemana(); pintarMes(); toast("Listo: los 7 días tienen este horario. Toca Guardar calendario."); } }, "Usar este horario todos los días")))
+        : h("p", { class: "muted", style: "margin:4px 0 0" }, "Este día no se puede reservar. Enciéndelo para poner tu horario."));
+    semana.replaceChildren(tiles, editor);
+  };
+
+  // Mi mes: cuadros con la fecha de cada día, tus citas y si trabajas, está bloqueado o es día extra.
+  const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const DSEM = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+  const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const hoyTx = (() => { try { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } })();
+  let vy = Number(hoyTx.slice(0, 4)), vm = Number(hoyTx.slice(5, 7)) - 1, fechaSel = hoyTx;
+  const citas = {}; (res && res.reservas || []).forEach(r => { (citas[r.fecha] = citas[r.fecha] || []).push(r); });
+  const estado = f => {
+    const c = cerrados.find(x => x.fecha === f); if (c) return { t: "bloq", lbl: "Cerrado", c };
+    const e = especiales.filter(x => x.fecha === f); if (e.length) return { t: "extra", lbl: rango(e), e };
+    const w = sem[DSEM[new Date(f + "T12:00").getDay()]]; return w.length ? { t: "on", lbl: rango(w) } : { t: "off", lbl: "Libre" };
+  };
+  const mes = h("div", { class: "mes" });
+  const pintarMes = () => {
+    const primero = new Date(vy, vm, 1), total = new Date(vy, vm + 1, 0).getDate(), hueco = (primero.getDay() + 6) % 7;
+    const cab = h("div", { class: "mes-cab" },
+      h("button", { class: "ib", type: "button", "aria-label": "Mes anterior", onclick: () => { vm--; if (vm < 0) { vm = 11; vy--; } pintarMes(); } }, "‹"),
+      h("b", null, `${MESES[vm][0].toUpperCase() + MESES[vm].slice(1)} ${vy}`),
+      h("button", { class: "ib", type: "button", "aria-label": "Mes siguiente", onclick: () => { vm++; if (vm > 11) { vm = 0; vy++; } pintarMes(); } }, "›"));
+    const grid = h("div", { class: "mes-grid" }, ["L", "M", "M", "J", "V", "S", "D"].map(x => h("span", { class: "mes-ds" }, x)));
+    for (let i = 0; i < hueco; i++) grid.append(h("span", { class: "md vacio" }));
+    for (let d = 1; d <= total; d++) {
+      const f = iso(vy, vm, d), e = estado(f), n = (citas[f] || []).length;
+      grid.append(h("button", { type: "button", class: `md ${e.t}${f === hoyTx ? " hoy" : ""}${f === fechaSel ? " sel" : ""}${f < hoyTx ? " pasado" : ""}`, "aria-label": `${d} de ${MESES[vm]}: ${e.lbl}${n ? `, ${n} cita${n > 1 ? "s" : ""}` : ""}`, onclick: () => { fechaSel = f; pintarMes(); } },
+        h("span", { class: "md-n" }, String(d)), h("span", { class: "md-l" }, e.t === "on" ? "" : e.t === "extra" ? "Extra" : e.lbl), n ? h("span", { class: "md-c" }, String(n)) : null));
+    }
+    // Detalle del día elegido
+    const e = estado(fechaSel), dt = new Date(fechaSel + "T12:00");
+    const titulo = dt.toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" });
+    const lista = (citas[fechaSel] || []).map(r => h("div", { class: "md-cita" }, h("b", null, r.horaBonita), h("span", null, `${r.nombre} · ${r.lectura}`)));
+    const acc = [];
+    if (fechaSel >= hoyTx) {
+      if (e.t === "bloq") acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.splice(cerrados.indexOf(e.c), 1); repintar(); } }, "Abrir otra vez este día"));
+      else if (e.t === "extra") {
+        e.e.forEach(x => acc.push(h("div", { class: "blk" }, hora(x.desde, v => { x.desde = v; repintar(); }), h("span", { class: "muted" }, "a"), hora(x.hasta, v => { x.hasta = v; repintar(); }))));
+        acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { for (let i = especiales.length - 1; i >= 0; i--) if (especiales[i].fecha === fechaSel) especiales.splice(i, 1); repintar(); } }, "Volver a mi horario normal"));
+        acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.push({ fecha: fechaSel, motivo: "" }); repintar(); } }, "Cerrar este día"));
+      } else {
+        if (e.t === "on") acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { cerrados.push({ fecha: fechaSel, motivo: "" }); repintar(); } }, "Cerrar este día"));
+        acc.push(h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { especiales.push({ fecha: fechaSel, desde: "10:00", hasta: "14:00" }); repintar(); } }, e.t === "on" ? "Cambiar horario solo este día" : "Abrir este día"));
+      }
+    }
+    const det = h("div", { class: "md-det" },
+      h("div", { class: "md-det-top" }, h("b", null, titulo[0].toUpperCase() + titulo.slice(1)), h("span", { class: "pill md-p-" + e.t }, e.t === "on" ? `Trabajo ${e.lbl}` : e.t === "extra" ? `Día extra ${e.lbl}` : e.lbl)),
+      lista.length ? h("div", { class: "md-citas" }, lista) : h("p", { class: "muted", style: "margin:6px 0 0" }, "Sin citas este día."),
+      acc.length ? h("div", { class: "md-acc" }, acc) : null);
+    const ley = h("div", { class: "mes-ley" }, [["on", "Trabajo"], ["off", "Libre"], ["bloq", "Cerrado"], ["extra", "Día extra"]].map(([k, t]) => h("span", null, h("i", { class: "ly-" + k }), t)), h("span", null, h("i", { class: "ly-c" }), "Citas"));
+    mes.replaceChildren(cab, grid, ley, det);
+  };
+  const repintar = () => { pintarMes(); listaC.pintar(); listaE.pintar(); };
   const listaFechas = (arr, conHoras, vacio, boton) => {
     const caja = h("div", { class: "lst" });
     const pintar = () => caja.replaceChildren(
       ...(arr.length ? arr.map((x, i) => {
-        const f = h("input", { type: "date", value: x.fecha || "", "aria-label": "Fecha", oninput: e => x.fecha = e.target.value });
+        const f = h("input", { type: "date", value: x.fecha || "", "aria-label": "Fecha", onchange: e => { x.fecha = e.target.value; pintarMes(); } });
         return h("div", { class: "r" }, f,
-          conHoras ? [hora(x.desde, v => x.desde = v), hora(x.hasta, v => x.hasta = v)] : h("input", { type: "text", value: x.motivo || "", placeholder: "Motivo (solo lo ves tú)", "aria-label": "Motivo", oninput: e => x.motivo = e.target.value }),
-          h("button", { class: "ib", type: "button", "aria-label": "Quitar", onclick: () => { arr.splice(i, 1); pintar(); } }, "×"));
+          conHoras ? [hora(x.desde, v => { x.desde = v; pintarMes(); }), hora(x.hasta, v => { x.hasta = v; pintarMes(); })] : h("input", { type: "text", value: x.motivo || "", placeholder: "Motivo (solo lo ves tú)", "aria-label": "Motivo", oninput: e => x.motivo = e.target.value }),
+          h("button", { class: "ib", type: "button", "aria-label": "Quitar", onclick: () => { arr.splice(i, 1); pintar(); pintarMes(); } }, "×"));
       }) : [h("p", { class: "muted", style: "margin:0" }, vacio)]),
       h("div", null, h("button", { class: "btn btn-line btn-sm", type: "button", onclick: () => { arr.push(conHoras ? { fecha: "", desde: "10:00", hasta: "14:00" } : { fecha: "", motivo: "" }); pintar(); } }, boton)));
-    pintar(); return caja;
+    caja.pintar = pintar; pintar(); return caja;
   };
+  const listaC = listaFechas(cerrados, false, "No tienes días bloqueados.", "+ Bloquear un día"), listaE = listaFechas(especiales, true, "No tienes días extra.", "+ Agregar día extra");
+  pintarSemana(); pintarMes();
   const err = h("p", { class: "note err", hidden: true });
   const b = h("button", { class: "btn btn-solid", type: "button", onclick: async () => {
     err.hidden = true;
@@ -1588,9 +1698,10 @@ async function calendario() {
   } }, "Guardar calendario");
   marco(...cabeza("Mi calendario", "Cuándo te pueden reservar una lectura. Todas las horas son de Texas."),
     h("div", { class: "card" }, h("h2", null, "General"), gen.nodo),
-    h("div", { class: "card" }, h("h2", null, "Mi semana"), h("p", { class: "sub" }, "Los días y horas que trabajas normalmente."), semana),
-    h("div", { class: "card" }, h("h2", null, "Días que NO trabajo"), h("p", { class: "sub" }, "Vacaciones, compromisos o días libres. Ese día no se puede reservar."), listaFechas(cerrados, false, "No tienes días bloqueados.", "+ Bloquear un día")),
-    h("div", { class: "card" }, h("h2", null, "Días extra que SÍ trabajo"), h("p", { class: "sub" }, "Para abrir un día que normalmente no trabajas o cambiar el horario de una fecha."), listaFechas(especiales, true, "No tienes días extra.", "+ Agregar día extra")),
+    h("div", { class: "card" }, h("h2", null, "Mi mes"), h("p", { class: "sub" }, "Toca un día para ver tus citas, bloquearlo o abrirlo."), mes),
+    h("div", { class: "card" }, h("h2", null, "Mi semana"), h("p", { class: "sub" }, "Los días y horas que trabajas normalmente. Toca un día para cambiarlo."), semana),
+    h("div", { class: "card" }, h("h2", null, "Días que NO trabajo"), h("p", { class: "sub" }, "Vacaciones, compromisos o días libres. Ese día no se puede reservar."), listaC),
+    h("div", { class: "card" }, h("h2", null, "Días extra que SÍ trabajo"), h("p", { class: "sub" }, "Para abrir un día que normalmente no trabajas o cambiar el horario de una fecha."), listaE),
     err, h("div", { class: "save-bar" }, b));
 }
 
