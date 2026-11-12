@@ -110,6 +110,9 @@
 .post .tx a{word-break:break-all}
 .video{position:relative;aspect-ratio:16/9;background:#000;margin-top:14px}
 .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.grab{margin-top:14px;border-radius:12px;overflow:hidden;background:#000}
+.grab video{display:block;width:100%;max-height:78vh;background:#000}
+.grab.vertical{width:min(100%,440px);margin-left:auto;margin-right:auto}
 .video.vertical{aspect-ratio:9/16;max-height:78vh;margin-left:auto;margin-right:auto;width:min(100%,440px)}
 .enlace-video{margin:14px 18px 0}
 .fotos{display:grid;gap:3px;margin-top:14px}
@@ -487,6 +490,11 @@ function tarjetaPost(p) {
   c.append(cab);
   if (s(p.titulo)) c.append(el("h3", null, p.titulo));
   if (s(p.texto)) { const t = el("div", "tx"); t.append(conEnlaces(p.texto)); c.append(t); }
+  if (p.grabacion) {
+    const g = el("div", "grab" + (p.grabacion.vertical ? " vertical" : "")), v = el("video");
+    v.controls = true; v.playsInline = true; v.preload = "metadata"; v.setAttribute("controlsList", "nodownload"); v.oncontextmenu = e => e.preventDefault();
+    v.src = `/api/comunidad/video?p=${encodeURIComponent(p.id)}`; g.append(v); c.append(g);
+  }
   if (p.video) c.append(video(p.video));
   if ((p.fotos || []).length) {
     const n = p.fotos.length, g = el("div", "fotos " + (n === 1 ? "n1" : n === 2 ? "n2" : n === 3 ? "n3" : "nmas"));

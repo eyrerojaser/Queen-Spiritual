@@ -149,6 +149,27 @@ progress{width:100%;height:8px}
 .empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center}
 /* calendario */
 .wk{display:grid;gap:10px}
+.grab-acts{display:flex;flex-wrap:wrap;gap:8px}
+.grab-pv{width:100%;max-height:50vh;border-radius:12px;background:#000;margin-bottom:6px}
+.ok-line{color:#1E7A46;font-weight:600;margin:4px 0 8px}
+.rec-ov[open]{display:flex}
+.rec-ov{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;z-index:1000;background:#0F1428;color:#fff;display:none;flex-direction:column;padding:max(12px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));gap:10px}
+.rec-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rec-top .x{background:none;border:0;color:#fff;font-size:1.8rem;line-height:1;cursor:pointer}
+.rec-time{display:inline-flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-weight:700}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:#E5484D;animation:recP 1s infinite}
+@keyframes recP{50%{opacity:.25}}
+.rec-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#000;border-radius:14px;overflow:hidden;border:1.5px solid #D4AE52}
+.rec-v{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;background:#000}
+.rec-v.espejo{transform:scaleX(-1)}
+.rec-msg{margin:0;min-height:1.2em;color:#FFD966;text-align:center}
+.rec-src{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.rec-src .btn{color:#fff;border-color:rgba(255,255,255,.4)}
+.rec-src .btn[aria-pressed="true"]{background:#fff;color:#1A2340}
+.rec-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.rec-btn{background:#E5484D;border-color:#E5484D;min-width:220px}
+.rec-btn.on{background:#fff;color:#C0392B;border-color:#fff}
+.rec-acts .btn-line{color:#fff;border-color:rgba(255,255,255,.5)}
 .cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
 .cat-chips button,.cat-chips span{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:.88rem;cursor:pointer}
 .cat-chips span{cursor:default;background:var(--blue-soft);color:var(--blue);border-color:transparent}
@@ -482,6 +503,21 @@ async function subirFoto(file) {
   c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
   const blob = await new Promise(r => c.toBlob(r, "image/jpeg", .85));
   return (await api("/api/panel/subir?tipo=img", { method: "POST", raw: blob, ct: "image/jpeg" })).url;
+}
+// Videos: se suben en partes de 4 MB (máximo 500 MB)
+async function subirVideo(file, progreso) {
+  if (file.size > 500 * 1024 * 1024) throw new Error("El video pesa más de 500 MB. Grábalo más corto o en menor calidad.");
+  const PARTE = 4 * 1024 * 1024, total = Math.max(1, Math.ceil(file.size / PARTE)), id = crypto.randomUUID();
+  let r;
+  for (let i = 0; i < total; i++) {
+    const trozo = file.slice(i * PARTE, (i + 1) * PARTE);
+    for (let intento = 0; ; intento++) {
+      try { r = await api(`/api/panel/subir?tipo=vid&id=${id}&parte=${i}&total=${total}`, { method: "POST", raw: trozo, ct: "application/octet-stream" }); break; }
+      catch (e) { if (intento >= 2 || (e && /no es un video|demasiado grande/.test(e.message || ""))) throw e; await new Promise(z => setTimeout(z, 1500)); }
+    }
+    progreso((i + 1) / total);
+  }
+  return r;
 }
 async function subirPdf(file, progreso) {
   if (file.size > 20 * 1024 * 1024) throw new Error("El PDF pesa más de 20 MB. Comprímelo e inténtalo de nuevo.");
@@ -1876,6 +1912,102 @@ function campoFotos(valor) {
 }
 
 // PDFs descargables para una publicación (solo los bajan tus miembros).
+// Grabar un video aquí mismo (cámara o pantalla) o subirlo del teléfono; se queda en tu página, solo para miembros.
+function campoGrabacion(valor) {
+  let v = valor ? clon(valor) : null, local = null;
+  const caja = h("div", { class: "grab-box" }), bar = h("progress", { max: 1, value: 0, hidden: true });
+  const inp = h("input", { type: "file", accept: "video/mp4,video/quicktime,video/webm,video/*", hidden: true });
+  const estado = h("p", { class: "muted", style: "margin:6px 0 0" });
+  const bGrabar = h("button", { type: "button", class: "btn btn-solid btn-sm", onclick: () => grabadora(f => subir(f)) }, "🎥 Grabar video aquí");
+  const bSubir = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => inp.click() }, "📁 Subir video del teléfono");
+  const bQuitar = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => { if (confirm("¿Quitar este video de la publicación?")) { v = null; local = null; pintar(); } } }, "Quitar video");
+  const pintar = () => {
+    caja.replaceChildren();
+    if (v) {
+      if (local) { const pv = h("video", { controls: true, playsinline: true, src: local, class: "grab-pv" }); caja.append(pv); }
+      caja.append(h("p", { class: "ok-line" }, "✓ Video listo. Se ve en la Comunidad, solo para miembros."));
+      const vert = h("input", { type: "checkbox", checked: !!v.vertical, role: "switch" }); vert.onchange = () => v.vertical = vert.checked;
+      caja.append(h("label", { class: "sw" }, h("span", null, "Es un video vertical (de teléfono)"), vert));
+    }
+    bGrabar.hidden = bSubir.hidden = !!v; bQuitar.hidden = !v;
+  };
+  const subir = async (f) => {
+    bGrabar.disabled = bSubir.disabled = true; bar.hidden = false; bar.value = 0; estado.textContent = "Subiendo tu video… no cierres esta ventana.";
+    try {
+      const r = await subirVideo(f, x => { bar.value = x; estado.textContent = `Subiendo tu video… ${Math.round(x * 100)}%`; });
+      local = URL.createObjectURL(f);
+      const dims = await new Promise(ok => { const t = document.createElement("video"); t.preload = "metadata"; t.onloadedmetadata = () => ok([t.videoWidth, t.videoHeight]); t.onerror = () => ok([16, 9]); t.src = local; });
+      v = { ref: r.ref, vertical: dims[1] > dims[0] }; estado.textContent = "";
+    } catch (e) { estado.textContent = ""; fallo(e); }
+    bGrabar.disabled = bSubir.disabled = false; bar.hidden = true; pintar();
+  };
+  inp.onchange = () => { const f = inp.files[0]; inp.value = ""; if (f) subir(f); };
+  pintar();
+  return { nodo: h("div", { class: "fld" }, h("div", { class: "lab" }, "Tu video"), caja, h("div", { class: "grab-acts" }, bGrabar, bSubir, bQuitar), bar, estado, inp,
+    h("div", { class: "hint" }, "Graba aquí con tu cámara o tu pantalla, o sube un video que ya tengas. Se guarda en tu página y solo lo ven tus miembros. Hasta 500 MB (unos 30 a 40 minutos).")), get: () => v };
+}
+
+// Grabadora: cámara (frontal o trasera) o pantalla, con micrófono. Al terminar puedes verlo antes de usarlo.
+function grabadora(alTerminar) {
+  const ov = h("dialog", { class: "rec-ov", "aria-label": "Grabar video" });
+  const vid = h("video", { autoplay: true, muted: true, playsinline: true, class: "rec-v" });
+  const reloj = h("span", { class: "rec-t" }, "00:00"), punto = h("span", { class: "rec-dot", hidden: true });
+  const msg = h("p", { class: "rec-msg" });
+  let stream = null, rec = null, partes = [], t0 = 0, tic = null, frente = true, fuente = "camara", archivo = null;
+  const tipo = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || "";
+  const parar = () => { if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; };
+  const cerrar = () => { clearInterval(tic); try { if (rec && rec.state !== "inactive") { rec.onstop = null; rec.stop(); } } catch (e) {} parar(); try { ov.close(); } catch (e) {} ov.remove(); };
+  const bCam = h("button", { type: "button", class: "btn btn-line btn-sm", "aria-pressed": "true", onclick: () => abrir("camara") }, "📷 Cámara");
+  const bPan = h("button", { type: "button", class: "btn btn-line btn-sm", "aria-pressed": "false", hidden: !(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia), onclick: () => abrir("pantalla") }, "🖥️ Mi pantalla");
+  const bGirar = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => { frente = !frente; abrir("camara"); } }, "🔄 Girar cámara");
+  const bRec = h("button", { type: "button", class: "btn btn-solid rec-btn" }, "● Empezar a grabar");
+  const bOtra = h("button", { type: "button", class: "btn btn-line", hidden: true }, "Grabar otra vez");
+  const bUsar = h("button", { type: "button", class: "btn btn-solid", hidden: true }, "Usar este video");
+  const fuentes = h("div", { class: "rec-src" }, bCam, bPan, bGirar);
+  async function abrir(f) {
+    fuente = f; parar(); msg.textContent = ""; archivo = null;
+    bCam.setAttribute("aria-pressed", String(f === "camara")); bPan.setAttribute("aria-pressed", String(f === "pantalla")); bGirar.hidden = f !== "camara";
+    try {
+      if (f === "pantalla") {
+        const pan = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
+        let mic = null; try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); } catch (e) {}
+        stream = new MediaStream([...pan.getVideoTracks(), ...(mic ? mic.getAudioTracks() : pan.getAudioTracks())]);
+        pan.getVideoTracks()[0].onended = () => { if (rec && rec.state === "recording") rec.stop(); };
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? "user" : "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: { echoCancellation: true, noiseSuppression: true } });
+      }
+      vid.srcObject = stream; vid.muted = true; vid.controls = false; vid.classList.toggle("espejo", f === "camara" && frente);
+      bRec.hidden = false; bOtra.hidden = bUsar.hidden = true; fuentes.hidden = false;
+    } catch (e) { msg.textContent = f === "pantalla" ? "No se pudo compartir la pantalla." : "No se pudo abrir la cámara. Revisa que le diste permiso a la cámara y al micrófono."; }
+  }
+  bRec.onclick = () => {
+    if (rec && rec.state === "recording") { rec.stop(); return; }
+    if (!stream) return abrir(fuente);
+    if (!window.MediaRecorder) { msg.textContent = "Este navegador no puede grabar. Usa Safari o Chrome actualizados, o sube un video del teléfono."; return; }
+    partes = []; rec = new MediaRecorder(stream, tipo ? { mimeType: tipo, videoBitsPerSecond: 2_000_000 } : undefined);
+    rec.ondataavailable = e => { if (e.data && e.data.size) partes.push(e.data); };
+    rec.onstop = () => {
+      clearInterval(tic); punto.hidden = true; parar();
+      const mt = (rec.mimeType || tipo || "video/mp4").split(";")[0];
+      const blob = new Blob(partes, { type: mt });
+      archivo = new File([blob], `video-${Date.now()}.${/webm/.test(mt) ? "webm" : "mp4"}`, { type: mt });
+      vid.srcObject = null; vid.src = URL.createObjectURL(blob); vid.muted = false; vid.controls = true; vid.classList.remove("espejo");
+      bRec.hidden = true; fuentes.hidden = true; bOtra.hidden = bUsar.hidden = false; bRec.textContent = "● Empezar a grabar"; bRec.classList.remove("on");
+      msg.textContent = "Mira tu video. Si te gusta, toca «Usar este video».";
+    };
+    rec.start(1000); t0 = Date.now(); punto.hidden = false; bRec.textContent = "■ Terminar"; bRec.classList.add("on"); fuentes.hidden = true; msg.textContent = "";
+    tic = setInterval(() => { const s2 = Math.floor((Date.now() - t0) / 1000); reloj.textContent = `${String(Math.floor(s2 / 60)).padStart(2, "0")}:${String(s2 % 60).padStart(2, "0")}`; }, 500);
+  };
+  bOtra.onclick = () => { reloj.textContent = "00:00"; abrir(fuente); };
+  bUsar.onclick = () => { const f = archivo; cerrar(); if (f) alTerminar(f); };
+  ov.append(
+    h("div", { class: "rec-top" }, h("b", null, "Grabar video"), h("span", { class: "rec-time" }, punto, reloj), h("button", { type: "button", class: "x", "aria-label": "Cerrar", onclick: () => { if (!rec || rec.state !== "recording" || confirm("¿Dejar de grabar y salir?")) cerrar(); } }, "×")),
+    h("div", { class: "rec-stage" }, vid), msg, fuentes, h("div", { class: "rec-acts" }, bRec, bOtra, bUsar));
+  ov.addEventListener("cancel", e => { e.preventDefault(); if (!rec || rec.state !== "recording" || confirm("¿Dejar de grabar y salir?")) cerrar(); });
+  document.body.append(ov); ov.showModal();
+  abrir("camara");
+}
+
 function campoArchivos(valor) {
   let v = Array.isArray(valor) ? valor.map(a => ({ ...a })) : [];
   const lista = h("div", { style: "display:grid;gap:6px" }), inp = h("input", { type: "file", accept: "application/pdf,.pdf", multiple: true, hidden: true });
@@ -1901,14 +2033,14 @@ function campoArchivos(valor) {
 
 function editarPost(p, alGuardar) {
   const nuevo = !p;
-  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", fotos: [], archivos: [], fijado: false, visible: true, avisar: true };
+  p = p ? clon(p) : { tipo: "video", titulo: "", texto: "", video: "", grabacion: null, fotos: [], archivos: [], fijado: false, visible: true, avisar: true };
   const yaSalio = !nuevo && p.salio !== false;
   p.programar = !!p.programado; p.pfecha = p.programado ? p.programado.fecha : ""; p.phora = p.programado ? p.programado.hora : "09:00";
   const manana = new Date(Date.now() + 864e5), hoyIso = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, "0")}-${String(manana.getDate()).padStart(2, "0")}`;
   const fm = formulario([
     { k: "tipo", t: "seg", label: "¿Qué vas a publicar?", ops: TIPOS_POST },
     { k: "titulo", t: "text", label: "Título", ph: "Ej: Cómo preparar un baño de limpieza" },
-    { k: "video", t: "text", label: "Enlace del video", ph: "https://youtube.com/…", hint: "Sube el video a YouTube como “No listado” y pega aquí el enlace: así solo lo ven tus miembros. También sirven Vimeo, Google Drive, Instagram, TikTok o Facebook.", si: v => v.tipo === "video" },
+    { k: "video", t: "text", label: "O pega un enlace (YouTube, Vimeo…)", ph: "https://youtube.com/…", hint: "Opcional. Si ya grabaste o subiste tu video arriba, déjalo vacío." },
     { k: "texto", t: "area", label: "Texto", rows: 6, hint: "La enseñanza, la explicación del video o lo que quieras contar." },
     { k: "fijado", t: "bool", label: "Fijar arriba", hint: "Sale primero en la comunidad." },
     { k: "visible", t: "bool", label: "Publicado", hint: "Apágalo para guardarlo como borrador." },
@@ -1919,13 +2051,14 @@ function editarPost(p, alGuardar) {
     ]),
     ...(p.avisado ? [] : [{ k: "avisar", t: "bool", label: "Avisar a los miembros por correo", hint: "Si la programas, el aviso sale cuando se publique." }]),
   ], p);
-  const fotos = campoFotos(p.fotos), archivos = campoArchivos(p.archivos);
-  fm.nodo.insertBefore(fotos.nodo, fm.nodo.children[3]);
+  const fotos = campoFotos(p.fotos), archivos = campoArchivos(p.archivos), grab = campoGrabacion(p.grabacion);
+  fm.nodo.insertBefore(grab.nodo, fm.nodo.children[2]);
+  fm.nodo.insertBefore(fotos.nodo, fm.nodo.children[4]);
   fm.nodo.insertBefore(archivos.nodo, fotos.nodo.nextSibling);
   const err = h("p", { class: "note err", hidden: true });
   const ok = h("button", { type: "button", class: "btn btn-solid" }, nuevo ? "Publicar" : "Guardar");
   ok.onclick = async () => {
-    const v = { ...fm.valores(), fotos: fotos.get(), archivos: archivos.get(), id: p.id };
+    const v = { ...fm.valores(), grabacion: grab.get(), fotos: fotos.get(), archivos: archivos.get(), id: p.id };
     if (v.programar && !v.pfecha) { err.textContent = "Elige el día en que sale la publicación."; err.hidden = false; return; }
     if ("programar" in v) v.programado = v.programar ? { fecha: v.pfecha, hora: v.phora } : null; else v.programado = p.programado || null;
     if (!("avisar" in v)) v.avisar = !!p.avisar;

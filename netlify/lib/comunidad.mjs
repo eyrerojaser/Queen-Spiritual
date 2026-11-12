@@ -194,6 +194,7 @@ export function limpiarPost(p, antes = {}) {
     titulo: texto(p.titulo, 160), texto: texto(p.texto, 8000), video: url(p.video),
     fotos: (Array.isArray(p.fotos) ? p.fotos : []).map(foto).filter(Boolean).slice(0, 12),
     archivos: (Array.isArray(p.archivos) ? p.archivos : []).map((a) => a && /^pdf\/[0-9a-f-]{36}$/.test(a.ref || "") ? { ref: a.ref, nombre: texto(a.nombre, 200) || "archivo.pdf" } : null).filter(Boolean).slice(0, 6),
+    grabacion: p.grabacion && /^vid\/[0-9a-f-]{36}$/.test(p.grabacion.ref || "") ? { ref: p.grabacion.ref, vertical: p.grabacion.vertical === true } : null,
     fijado: p.fijado === true, visible: p.visible !== false,
     programado: limpiarProgramado(p.programar === false ? null : p.programado),
     avisar: p.avisar === true, avisado: antes.avisado || "",
