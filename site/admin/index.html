@@ -153,6 +153,29 @@ progress{width:100%;height:8px}
 .grab-pv{width:100%;max-height:50vh;border-radius:12px;background:#000;margin-bottom:6px}
 .ok-line{color:#1E7A46;font-weight:600;margin:4px 0 8px}
 .rec-ov[open]{display:flex}
+.rec-cuerpo{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.rec-src-v{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.rec-fotos{display:flex;gap:8px;overflow-x:auto;padding:2px}
+.rec-th{flex:none;width:58px;height:58px;border-radius:10px;border:2px solid rgba(255,255,255,.35);background:#1A2340;padding:0;overflow:hidden;cursor:pointer;color:#fff;font:inherit;font-size:.75rem;font-weight:700}
+.rec-th img{width:100%;height:100%;object-fit:cover;display:block}
+.rec-th.on{border-color:#FFD966;box-shadow:0 0 0 2px #FFD966}
+.rec-ayuda{margin:0;font-size:.82rem;color:#C9D1EA;text-align:center}
+.ed-stage{position:relative}
+.ed-capa{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#141B33;pointer-events:none}
+.ed-panel{background:#1A2340;border-radius:14px;padding:12px;display:grid;gap:8px;max-height:46vh;overflow:auto}
+.ed-fila{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ed-panel .btn-line{color:#fff;border-color:rgba(255,255,255,.5)}
+.ed-lab{font-weight:700;color:#FFD966}
+.ed-ahora{font-variant-numeric:tabular-nums;color:#C9D1EA}
+.ed-fotos{display:grid;gap:6px}
+.ed-foto{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:6px}
+.ed-foto img{width:44px;height:44px;object-fit:cover;border-radius:8px}
+.ed-foto span{flex:1}
+.ed-foto select{flex:none;width:auto;font:inherit;border-radius:8px;padding:4px 6px}
+.ed-foto .ib{color:#fff;background:transparent;border-color:rgba(255,255,255,.4)}
+.ed-2{display:grid;grid-template-columns:1fr 1fr}
+.ed-2 .btn{width:100%}
+.ed-bar{width:100%}
 .rec-ov{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;z-index:1000;background:#0F1428;color:#fff;display:none;flex-direction:column;padding:max(12px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));gap:10px}
 .rec-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .rec-top .x{background:none;border:0;color:#fff;font-size:1.8rem;line-height:1;cursor:pointer}
@@ -1941,71 +1964,189 @@ function campoGrabacion(valor) {
     } catch (e) { estado.textContent = ""; fallo(e); }
     bGrabar.disabled = bSubir.disabled = false; bar.hidden = true; pintar();
   };
-  inp.onchange = () => { const f = inp.files[0]; inp.value = ""; if (f) subir(f); };
+  inp.onchange = () => { const f = inp.files[0]; inp.value = ""; if (f) editorVideo(f, g => subir(g)); };
   pintar();
   return { nodo: h("div", { class: "fld" }, h("div", { class: "lab" }, "Tu video"), caja, h("div", { class: "grab-acts" }, bGrabar, bSubir, bQuitar), bar, estado, inp,
-    h("div", { class: "hint" }, "Graba aquí con tu cámara o tu pantalla, o sube un video que ya tengas. Se guarda en tu página y solo lo ven tus miembros. Hasta 500 MB (unos 30 a 40 minutos).")), get: () => v };
+    h("div", { class: "hint" }, "Graba aquí con tu cámara o tu pantalla, o sube un video que ya tengas. Antes de publicarlo lo puedes recortar y ponerle fotos. Solo lo ven tus miembros. Hasta 500 MB (unos 30 a 40 minutos).")), get: () => v };
 }
 
-// Grabadora: cámara (frontal o trasera) o pantalla, con micrófono. Al terminar puedes verlo antes de usarlo.
+// ── Video: herramientas comunes ──
+const TIPO_GRAB = () => ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || "";
+const cargarImg = f => new Promise((ok, mal) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => mal(new Error("No se pudo abrir esa foto.")); im.src = URL.createObjectURL(f); });
+// Dibuja una foto completa (sin cortarla) sobre fondo azul oscuro
+function dibujarFoto(c, im) { const W = c.canvas.width, H = c.canvas.height, k = Math.min(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * k, hh = im.naturalHeight * k; c.fillStyle = "#141B33"; c.fillRect(0, 0, W, H); c.drawImage(im, (W - w) / 2, (H - hh) / 2, w, hh); }
+const archivoDe = (partes, mt) => { mt = (mt || "video/mp4").split(";")[0]; return new File([new Blob(partes, { type: mt })], `video-${Date.now()}.${/webm/.test(mt) ? "webm" : "mp4"}`, { type: mt }); };
+function pantallaVideo(titulo) {
+  const ov = h("dialog", { class: "rec-ov", "aria-label": titulo });
+  const cuerpo = h("div", { class: "rec-cuerpo" });
+  let alCerrar = () => true;
+  const cerrar = () => { try { ov.close(); } catch (e) {} ov.remove(); };
+  const x = h("button", { type: "button", class: "x", "aria-label": "Cerrar", onclick: () => { if (alCerrar() !== false) cerrar(); } }, "×");
+  const extra = h("span", { class: "rec-time" });
+  ov.addEventListener("cancel", e => { e.preventDefault(); if (alCerrar() !== false) cerrar(); });
+  ov.append(h("div", { class: "rec-top" }, h("b", null, titulo), extra, x), cuerpo);
+  document.body.append(ov); ov.showModal();
+  return { ov, cuerpo, extra, cerrar, set alCerrar(f) { alCerrar = f; } };
+}
+
+// Grabadora: cámara o pantalla, con micrófono. Mientras grabas puedes mostrar fotos (tocas una y sale en el video).
 function grabadora(alTerminar) {
-  const ov = h("dialog", { class: "rec-ov", "aria-label": "Grabar video" });
-  const vid = h("video", { autoplay: true, muted: true, playsinline: true, class: "rec-v" });
-  const reloj = h("span", { class: "rec-t" }, "00:00"), punto = h("span", { class: "rec-dot", hidden: true });
+  const P = pantallaVideo("Grabar video");
+  const cam = h("video", { autoplay: true, muted: true, playsinline: true, class: "rec-src-v" });
+  const lienzo = h("canvas", { class: "rec-v" }), c = lienzo.getContext("2d");
+  const ver = h("video", { playsinline: true, controls: true, class: "rec-v", hidden: true });
+  const reloj = h("span", null, "00:00"), punto = h("span", { class: "rec-dot", hidden: true });
+  P.extra.append(punto, reloj);
   const msg = h("p", { class: "rec-msg" });
-  let stream = null, rec = null, partes = [], t0 = 0, tic = null, frente = true, fuente = "camara", archivo = null;
-  const tipo = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || "";
-  const parar = () => { if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; };
-  const cerrar = () => { clearInterval(tic); try { if (rec && rec.state !== "inactive") { rec.onstop = null; rec.stop(); } } catch (e) {} parar(); try { ov.close(); } catch (e) {} ov.remove(); };
+  let stream = null, mic = null, rec = null, partes = [], t0 = 0, tic = null, frente = true, fuente = "camara", archivo = null, foto = null, anim = 0;
+  const fotos = [];
+  const parar = () => { [stream, mic].forEach(s2 => s2 && s2.getTracks().forEach(t => t.stop())); stream = mic = null; cancelAnimationFrame(anim); };
+  P.alCerrar = () => { if (rec && rec.state === "recording" && !confirm("¿Dejar de grabar y salir?")) return false; clearInterval(tic); try { if (rec && rec.state !== "inactive") { rec.onstop = null; rec.stop(); } } catch (e) {} parar(); };
+  const pintar = () => {
+    if (foto) dibujarFoto(c, foto);
+    else if (cam.readyState >= 2) { const w = cam.videoWidth, hh = cam.videoHeight; if (w && (lienzo.width !== w || lienzo.height !== hh)) { lienzo.width = w; lienzo.height = hh; } c.drawImage(cam, 0, 0, lienzo.width, lienzo.height); }
+    anim = requestAnimationFrame(pintar);
+  };
+  // Fotos para mostrar mientras grabas
+  const bandeja = h("div", { class: "rec-fotos" }), finp = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true });
+  const pintarBandeja = () => bandeja.replaceChildren(
+    ...fotos.map(im => h("button", { type: "button", class: "rec-th" + (foto === im ? " on" : ""), "aria-label": foto === im ? "Volver a la cámara" : "Mostrar esta foto en el video", onclick: () => { foto = foto === im ? null : im; pintarBandeja(); } }, h("img", { src: im.src, alt: "" }))),
+    h("button", { type: "button", class: "rec-th mas", onclick: () => finp.click() }, "+ Fotos"));
+  finp.onchange = async () => { for (const f of [...finp.files].slice(0, 12)) { try { fotos.push(await cargarImg(f)); } catch (e) {} } finp.value = ""; pintarBandeja(); };
+  pintarBandeja();
+  const ayudaFotos = h("p", { class: "rec-ayuda" }, "Toca una foto para que salga en el video; tócala otra vez para volver a la cámara.");
   const bCam = h("button", { type: "button", class: "btn btn-line btn-sm", "aria-pressed": "true", onclick: () => abrir("camara") }, "📷 Cámara");
   const bPan = h("button", { type: "button", class: "btn btn-line btn-sm", "aria-pressed": "false", hidden: !(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia), onclick: () => abrir("pantalla") }, "🖥️ Mi pantalla");
   const bGirar = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => { frente = !frente; abrir("camara"); } }, "🔄 Girar cámara");
+  const fuentes = h("div", { class: "rec-src" }, bCam, bPan, bGirar);
   const bRec = h("button", { type: "button", class: "btn btn-solid rec-btn" }, "● Empezar a grabar");
   const bOtra = h("button", { type: "button", class: "btn btn-line", hidden: true }, "Grabar otra vez");
+  const bEditar = h("button", { type: "button", class: "btn btn-line", hidden: true }, "✂️ Editar");
   const bUsar = h("button", { type: "button", class: "btn btn-solid", hidden: true }, "Usar este video");
-  const fuentes = h("div", { class: "rec-src" }, bCam, bPan, bGirar);
   async function abrir(f) {
-    fuente = f; parar(); msg.textContent = ""; archivo = null;
+    fuente = f; parar(); msg.textContent = ""; archivo = null; foto = null; pintarBandeja();
+    ver.hidden = true; lienzo.hidden = false;
     bCam.setAttribute("aria-pressed", String(f === "camara")); bPan.setAttribute("aria-pressed", String(f === "pantalla")); bGirar.hidden = f !== "camara";
     try {
       if (f === "pantalla") {
-        const pan = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
-        let mic = null; try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); } catch (e) {}
-        stream = new MediaStream([...pan.getVideoTracks(), ...(mic ? mic.getAudioTracks() : pan.getAudioTracks())]);
-        pan.getVideoTracks()[0].onended = () => { if (rec && rec.state === "recording") rec.stop(); };
-      } else {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? "user" : "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: { echoCancellation: true, noiseSuppression: true } });
-      }
-      vid.srcObject = stream; vid.muted = true; vid.controls = false; vid.classList.toggle("espejo", f === "camara" && frente);
-      bRec.hidden = false; bOtra.hidden = bUsar.hidden = true; fuentes.hidden = false;
+        stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+        stream.getVideoTracks()[0].onended = () => { if (rec && rec.state === "recording") rec.stop(); };
+      } else stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? "user" : "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+      try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); } catch (e) { msg.textContent = "No pude abrir el micrófono: el video se grabará sin sonido."; }
+      cam.srcObject = stream; await cam.play().catch(() => {});
+      lienzo.width = cam.videoWidth || 1280; lienzo.height = cam.videoHeight || 720; pintar();
+      bRec.hidden = false; bOtra.hidden = bUsar.hidden = bEditar.hidden = true; fuentes.hidden = false;
     } catch (e) { msg.textContent = f === "pantalla" ? "No se pudo compartir la pantalla." : "No se pudo abrir la cámara. Revisa que le diste permiso a la cámara y al micrófono."; }
   }
   bRec.onclick = () => {
     if (rec && rec.state === "recording") { rec.stop(); return; }
     if (!stream) return abrir(fuente);
-    if (!window.MediaRecorder) { msg.textContent = "Este navegador no puede grabar. Usa Safari o Chrome actualizados, o sube un video del teléfono."; return; }
-    partes = []; rec = new MediaRecorder(stream, tipo ? { mimeType: tipo, videoBitsPerSecond: 2_000_000 } : undefined);
+    if (!window.MediaRecorder || !lienzo.captureStream) { msg.textContent = "Este navegador no puede grabar. Usa Safari o Chrome actualizados, o sube un video del teléfono."; return; }
+    const tipo = TIPO_GRAB(), salida = lienzo.captureStream(30);
+    if (mic) mic.getAudioTracks().forEach(t => salida.addTrack(t));
+    partes = []; rec = new MediaRecorder(salida, tipo ? { mimeType: tipo, videoBitsPerSecond: 2_000_000 } : undefined);
     rec.ondataavailable = e => { if (e.data && e.data.size) partes.push(e.data); };
     rec.onstop = () => {
       clearInterval(tic); punto.hidden = true; parar();
-      const mt = (rec.mimeType || tipo || "video/mp4").split(";")[0];
-      const blob = new Blob(partes, { type: mt });
-      archivo = new File([blob], `video-${Date.now()}.${/webm/.test(mt) ? "webm" : "mp4"}`, { type: mt });
-      vid.srcObject = null; vid.src = URL.createObjectURL(blob); vid.muted = false; vid.controls = true; vid.classList.remove("espejo");
-      bRec.hidden = true; fuentes.hidden = true; bOtra.hidden = bUsar.hidden = false; bRec.textContent = "● Empezar a grabar"; bRec.classList.remove("on");
-      msg.textContent = "Mira tu video. Si te gusta, toca «Usar este video».";
+      archivo = archivoDe(partes, rec.mimeType || tipo);
+      lienzo.hidden = true; ver.hidden = false; ver.src = URL.createObjectURL(archivo);
+      bRec.hidden = true; fuentes.hidden = true; bandeja.hidden = ayudaFotos.hidden = true; bOtra.hidden = bUsar.hidden = bEditar.hidden = false; bRec.textContent = "● Empezar a grabar"; bRec.classList.remove("on");
+      msg.textContent = "Mira tu video. Puedes usarlo así o editarlo.";
     };
     rec.start(1000); t0 = Date.now(); punto.hidden = false; bRec.textContent = "■ Terminar"; bRec.classList.add("on"); fuentes.hidden = true; msg.textContent = "";
     tic = setInterval(() => { const s2 = Math.floor((Date.now() - t0) / 1000); reloj.textContent = `${String(Math.floor(s2 / 60)).padStart(2, "0")}:${String(s2 % 60).padStart(2, "0")}`; }, 500);
   };
-  bOtra.onclick = () => { reloj.textContent = "00:00"; abrir(fuente); };
-  bUsar.onclick = () => { const f = archivo; cerrar(); if (f) alTerminar(f); };
-  ov.append(
-    h("div", { class: "rec-top" }, h("b", null, "Grabar video"), h("span", { class: "rec-time" }, punto, reloj), h("button", { type: "button", class: "x", "aria-label": "Cerrar", onclick: () => { if (!rec || rec.state !== "recording" || confirm("¿Dejar de grabar y salir?")) cerrar(); } }, "×")),
-    h("div", { class: "rec-stage" }, vid), msg, fuentes, h("div", { class: "rec-acts" }, bRec, bOtra, bUsar));
-  ov.addEventListener("cancel", e => { e.preventDefault(); if (!rec || rec.state !== "recording" || confirm("¿Dejar de grabar y salir?")) cerrar(); });
-  document.body.append(ov); ov.showModal();
+  bOtra.onclick = () => { reloj.textContent = "00:00"; bandeja.hidden = ayudaFotos.hidden = false; abrir(fuente); };
+  bUsar.onclick = () => { const f = archivo; P.alCerrar = () => true; P.cerrar(); if (f) alTerminar(f); };
+  bEditar.onclick = () => { const f = archivo; P.alCerrar = () => true; P.cerrar(); if (f) editorVideo(f, alTerminar); };
+  P.cuerpo.append(h("div", { class: "rec-stage" }, lienzo, ver), msg, bandeja, ayudaFotos, fuentes, h("div", { class: "rec-acts" }, bRec, bOtra, bEditar, bUsar), cam, finp);
   abrir("camara");
+}
+
+// Editor: recortar el principio y el final, y poner fotos en el momento que quieras (salen unos segundos mientras sigue tu voz).
+function editorVideo(file, alTerminar) {
+  const P = pantallaVideo("Editar video");
+  const url = URL.createObjectURL(file);
+  const v = h("video", { src: url, controls: true, playsinline: true, preload: "auto", class: "rec-v" });
+  const capa = h("img", { class: "ed-capa", alt: "", hidden: true });
+  let ini = 0, fin = 0, dur = 0;
+  const fotos = []; // { t, d, im }
+  const tIni = h("b"), tFin = h("b"), tAhora = h("span", { class: "ed-ahora" }, "0:00");
+  const lista = h("div", { class: "ed-fotos" });
+  const msg = h("p", { class: "rec-msg" });
+  const pintarTiempos = () => { tIni.textContent = mmss(ini); tFin.textContent = mmss(fin); };
+  const pintarFotos = () => lista.replaceChildren(...fotos.sort((a, b) => a.t - b.t).map(f => {
+    const sel = h("select", { "aria-label": "Segundos que se ve la foto", onchange: e => { f.d = Number(e.target.value); } }, [3, 5, 8, 10, 15].map(n => h("option", { value: n, selected: n === f.d }, `${n} s`)));
+    return h("div", { class: "ed-foto" }, h("img", { src: f.im.src, alt: "" }), h("span", null, `En ${mmss(f.t)}`), sel,
+      h("button", { type: "button", class: "ib", "aria-label": "Quitar foto", onclick: () => { fotos.splice(fotos.indexOf(f), 1); pintarFotos(); } }, "×"));
+  }));
+  v.addEventListener("loadedmetadata", () => { dur = isFinite(v.duration) ? v.duration : 0; if (!dur) { v.currentTime = 1e9; v.addEventListener("timeupdate", function f1() { v.removeEventListener("timeupdate", f1); dur = v.duration || v.currentTime; fin = dur; v.currentTime = 0; pintarTiempos(); }); } fin = dur; pintarTiempos(); });
+  v.addEventListener("timeupdate", () => {
+    tAhora.textContent = mmss(v.currentTime);
+    const f = fotos.find(x => v.currentTime >= x.t && v.currentTime < x.t + x.d);
+    capa.hidden = !f; if (f) capa.src = f.im.src;
+    if (fin && v.currentTime > fin && !v.paused) v.pause();
+  });
+  const finp = h("input", { type: "file", accept: "image/*", hidden: true });
+  finp.onchange = async () => { const f = finp.files[0]; finp.value = ""; if (!f) return; try { fotos.push({ t: v.currentTime, d: 5, im: await cargarImg(f) }); pintarFotos(); } catch (e) { fallo(e); } };
+  const bIni = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => { ini = Math.min(v.currentTime, fin - 0.5); pintarTiempos(); } }, "Empieza aquí");
+  const bFin = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => { fin = Math.max(v.currentTime, ini + 0.5); pintarTiempos(); } }, "Termina aquí");
+  const bFoto = h("button", { type: "button", class: "btn btn-line btn-sm", onclick: () => { v.pause(); finp.click(); } }, "🖼️ Poner una foto aquí");
+  const bUsar = h("button", { type: "button", class: "btn btn-line" }, "Usar sin cambios");
+  const bListo = h("button", { type: "button", class: "btn btn-solid" }, "Guardar cambios");
+  const barra = h("progress", { max: 1, value: 0, hidden: true, class: "ed-bar" });
+  bUsar.onclick = () => { P.cerrar(); alTerminar(file); };
+  bListo.onclick = async () => {
+    const recorta = ini > 0.3 || (dur && fin < dur - 0.3);
+    if (!recorta && !fotos.length) { P.cerrar(); alTerminar(file); return; }
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg.textContent = "Este navegador no puede editar videos. Usa Safari o Chrome actualizados."; return; }
+    bListo.disabled = bUsar.disabled = bIni.disabled = bFin.disabled = bFoto.disabled = true; barra.hidden = false;
+    msg.textContent = "Preparando tu video… se tarda lo mismo que dura. No cierres esta ventana.";
+    try { const out = await renderizar(file, ini, fin || dur, fotos, x => { barra.value = x; msg.textContent = `Preparando tu video… ${Math.round(x * 100)}%. No cierres esta ventana.`; }); P.cerrar(); alTerminar(out); }
+    catch (e) { msg.textContent = e.message || "No se pudo preparar el video."; bListo.disabled = bUsar.disabled = bIni.disabled = bFin.disabled = bFoto.disabled = false; barra.hidden = true; }
+  };
+  P.alCerrar = () => bListo.disabled ? confirm("¿Dejar de preparar el video y salir?") : true;
+  P.cuerpo.append(
+    h("div", { class: "rec-stage ed-stage" }, v, capa),
+    h("div", { class: "ed-panel" },
+      h("div", { class: "ed-fila" }, h("span", { class: "ed-lab" }, "✂️ Recortar"), tAhora),
+      h("p", { class: "rec-ayuda" }, "Pon el video donde quieres que empiece y toca «Empieza aquí». Haz lo mismo para el final."),
+      h("div", { class: "ed-fila ed-2" }, bIni, bFin), h("p", { class: "rec-ayuda" }, "Tu video queda desde ", tIni, " hasta ", tFin),
+      h("div", { class: "ed-fila", style: "margin-top:10px" }, h("span", { class: "ed-lab" }, "🖼️ Fotos"), bFoto),
+      lista, msg, barra,
+      h("div", { class: "rec-acts" }, bUsar, bListo)), finp);
+  pintarTiempos();
+}
+
+// Vuelve a grabar el pedazo elegido con las fotos encima (en el teléfono, sin sonar en voz alta).
+async function renderizar(file, ini, fin, fotos, progreso) {
+  const v = document.createElement("video"); v.src = URL.createObjectURL(file); v.playsInline = true; v.preload = "auto";
+  await new Promise((ok, mal) => { v.onloadedmetadata = ok; v.onerror = () => mal(new Error("No se pudo abrir el video.")); });
+  const k = Math.min(1, 1280 / Math.max(v.videoWidth || 1280, v.videoHeight || 720));
+  const lienzo = document.createElement("canvas"); lienzo.width = Math.round((v.videoWidth || 1280) * k / 2) * 2; lienzo.height = Math.round((v.videoHeight || 720) * k / 2) * 2;
+  const c = lienzo.getContext("2d");
+  const AC = window.AudioContext || window.webkitAudioContext, ctx = AC ? new AC() : null;
+  const salida = lienzo.captureStream(30);
+  if (ctx) { const dst = ctx.createMediaStreamDestination(); ctx.createMediaElementSource(v).connect(dst); dst.stream.getAudioTracks().forEach(t => salida.addTrack(t)); await ctx.resume().catch(() => {}); }
+  v.currentTime = ini; await new Promise(ok => { v.onseeked = ok; setTimeout(ok, 3000); });
+  const tipo = TIPO_GRAB(), partes = [];
+  const rec = new MediaRecorder(salida, tipo ? { mimeType: tipo, videoBitsPerSecond: 2_000_000 } : undefined);
+  rec.ondataavailable = e => { if (e.data && e.data.size) partes.push(e.data); };
+  const listo = new Promise(ok => { rec.onstop = ok; });
+  let anim = 0;
+  const dibujar = () => {
+    const t = v.currentTime, f = fotos.find(x => t >= x.t && t < x.t + x.d);
+    if (f) dibujarFoto(c, f.im); else c.drawImage(v, 0, 0, lienzo.width, lienzo.height);
+    progreso(Math.min(1, (t - ini) / Math.max(0.1, fin - ini)));
+    if (t >= fin || v.ended) { v.pause(); if (rec.state === "recording") rec.stop(); return; }
+    anim = requestAnimationFrame(dibujar);
+  };
+  c.drawImage(v, 0, 0, lienzo.width, lienzo.height);
+  rec.start(1000);
+  try { await v.play(); } catch (e) { rec.stop(); throw new Error("Toca «Guardar cambios» otra vez para empezar."); }
+  dibujar();
+  await listo; cancelAnimationFrame(anim); if (ctx) ctx.close().catch(() => {});
+  return archivoDe(partes, rec.mimeType || tipo);
 }
 
 function campoArchivos(valor) {
