@@ -33,6 +33,15 @@
 <script src="/resenas.js"></script>
 <style>
 /* barra */
+/* Barra de secciones: fondo azul, letras blancas, separadas por líneas doradas */
+.cats-bar{background:linear-gradient(180deg,#1A2340,#141B33);border-top:1px solid rgba(212,174,82,.35);box-shadow:0 6px 16px rgba(20,27,51,.15)}
+.cats-in{display:flex;align-items:center;justify-content:center;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cats-in::-webkit-scrollbar{display:none}
+.cats-bar a{flex:none;position:relative;color:#fff;text-decoration:none;font-weight:600;font-size:.98rem;letter-spacing:.01em;padding:13px 18px;white-space:nowrap}
+.cats-bar a + a::before{content:"";position:absolute;left:0;top:50%;height:16px;margin-top:-8px;width:1px;background:#D4AE52;opacity:.8}
+.cats-bar a:hover,.cats-bar a:focus-visible{color:#FFD966}
+.cats-bar a.dest{color:#FFD966}
+@media (max-width:860px){.cats-in{justify-content:flex-start;padding-left:4px;padding-right:4px}.cats-bar a{font-size:.92rem;padding:11px 14px}}
 .top{display:flex;justify-content:space-between;align-items:center;padding-top:18px;padding-bottom:18px;gap:16px}
 .brand{font-family:"Cormorant",Georgia,serif;font-size:1.6rem;font-weight:600;color:var(--ink);text-decoration:none}
 .top nav{display:flex;gap:20px;flex-wrap:wrap}
@@ -269,7 +278,6 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .item,.item:nth-child(even){grid-template-columns:1fr;gap:24px}
   .item:nth-child(even) .photo{order:0}
   .contact{grid-template-columns:1fr}
-  .top nav{display:none}
 }
 /* Menú ☰ en el celular */
 .menu-btn,.menu-m{display:none}
@@ -318,19 +326,19 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 <header class="cabecera">
   <div class="wrap top">
     <a class="brand" href="#" id="brandName"></a>
-    <nav aria-label="Secciones">
-      <a href="/lecturas.html">Lecturas</a>
-      <a href="/tienda.html">Queen Shop</a>
-      <a href="#arreglos">Arreglos y mesas</a>
-      <a href="/eventos.html">Eventos</a>
-      <a href="/comunidad.html">Comunidad</a>
-      <a href="#resenas">Reseñas</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
     <button class="menu-btn" type="button" id="menuBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuM">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="l1" d="M4 7h16"/><path class="l2" d="M4 12h16"/><path class="l3" d="M4 17h16"/></svg>
     </button>
   </div>
+    <nav class="cats-bar" aria-label="Secciones"><div class="wrap cats-in">
+    <a href="/lecturas.html" class="dest">Lecturas</a>
+    <a href="/tienda.html" class="dest">Queen Shop</a>
+    <a href="#arreglos">Arreglos y mesas</a>
+    <a href="/eventos.html">Eventos</a>
+    <a href="/comunidad.html">Comunidad</a>
+    <a href="#resenas">Reseñas</a>
+    <a href="#contacto">Contacto</a>
+    </div></nav>
   <nav class="menu-m" id="menuM" aria-label="Menú" hidden>
     <a href="/lecturas.html">Lecturas de cartas</a>
     <a href="/tienda.html">Queen Shop</a>
