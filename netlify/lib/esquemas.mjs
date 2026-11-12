@@ -18,6 +18,7 @@ export const ESQUEMAS = {
   negocio: obj({
     nombre: str(80), titulo: str(160), frase: str(600), fotoPrincipal: foto(),
     portada: uno(["lecturas", "flores"], "lecturas"), lecTitulo: str(160), lecFrase: str(600),
+    destacar: uno(["tienda", "flores"], "tienda"),
     popup: popup(), popupDonde: uno(["inicio", "todas"], "inicio"),
     contacto: obj({ whatsapp: str(30), telefono: str(30), instagram: str(200), tiktok: str(200), facebook: str(300), mapa: url(600), zona: str(300), enlaceResenas: url(600) }),
   }),

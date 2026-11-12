@@ -1540,6 +1540,7 @@ const negocio = () => vistaForm({
     ["Portada", null, [
       { k: "nombre", t: "text", label: "Nombre del negocio" },
       { k: "portada", t: "seg", label: "¿Qué sale primero en tu página?", ops: [["lecturas", "🔮 Lecturas de cartas"], ["flores", "🌸 Flores y arreglos"]], hint: "Puedes cambiarlo cuando quieras. Lo demás de tu página sigue igual." },
+      { k: "destacar", t: "seg", label: "¿Qué se ve primero debajo de la portada?", ops: [["tienda", "🛍️ Queen Shop"], ["flores", "🌸 Flores y arreglos"]], hint: "Lo otro sigue en tu página, más abajo. Cámbialo cuando quieras." },
       { k: "titulo", t: "text", label: "Título grande", si: v => v.portada === "flores" },
       { k: "frase", t: "area", label: "Frase debajo del título", si: v => v.portada === "flores" },
       { k: "fotoPrincipal", t: "foto", label: "Foto de la portada", si: v => v.portada === "flores" },

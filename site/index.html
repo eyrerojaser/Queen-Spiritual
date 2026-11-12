@@ -110,29 +110,27 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .kicker{display:block;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
 /* arreglos: 3 por fila */
 /* Tienda más visible y flores en una franja compacta */
+/* Queen Shop en el inicio: una fila de lado (3 en el teléfono, 4 en la computadora); se desliza para ver más */
+#tienda .shop{display:flex!important;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 12px;-webkit-overflow-scrolling:touch;grid-template-columns:none}
+#tienda .product{flex:0 0 calc((100% - 36px) / 4);scroll-snap-align:start;min-width:0}
+#tienda .product .cover{aspect-ratio:1/1}
+#tienda .product .cover span{font-size:.95rem;padding:8px;text-align:center}
+#tienda .product .body{padding:10px 12px 12px;gap:4px}
+#tienda .product .body > p,#tienda .product .tag{display:none}
+#tienda .product h3{font-size:1.05rem;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#tienda .product .row{flex-direction:column;align-items:flex-start;gap:6px}
+#tienda .product .row .btn{width:100%;text-align:center;padding:7px 8px;font-size:.8rem}
 @media (max-width:760px){
-  #tienda .shop{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  #tienda .product .cover{aspect-ratio:1/1}
-  #tienda .product .body{padding:10px 12px 12px}
-  #tienda .product .body > p{display:none}
-  #tienda .product h3{font-size:1.05rem;line-height:1.15}
-  #tienda .product .row{flex-direction:column;align-items:flex-start;gap:8px}
-  #tienda .product .row .btn{width:100%;text-align:center;padding:8px 10px;font-size:.85rem}
+  #tienda .shop{gap:8px}
+  #tienda .product{flex-basis:calc((100% - 16px) / 3)}
+  #tienda .product .body{padding:7px 8px 9px}
+  #tienda .product h3{font-size:.86rem}
+  #tienda .product .cost{font-size:.95rem}
+  #tienda .product .row .btn{font-size:.72rem;padding:6px 4px}
 }
 .shop-cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:-14px 0 30px}
 .shop-cats a{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--blue);font-weight:600;font-size:.92rem;text-decoration:none}
 .shop-cats a:hover{border-color:var(--blue)}
-#arreglos{padding-top:56px;padding-bottom:56px}
-.arr-mini{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:28px;align-items:center}
-.arr-mini .arr-tx h2{margin:4px 0 8px}
-.arr-mini .arr-tx p{color:var(--muted);margin:0 0 16px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
-#arreglos #chips{display:none}
-.tira{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}
-.tira .tarj{flex:0 0 150px;scroll-snap-align:start}
-.tira .tarj .tx{padding:8px 10px 10px;gap:2px}
-.tira .tarj h3{font-size:1.05rem}
-.tira .tarj .tp,.tira .tarj .oc,.tira .tarj .ds,.tira .tarj .mas{display:none}
-@media (max-width:760px){.arr-mini{grid-template-columns:1fr;gap:16px}.arr-mini .arr-tx{text-align:center}.tira .tarj{flex-basis:130px}}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 22px}
 .tarj{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;text-align:left;font:inherit;color:inherit;padding:0}
 .tarj:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(26,35,64,.12)}
@@ -394,9 +392,9 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 
 <section id="arreglos">
   <div class="wrap">
-    <div class="arr-mini"><div class="arr-tx"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></div>
+    <div class="sec-head"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><p style="margin-top:18px"><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></p></div>
     <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo" hidden></div>
-    <div id="catalog" class="tira" aria-label="Arreglos"></div></div>
+    <div id="catalog" class="grid3"></div>
   </div>
 </section>
 
@@ -628,7 +626,7 @@ function renderTienda(T, AJ) {
     const bd = el("div", "body");
     bd.append(el("span", "tag", [s(p.categoria), p.entrega !== "fisico" ? "Descarga inmediata" : ""].filter(Boolean).join(" · ")), el("h3", null, p.titulo));
     if (s(p.descripcion)) bd.append(el("p", null, p.descripcion));
-    const row = el("div", "row"), a = el("a", "btn btn-line btn-sm", "Ver en la tienda");
+    const row = el("div", "row"), a = el("a", "btn btn-line btn-sm", "Ver");
     a.href = "/tienda.html" + (s(p.categoria) ? "?categoria=" + encodeURIComponent(p.categoria) : "");
     row.append(el("span", "cost", dinero(p.precio)), a);
     bd.append(row); c.append(cv, bd); g.append(c);
@@ -756,6 +754,9 @@ Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitude
   if (SL && typeof SL === "object" && "activo" in SL) { SOL = SL; if (s(SL.intro)) $("#solIntro").textContent = SL.intro; if (SL.activo === false) { $("#solCta").hidden = true; } }
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P, TA); renderResenas(R, C);
   if (N.portada !== "flores") portadaLecturas(N, L);
+  // Qué se ve primero debajo de la portada (lo eliges en tu panel): Queen Shop o las flores
+  { const t = $("#tienda"), a = $("#arreglos"), l = $("#lecturas");
+    if (N.destacar === "flores") { l.before(a); l.after(t); } else { l.before(t); l.after(a); } }
   resenasArriba(R, N.portada !== "flores");
 });
 
