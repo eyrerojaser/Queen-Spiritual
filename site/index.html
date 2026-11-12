@@ -37,11 +37,10 @@
 .cats-bar{background:linear-gradient(180deg,#1A2340,#141B33);border-top:1px solid rgba(212,174,82,.35);box-shadow:0 6px 16px rgba(20,27,51,.15)}
 .cats-in{display:flex;align-items:center;justify-content:center;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .cats-in::-webkit-scrollbar{display:none}
-.cats-bar a{flex:none;position:relative;color:#fff;text-decoration:none;font-weight:600;font-size:.98rem;letter-spacing:.01em;padding:13px 18px;white-space:nowrap}
+.cats-bar a{flex:none;position:relative;color:#FFD966;text-decoration:none;font-weight:600;font-size:.98rem;letter-spacing:.01em;padding:13px 18px;white-space:nowrap}
 .cats-bar a + a::before{content:"";position:absolute;left:0;top:50%;height:16px;margin-top:-8px;width:1px;background:#D4AE52;opacity:.8}
-.cats-bar a:hover,.cats-bar a:focus-visible{color:#FFD966}
-.cats-bar a.dest{color:#FFD966}
-@media (max-width:860px){.cats-in{justify-content:flex-start;padding-left:4px;padding-right:4px}.cats-bar a{font-size:.92rem;padding:11px 14px}}
+.cats-bar a:hover,.cats-bar a:focus-visible{color:#fff}
+@media (max-width:860px){.cats-in{justify-content:flex-start;padding-left:2px;padding-right:2px}.cats-bar a{font-size:.8rem;padding:10px 9px;letter-spacing:0}.cats-bar a + a::before{height:12px;margin-top:-6px}}
 .top{display:flex;justify-content:space-between;align-items:center;padding-top:18px;padding-bottom:18px;gap:16px}
 .brand{font-family:"Cormorant",Georgia,serif;font-size:1.6rem;font-weight:600;color:var(--ink);text-decoration:none}
 .top nav{display:flex;gap:20px;flex-wrap:wrap}
@@ -331,9 +330,9 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
     </button>
   </div>
     <nav class="cats-bar" aria-label="Secciones"><div class="wrap cats-in">
-    <a href="/lecturas.html" class="dest">Lecturas</a>
-    <a href="/tienda.html" class="dest">Queen Shop</a>
-    <a href="#arreglos">Arreglos y mesas</a>
+    <a href="/lecturas.html">Lecturas</a>
+    <a href="/tienda.html">Queen Shop</a>
+    <a href="#arreglos">Arreglos</a>
     <a href="/eventos.html">Eventos</a>
     <a href="/comunidad.html">Comunidad</a>
     <a href="#resenas">Reseñas</a>
@@ -763,7 +762,7 @@ Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitude
   { const t = $("#tienda"), a = $("#arreglos"), l = $("#lecturas");
     const cm = $("#comunidad");
     if (N.destacar === "flores") { l.before(a); l.after(t); } else { l.before(t); l.after(a); }
-    l.after(cm); }
+    $("#destacadas").after(cm); }
   resenasArriba(R, N.portada !== "flores");
 });
 
