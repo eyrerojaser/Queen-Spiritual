@@ -40,7 +40,7 @@
 .top nav a:hover{color:var(--ink)}
 /* portada */
 .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;padding:40px 0 72px}
-.hero h1{font-size:clamp(2.8rem,6.4vw,4.8rem);letter-spacing:-.01em}
+.hero h1{font-size:clamp(2.3rem,4.8vw,3.6rem);letter-spacing:-.01em}
 .hero p{color:var(--muted);max-width:40ch;font-size:1.1rem;margin:22px 0 30px}
 .arch{position:relative;aspect-ratio:3/4;border-radius:999px 999px 18px 18px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .arch img{width:100%;height:100%;object-fit:cover}
@@ -183,7 +183,7 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .banda{display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:center}
 .banda-foto{display:block;border-radius:50%;overflow:hidden;aspect-ratio:1;border:3px solid var(--gold);box-shadow:0 0 0 6px rgba(217,182,90,.15),0 14px 40px rgba(0,0,0,.4)}
 .banda-foto img{width:100%;height:100%;object-fit:cover;object-position:50% 28%}
-.banda-tx h2{font-size:clamp(2rem,4vw,2.8rem)}
+.banda-tx h2{font-size:clamp(1.6rem,3vw,2.2rem)}
 #lecIntro{color:var(--night-muted);font-size:1.02rem;line-height:1.65;margin:12px 0 20px;max-width:60ch}
 .estado{display:inline-flex;align-items:center;gap:10px;padding:7px 15px 7px 11px;border-radius:999px;font-weight:600;font-size:.92rem;margin-top:12px}
 .estado i{width:11px;height:11px;border-radius:50%;flex:none}
@@ -296,7 +296,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   .hero{gap:22px;padding:2px 0 34px}
   .arch{width:64%;max-width:260px;margin:0 auto}
   .arch::after{inset:7px}
-  .hero h1{font-size:2.2rem;line-height:1.05}
+  .hero h1{font-size:1.85rem;line-height:1.08}
   .hero p{font-size:.98rem;line-height:1.5;margin:10px 0 16px}
   .pillars{grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
   .pillars a{padding:12px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px;border-radius:12px}
@@ -412,7 +412,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 
 <section id="resenas">
   <div class="wrap">
-    <div class="sec-head"><span class="kicker">Reseñas</span><h2>Lo que dicen mis clientes</h2><p>De mis arreglos y de mis lecturas de cartas.</p></div>
+    <div class="sec-head"><span class="kicker">Reseñas</span><h2>Lo que dicen mis clientes</h2></div>
     <div class="chips rv-filtro" id="rvFiltro" role="group" aria-label="Filtrar reseñas" hidden></div>
     <div id="reviewList"></div>
     <div class="rv-acciones" id="rvAcciones"></div>
@@ -649,9 +649,6 @@ function renderResenas(R, C) {
       });
     }
   } else {
-    const e = el("div", "empty");
-    e.append(el("p", null, "Las reseñas de mis clientes aparecerán aquí muy pronto. Si ya recibiste un arreglo o una lectura, me encantaría saber tu opinión."));
-    rl.append(e);
   }
   const ac = $("#rvAcciones"), d = el("button", "btn btn-solid", "⭐ Deja tu reseña"); d.type = "button"; d.onclick = () => Resenas.abrir("Arreglos"); ac.append(d);
   const linkRes = safeUrl(s(C.enlaceResenas));
@@ -756,7 +753,9 @@ Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitude
   if (N.portada !== "flores") portadaLecturas(N, L);
   // Qué se ve primero debajo de la portada (lo eliges en tu panel): Queen Shop o las flores
   { const t = $("#tienda"), a = $("#arreglos"), l = $("#lecturas");
-    if (N.destacar === "flores") { l.before(a); l.after(t); } else { l.before(t); l.after(a); } }
+    const cm = $("#comunidad");
+    if (N.destacar === "flores") { l.before(a); l.after(t); } else { l.before(t); l.after(a); }
+    l.after(cm); }
   resenasArriba(R, N.portada !== "flores");
 });
 
