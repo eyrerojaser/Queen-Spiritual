@@ -2181,7 +2181,7 @@ function editarPost(p, alGuardar) {
   const fm = formulario([
     { k: "tipo", t: "seg", label: "¿Qué vas a publicar?", ops: TIPOS_POST },
     { k: "titulo", t: "text", label: "Título", ph: "Ej: Cómo preparar un baño de limpieza" },
-    { k: "video", t: "text", label: "O pega un enlace (YouTube, Vimeo…)", ph: "https://youtube.com/…", hint: "Opcional. Si ya grabaste o subiste tu video arriba, déjalo vacío." },
+    ...(p.video ? [{ k: "video", t: "text", label: "Enlace del video (de antes)", hint: "Esta publicación usa un enlace. Si lo borras, sube o graba el video arriba." }] : []),
     { k: "texto", t: "area", label: "Texto", rows: 6, hint: "La enseñanza, la explicación del video o lo que quieras contar." },
     { k: "fijado", t: "bool", label: "Fijar arriba", hint: "Sale primero en la comunidad." },
     { k: "visible", t: "bool", label: "Publicado", hint: "Apágalo para guardarlo como borrador." },

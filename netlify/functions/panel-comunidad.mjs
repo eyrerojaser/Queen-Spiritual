@@ -65,7 +65,7 @@ export default manejar(async (req) => {
       const i = doc.lista.findIndex((p) => p.id === (b.post && b.post.id));
       const p = limpiarPost(b.post || {}, i >= 0 ? doc.lista[i] : {});
       if (!p.titulo && !p.texto && !p.video && !p.grabacion && !p.fotos.length && !p.archivos.length) throw new Fallo(400, "Escribe un título o agrega contenido.");
-      if (p.tipo === "video" && !p.video && !p.grabacion) throw new Fallo(400, "Graba o sube tu video, o pega el enlace de YouTube, Vimeo, Instagram, TikTok o Google Drive.");
+      if (p.tipo === "video" && !p.video && !p.grabacion) throw new Fallo(400, "Graba o sube tu video antes de publicar.");
       if (p.tipo === "fotos" && !p.fotos.length) throw new Fallo(400, "Sube al menos una foto.");
       if (p.programado && salio(p) && !(i >= 0 && doc.lista[i].programado)) p.programado = null; // fecha pasada: sale ya
       if (i >= 0) doc.lista[i] = p; else doc.lista.unshift(p);
