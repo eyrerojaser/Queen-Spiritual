@@ -149,6 +149,11 @@ progress{width:100%;height:8px}
 .empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center}
 /* calendario */
 .wk{display:grid;gap:10px}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.cat-chips button,.cat-chips span{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:.88rem;cursor:pointer}
+.cat-chips span{cursor:default;background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.cat-chips button[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+.cat-card{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
 .wtiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .wt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--muted);font:inherit;cursor:pointer;min-height:66px;justify-content:center}
 .wt .wt-d{font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
@@ -545,6 +550,17 @@ function campo(def, valor, todo) {
     get = () => v;
     return { nodo, get, def, extra: () => ({ archivoNombre: nombre }) };
   }
+  if (def.t === "cat") {
+    // Categoría: tocas una de las que ya tienes o escribes una nueva
+    const i = h("input", { id, type: "text", maxlength: 60, placeholder: "Escribe una categoría nueva…", autocomplete: "off" }); i.value = valor ?? "";
+    const pintar = () => chips.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.textContent === i.value.trim())));
+    const chips = h("div", { class: "cat-chips" }, (def.ops || []).map(n => h("button", { type: "button", onclick: () => { i.value = i.value.trim() === n ? "" : n; pintar(); todo && todo(); } }, n)));
+    i.addEventListener("input", () => { pintar(); todo && todo(); });
+    pintar();
+    nodo = h("div", { class: "fld" }, lab(), chips, i, hint);
+    get = () => i.value.trim();
+    return { nodo, get, def, input: i };
+  }
   let i;
   if (def.t === "area") i = h("textarea", { id, rows: def.rows || 3 });
   else if (def.t === "select") i = h("select", { id }, def.ops.map(([val, txt]) => h("option", { value: val }, txt)));
@@ -648,7 +664,7 @@ function pantallaEntrar(msg) {
 const CATS = [
   { id: "agenda", nombre: "Agenda", ico: "cal", desc: "Citas, sala privada y fichas de tus clientas", tiles: [["reservas", "cal", "Reservas", "Tus próximas lecturas"], ["salas", "video", "Private Reading Room", "Tus lecturas por videollamada privada"], ["fichas", "users", "Fichas de clientes", "Notas y control de cada clienta"], ["calendario", "clock", "Mi calendario", "Días y horas disponibles"]] },
   { id: "pedidos", nombre: "Pedidos", ico: "bouquet", desc: "Arreglos, solicitudes y entregas", tiles: [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"]] },
-  { id: "ventas", nombre: "Ventas", ico: "bag", desc: "Queen Shop, cupones y suscripciones", tiles: [["tienda", "bag", "Queen Shop", "Tus productos"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["categorias", "tag", "Categorías y entregas", "Botones de la tienda, envío y recoger"]] },
+  { id: "ventas", nombre: "Ventas", ico: "bag", desc: "Queen Shop, cupones y suscripciones", tiles: [["tienda", "bag", "Queen Shop", "Tus productos"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["categorias", "tag", "Categorías y envíos", "Tus categorías, envíos y recoger"]] },
   { id: "comunidad-c", nombre: "Comunidad", ico: "users", desc: "Publicaciones, miembros y encuentros", tiles: [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["encuentros", "video", "Encuentros en vivo", "Cada 15 días, en tu sala o por Zoom"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]] },
   { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
   { id: "numeros", nombre: "Números", ico: "chart", desc: "Visitas y ventas", tiles: [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]] },
@@ -960,8 +976,9 @@ async function vistaLista(cfg) {
     const intro = cfg.intro ? (() => {
       const t = h("textarea", { id: "intro", rows: 3 }); t.value = doc.intro || "";
       const fo = cfg.introFoto ? campo({ k: "foto", t: "foto", label: cfg.introFoto }, doc.foto) : null;
-      const b = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { b.disabled = true; try { doc = await guardar(cfg.n, { ...doc, intro: t.value, ...(fo ? { foto: fo.get() } : {}) }); } catch (e) { fallo(e); } b.disabled = false; } }, fo ? "Guardar texto y foto" : "Guardar texto");
-      return h("div", { class: "card" }, h("div", { class: "fld" }, h("label", { for: "intro" }, cfg.intro), t), fo ? fo.nodo : null, h("div", { style: "margin-top:12px" }, b));
+      const ti = cfg.introTitulo ? campo({ k: "tituloHome", t: "text", label: cfg.introTitulo, ph: cfg.introTituloPh }, doc.tituloHome) : null;
+      const b = h("button", { class: "btn btn-line btn-sm", type: "button", onclick: async () => { b.disabled = true; try { doc = await guardar(cfg.n, { ...doc, intro: t.value, ...(fo ? { foto: fo.get() } : {}), ...(ti ? { tituloHome: ti.get() } : {}) }); toast("Guardado ✓"); } catch (e) { fallo(e); } b.disabled = false; } }, fo ? "Guardar texto y foto" : "Guardar texto");
+      return h("div", { class: "card" }, ti ? ti.nodo : null, h("div", { class: "fld" }, h("label", { for: "intro" }, cfg.intro), t), fo ? fo.nodo : null, h("div", { style: "margin-top:12px" }, b));
     })() : null;
     marco(...cabeza(cfg.titulo, cfg.lead), intro, cfg.cabecera ? cfg.cabecera(doc, d => { doc = d; }) : null, lista, h("button", { class: "btn btn-solid add", type: "button", onclick: () => abrir(null) }, `+ Agregar ${cfg.singular}`), cfg.pie ? cfg.pie() : null);
   };
@@ -1374,16 +1391,28 @@ const arreglos = () => vistaLista({
 
 async function tienda() {
   const aj = await leer("tienda-ajustes");
-  const cats = (aj.categorias || []).map(c => [c.nombre, c.nombre]);
+  const nombres = (aj.categorias || []).map(c => c.nombre).filter(Boolean);
+  const cats = nombres.map(n => [n, n]);
+  // Si escribes una categoría nueva en un producto, se agrega sola a tu lista de categorías
+  const asegurarCategoria = n => {
+    n = s(n); if (!n || nombres.some(x => x.toLowerCase() === n.toLowerCase())) return;
+    nombres.push(n);
+    guardar("tienda-ajustes", { ...aj, categorias: nombres.map(x => ({ nombre: x })) }).then(d => { Object.assign(aj, d); toast(`Categoría “${n}” agregada ✓`); }).catch(fallo);
+  };
   return vistaLista({
     n: "tienda", clave: "productos", titulo: "Queen Shop", singular: "producto", lead: "Tus productos. Los digitales se descargan al pagar; los físicos se envían o se recogen.",
-    intro: "Texto de la tienda",
+    intro: "Texto de la tienda", introTitulo: "Título de la tienda en tu página de inicio", introTituloPh: "Productos para tu camino espiritual",
+    cabecera: () => h("div", { class: "card cat-card" },
+      h("div", null, h("h2", null, "Categorías"), h("p", { class: "sub", style: "margin:2px 0 10px" }, nombres.length ? "Así se agrupan tus productos en la tienda." : "Todavía no tienes categorías. Crea una aquí o escríbela al agregar un producto."),
+        nombres.length ? h("div", { class: "cat-chips ver" }, nombres.map(n => h("span", null, n))) : null),
+      h("a", { class: "btn btn-line btn-sm", href: "#/categorias" }, "Categorías y envíos →")),
+    alGuardar: v => { asegurarCategoria(v.categoria); return v; },
     nuevo: () => ({ foto: "", titulo: "", categoria: cats[0] ? cats[0][0] : "", descripcion: "", precio: "", entrega: "digital", archivo: "", destacado: false, agotado: false, visible: true }),
     requeridos: [["titulo", "Escribe el nombre del producto."], ["precio", "Escribe el precio."]],
     campos: () => [
       { k: "foto", t: "foto", label: "Foto o portada" },
       { k: "titulo", t: "text", label: "Nombre del producto" },
-      cats.length ? { k: "categoria", t: "select", label: "Categoría", ops: [["", "Sin categoría"], ...cats], hint: "Las categorías se crean en “Categorías y entregas”." } : { k: "categoria", t: "text", label: "Categoría" },
+      { k: "categoria", t: "cat", label: "Categoría", ops: nombres, hint: "Toca una o escribe una nueva (ej: Velas, Joyería, Ropa). Las nuevas se agregan solas." },
       { k: "precio", t: "money", label: "Precio" },
       { k: "descripcion", t: "area", label: "Descripción" },
       { k: "entrega", t: "seg", label: "Tipo de producto", ops: [["digital", "Digital (PDF)"], ["fisico", "Físico"]] },
@@ -1394,7 +1423,7 @@ async function tienda() {
     ],
     resumen: p => ({ foto: p.foto, titulo: p.titulo, sub: [dinero(p.precio), p.categoria].filter(Boolean).join(" · "),
       pills: [[p.entrega === "fisico" ? "Físico" : "Digital"], p.entrega !== "fisico" && !p.archivo ? ["Falta el PDF", "off"] : null, p.agotado ? ["Agotado", "off"] : null, p.destacado ? ["En portada", "ok"] : null].filter(Boolean) }),
-    pie: () => h("p", { class: "muted", style: "margin-top:18px" }, h("a", { href: "/tienda.html", target: "_blank", rel: "noopener" }, "Ver Queen Shop"), " · ", h("a", { href: "#/categorias" }, "Categorías y entregas")),
+    pie: () => h("p", { class: "muted", style: "margin-top:18px" }, h("a", { href: "/tienda.html", target: "_blank", rel: "noopener" }, "Ver Queen Shop"), " · ", h("a", { href: "#/categorias" }, "Categorías y envíos")),
   });
 }
 
@@ -1576,7 +1605,7 @@ async function categorias() {
     try { await guardar("tienda-ajustes", { categorias: cats.map(c => ({ nombre: s(c) })).filter(c => c.nombre), envio: { ...v, opciones: ops.filter(o => s(o.servicio)) }, recoger: rec.valores() }); } catch (e) { fallo(e); }
     b.disabled = false;
   } }, "Guardar cambios");
-  marco(...cabeza("Categorías y entregas", "Las categorías son los botones de Queen Shop. Envío y recoger aplican solo a productos físicos."),
+  marco(...cabeza("Categorías y envíos", "Las categorías son los botones de Queen Shop. Envío y recoger aplican solo a productos físicos."),
     h("div", { class: "card" }, h("h2", null, "Categorías"), h("p", { class: "sub" }, "Solo aparecen en la tienda las que tienen productos."), caja),
     h("div", { class: "card" }, h("h2", null, "Envío"), env.nodo, h("h2", { style: "margin-top:20px" }, "Paqueterías y tarifas"), h("p", { class: "sub" }, "El cliente elige una. Pon lo que tú cobras por enviar un pedido normal."), cajaOps),
     h("div", { class: "card" }, h("h2", null, "Recoger"), rec.nodo),

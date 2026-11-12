@@ -4,7 +4,7 @@
     fetch("/api/contenido?n=negocio", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (n) {
       var u = n && n.popup, enInicio = location.pathname === "/" || location.pathname === "/index.html";
       if (!u || !/^https:\/\//.test(u) || !(n.popupDonde === "todas" || enInicio)) return;
-      if (document.querySelector('script[data-popup]')) return;
+      if ([].some.call(document.scripts, function (x) { return x.src === u || x.hasAttribute("data-popup"); })) return;
       var s = document.createElement("script"); s.src = u; s.async = true; s.setAttribute("data-popup", "1"); document.body.appendChild(s);
     }).catch(function () {});
   } catch (e) {}

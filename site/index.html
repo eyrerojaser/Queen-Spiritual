@@ -109,6 +109,30 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .sec-head p{color:var(--muted);margin:12px 0 0}
 .kicker{display:block;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
 /* arreglos: 3 por fila */
+/* Tienda más visible y flores en una franja compacta */
+@media (max-width:760px){
+  #tienda .shop{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #tienda .product .cover{aspect-ratio:1/1}
+  #tienda .product .body{padding:10px 12px 12px}
+  #tienda .product .body > p{display:none}
+  #tienda .product h3{font-size:1.05rem;line-height:1.15}
+  #tienda .product .row{flex-direction:column;align-items:flex-start;gap:8px}
+  #tienda .product .row .btn{width:100%;text-align:center;padding:8px 10px;font-size:.85rem}
+}
+.shop-cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:-14px 0 30px}
+.shop-cats a{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--blue);font-weight:600;font-size:.92rem;text-decoration:none}
+.shop-cats a:hover{border-color:var(--blue)}
+#arreglos{padding-top:56px;padding-bottom:56px}
+.arr-mini{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:28px;align-items:center}
+.arr-mini .arr-tx h2{margin:4px 0 8px}
+.arr-mini .arr-tx p{color:var(--muted);margin:0 0 16px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+#arreglos #chips{display:none}
+.tira{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}
+.tira .tarj{flex:0 0 150px;scroll-snap-align:start}
+.tira .tarj .tx{padding:8px 10px 10px;gap:2px}
+.tira .tarj h3{font-size:1.05rem}
+.tira .tarj .tp,.tira .tarj .oc,.tira .tarj .ds,.tira .tarj .mas{display:none}
+@media (max-width:760px){.arr-mini{grid-template-columns:1fr;gap:16px}.arr-mini .arr-tx{text-align:center}.tira .tarj{flex-basis:130px}}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 22px}
 .tarj{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;text-align:left;font:inherit;color:inherit;padding:0}
 .tarj:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(26,35,64,.12)}
@@ -297,10 +321,10 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   <div class="wrap top">
     <a class="brand" href="#" id="brandName"></a>
     <nav aria-label="Secciones">
-      <a href="#arreglos">Arreglos y mesas</a>
-      <a href="/eventos.html">Eventos</a>
       <a href="/lecturas.html">Lecturas</a>
       <a href="/tienda.html">Queen Shop</a>
+      <a href="#arreglos">Arreglos y mesas</a>
+      <a href="/eventos.html">Eventos</a>
       <a href="/comunidad.html">Comunidad</a>
       <a href="#resenas">Reseñas</a>
       <a href="#contacto">Contacto</a>
@@ -310,11 +334,11 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
     </button>
   </div>
   <nav class="menu-m" id="menuM" aria-label="Menú" hidden>
+    <a href="/lecturas.html">Lecturas de cartas</a>
+    <a href="/tienda.html">Queen Shop</a>
     <a href="#arreglos">Arreglos y mesas</a>
     <a href="/eventos.html">Eventos realizados</a>
     <a href="/personaliza.html">Personaliza tu arreglo</a>
-    <a href="/lecturas.html">Lecturas de cartas</a>
-    <a href="/tienda.html">Queen Shop</a>
     <a href="/comunidad.html">Comunidad</a>
     <a href="#resenas">Reseñas</a>
     <a href="#contacto">Contacto</a>
@@ -329,7 +353,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <div class="pillars">
         <a href="/personaliza.html"><b>Arreglos</b><span>Personalízalo</span></a>
         <a href="/lecturas.html"><b>Lecturas</b><span>Cartas españolas</span></a>
-        <a href="/tienda.html"><b>Queen Shop</b><span>Baños y más</span></a>
+        <a href="/tienda.html"><b>Queen Shop</b><span>Productos y más</span></a>
         <a href="/comunidad.html" class="p-com"><b>✦ Comunidad Queen Spiritual</b><span id="comPill">Únete gratis · comparte, aprende y conecta</span></a>
       </div>
     </div>
@@ -342,14 +366,6 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
     <div class="dst-cab"><div><span class="kicker">Reseñas</span><h2 id="dstTit">Lo que dicen mis clientas</h2><div class="dst-nota" id="dstNota"></div></div>
       <div class="dst-acc"><a class="btn btn-line btn-sm" href="#resenas" id="dstTodas">Ver todas</a><a class="btn btn-solid btn-sm" href="/resena.html">⭐ Deja tu reseña</a></div></div>
     <div class="dst-lista" id="dstLista"></div>
-  </div>
-</section>
-
-<section id="arreglos">
-  <div class="wrap">
-    <div class="sec-head"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><p style="margin-top:18px"><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></p></div>
-    <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo" hidden></div>
-    <div id="catalog" class="grid3"></div>
   </div>
 </section>
 
@@ -367,6 +383,23 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   </div>
 </section>
 
+<section id="tienda">
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker">Queen Shop</span><h2 id="shopTit">Productos para tu camino espiritual</h2><p id="shopIntro"></p></div>
+    <div class="shop-cats" id="shopCats" hidden></div>
+    <div id="shop"></div>
+    <div class="shop-cta"><a class="btn btn-solid" href="/tienda.html">Entrar a Queen Shop</a></div>
+  </div>
+</section>
+
+<section id="arreglos">
+  <div class="wrap">
+    <div class="arr-mini"><div class="arr-tx"><span class="kicker">Arreglos y mesas</span><h2>Flores para tus orishas</h2><p id="arrIntro"></p><a class="btn btn-solid" href="/personaliza.html" id="solCta">Personaliza tu arreglo</a></div>
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo" hidden></div>
+    <div id="catalog" class="tira" aria-label="Arreglos"></div></div>
+  </div>
+</section>
+
 <section class="banda-com" id="comunidad">
   <div class="wrap">
     <div>
@@ -376,14 +409,6 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <ul class="lista"><li>Conversa y comparte</li><li>Aprende de otros</li><li>Zoom cada 15 días</li></ul>
     </div>
     <a class="btn" href="/comunidad.html" id="comBtn">Unirme gratis</a>
-  </div>
-</section>
-
-<section id="tienda">
-  <div class="wrap">
-    <div class="sec-head"><span class="kicker">Queen Shop</span><h2>Baños espirituales y más</h2><p id="shopIntro"></p></div>
-    <div id="shop"></div>
-    <div class="shop-cta"><a class="btn btn-solid" href="/tienda.html">Entrar a Queen Shop</a></div>
   </div>
 </section>
 
@@ -585,11 +610,15 @@ function renderLecturas(L) {
 }
 
 /* ───── Queen Shop (vista previa; la tienda completa está en /tienda.html) ───── */
-function renderTienda(T) {
+function renderTienda(T, AJ) {
   $("#shopIntro").textContent = s(T.intro);
+  if (s(T.tituloHome)) $("#shopTit").textContent = T.tituloHome;
   const todos = (T.productos || []).filter(p => p && p.visible !== false && s(p.titulo) && Number(p.precio) > 0);
   const destacados = todos.filter(p => p.destacado);
-  const list = (destacados.length ? destacados : todos).slice(0, 4);
+  const list = (destacados.length ? destacados : todos).slice(0, 8);
+  const usadas = new Set(todos.map(p => s(p.categoria)).filter(Boolean)), orden = ((AJ && AJ.categorias) || []).map(c => s(c && c.nombre)).filter(n => usadas.has(n));
+  usadas.forEach(n => { if (!orden.includes(n)) orden.push(n); });
+  if (orden.length) { const cb = $("#shopCats"); cb.hidden = false; orden.forEach(n => { const a = el("a", null, n); a.href = "/tienda.html?categoria=" + encodeURIComponent(n); cb.append(a); }); }
   const box = $("#shop");
   if (!list.length) { box.append(el("p", "muted", "Muy pronto encontrarás aquí mis productos.")); return; }
   const g = el("div", "shop");
@@ -723,9 +752,9 @@ function abrirSolicitud(pre) {
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { abrir(false); btn.focus(); } });
   const sombra = () => cab.classList.toggle("sombra", scrollY > 4); addEventListener("scroll", sombra, { passive: true }); sombra();
 })();
-Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario"].map(leer)).then(([N, A, L, P, R, SL, HO]) => {
+Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario", "tienda-ajustes"].map(leer)).then(([N, A, L, P, R, SL, HO, TA]) => {
   if (SL && typeof SL === "object" && "activo" in SL) { SOL = SL; if (s(SL.intro)) $("#solIntro").textContent = SL.intro; if (SL.activo === false) { $("#solCta").hidden = true; } }
-  const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P); renderResenas(R, C);
+  const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P, TA); renderResenas(R, C);
   if (N.portada !== "flores") portadaLecturas(N, L);
   resenasArriba(R, N.portada !== "flores");
 });

@@ -38,7 +38,7 @@ export const ESQUEMAS = {
     especiales: lista(obj({ fecha: fecha(), desde: hora(), hasta: hora() }), 400, (e) => e.fecha && e.desde && e.hasta && e.desde < e.hasta),
   }),
   tienda: obj({
-    intro: str(600),
+    intro: str(600), tituloHome: str(120),
     productos: lista(obj({
       foto: foto(), titulo: str(120), categoria: str(80), descripcion: str(1500), precio: num(1, 100000, 1),
       entrega: uno(["digital", "fisico"], "digital"), archivo: (v) => { const s = str(200)(v); return /^pdf\/[0-9a-f-]{36}$/.test(s) || /^private\/pdfs\/[^/]+\.pdf$/i.test(s) ? s : ""; },
