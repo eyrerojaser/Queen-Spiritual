@@ -136,7 +136,7 @@ section{padding:72px 0;border-top:1px solid var(--line)}
   #tienda .product .cost{font-size:.95rem}
   #tienda .product .row .btn{font-size:.72rem;padding:6px 4px}
 }
-/* Consejera espiritual */
+/* Consejera */
 #consejera{padding-top:64px;padding-bottom:64px}
 .conse{max-width:760px;margin:0 auto;text-align:center;background:var(--surface);border:1.5px solid #D4AE52;border-radius:22px;padding:38px 28px;box-shadow:0 10px 30px rgba(20,27,51,.08)}
 .conse h2{margin:6px 0 12px}
@@ -400,7 +400,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
 <section id="consejera" hidden>
   <div class="wrap">
     <div class="conse">
-      <span class="kicker">Consejera espiritual</span>
+      <span class="kicker">Consejera</span>
       <h2 id="conTit">Un espacio para hablar de lo que llevas dentro</h2>
       <p id="conTx"></p>
       <ul class="conse-pts" id="conPts"></ul>
@@ -608,17 +608,17 @@ function resenasArriba(R, lecPrimero) {
 }
 // Portada con las lecturas primero (se elige en el panel > Negocio y contacto).
 
-// Consejera espiritual (la llenas en tu panel: Mi página → Consejera espiritual)
+// Consejera (la llenas en tu panel: Mi página → Consejera)
 function renderConsejera(L) {
   const C = (L && L.consejera) || {}, lista = ((L && L.lecturas) || []).filter(l => l && l.visible !== false && s(l.nombre));
   const serv = lista.find(l => l.nombre === C.servicio) || lista.find(l => /consej/i.test(l.nombre));
   if (C.activa === false || !serv) return;
   const sec = $("#consejera"); sec.hidden = false;
   if (s(C.titulo)) $("#conTit").textContent = C.titulo;
-  $("#conTx").textContent = s(C.texto) || "Por años he escuchado a muchas personas que llegan con el corazón cargado: problemas de pareja, de familia, de trabajo o decisiones difíciles. En una consejería espiritual me cuentas lo que estás viviendo y buscamos claridad, con la guía de tus ancestros y tu fe. Sin juicios, con respeto y en total confianza.";
+  $("#conTx").textContent = s(C.texto) || "Por años muchas personas me han contado sus problemas: de pareja, de familia, de trabajo o decisiones difíciles. Me cuentas lo que estás viviendo, te escucho y te doy mi consejo para que encuentres claridad y el mejor camino. Sin juicios, con respeto y en total confianza.";
   const pts = (s(C.puntos) || `Por videollamada privada · ${serv.duracion || "45 minutos"} · Todo queda entre tú y yo`).split("·").map(x => x.trim()).filter(Boolean);
   $("#conPts").replaceChildren(...pts.map(t => el("li", null, t)));
-  const b = $("#conBtn"); b.href = "/lecturas.html?l=" + encodeURIComponent(slug(serv.nombre)) + "#reserva"; b.textContent = `Reserva tu consejería · ${dinero(serv.precio)}`;
+  const b = $("#conBtn"); b.href = "/lecturas.html?l=" + encodeURIComponent(slug(serv.nombre)) + "#reserva"; b.textContent = "Reserva tu consejería";
   if (s(C.nota)) { const n = $("#conNota"); n.hidden = false; n.textContent = C.nota; }
   const nav = document.querySelector('.cats-in a[href="#consejera"]'); if (nav) nav.hidden = false;
 }

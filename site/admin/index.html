@@ -726,7 +726,7 @@ const CATS = [
   { id: "pedidos", nombre: "Pedidos", ico: "bouquet", desc: "Arreglos, solicitudes y entregas", tiles: [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"]] },
   { id: "ventas", nombre: "Ventas", ico: "bag", desc: "Queen Shop, cupones y suscripciones", tiles: [["tienda", "bag", "Queen Shop", "Tus productos"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["categorias", "tag", "Categorías y envíos", "Tus categorías, envíos y recoger"]] },
   { id: "comunidad-c", nombre: "Comunidad", ico: "users", desc: "Publicaciones, miembros y encuentros", tiles: [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["encuentros", "video", "Encuentros en vivo", "Cada 15 días, en tu sala o por Zoom"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]] },
-  { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["consejera", "heart", "Consejera espiritual", "Tu sección de consejería"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
+  { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["consejera", "heart", "Consejera", "Tu sección de consejos"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
   { id: "numeros", nombre: "Números", ico: "chart", desc: "Visitas y ventas", tiles: [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]] },
   { id: "cuenta", nombre: "Cuenta", ico: "key", desc: "Contraseña y correos", tiles: [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]] },
 ];
@@ -1599,15 +1599,15 @@ async function consejera() {
   const L = await leer("lecturas");
   const nombres = (L.lecturas || []).map(l => l.nombre).filter(Boolean);
   return vistaForm({
-    n: "lecturas", titulo: "Consejera espiritual", lead: "Una sección en tu página de inicio para quienes necesitan hablar y recibir tu consejo.",
+    n: "lecturas", titulo: "Consejera", lead: "Una sección en tu página de inicio para quienes necesitan hablar y recibir tu consejo.",
     secciones: [
       ["Sección en tu página", null, [
         { k: "activa", t: "bool", label: "Mostrar la sección en mi página" },
         { k: "titulo", t: "text", label: "Título", ph: "Un espacio para hablar de lo que llevas dentro" },
-        { k: "texto", t: "area", label: "Texto", rows: 5, ph: "Por años he escuchado a muchas personas…" },
+        { k: "texto", t: "area", label: "Texto", rows: 5, ph: "Por años muchas personas me han contado sus problemas…" },
         { k: "puntos", t: "text", label: "Detalles (separados por ·)", ph: "Por videollamada privada · 45 minutos · Todo queda entre tú y yo" },
-        { k: "servicio", t: "select", label: "¿Qué servicio reservan con el botón?", ops: [["", nombres.length ? "Elige uno" : "Primero crea el servicio en Lecturas"], ...nombres.map(n => [n, n])], hint: "En Agenda → Lecturas agrega uno llamado “Consejería espiritual” con su precio y duración. Sale en el calendario igual que tus lecturas." },
-        { k: "nota", t: "text", label: "Nota pequeña al final (opcional)", ph: "La consejería espiritual no reemplaza la atención médica ni psicológica." },
+        { k: "servicio", t: "select", label: "¿Qué servicio reservan con el botón?", ops: [["", nombres.length ? "Elige uno" : "Primero crea el servicio en Lecturas"], ...nombres.map(n => [n, n])], hint: "En Agenda → Lecturas agrega uno llamado “Consejería” con su precio y duración. Sale en el calendario igual que tus lecturas." },
+        { k: "nota", t: "text", label: "Nota pequeña al final (opcional)", ph: "Mis consejos no reemplazan la atención médica ni psicológica." },
       ], "consejera"],
     ],
   });
