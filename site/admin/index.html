@@ -421,6 +421,7 @@ const dinero = n => "$" + (Number(n) % 1 ? Number(n).toFixed(2) : Number(n || 0)
 const clon = o => JSON.parse(JSON.stringify(o));
 function toast(m, tipo) { document.querySelectorAll(".toast").forEach(t => t.remove()); const t = h("div", { class: "toast", role: "status" }, m); if (tipo === "err") t.style.background = "var(--warn)"; document.body.append(t); setTimeout(() => t.remove(), 3500); }
 const ICON = {
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V7M17 16v-8"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg>',
   chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0.5a2 2 0 0 1-2-2z"/><path d="M8.5 9.5h7M8.5 12.5h4.5" stroke-linecap="round"/></svg>',
@@ -725,7 +726,7 @@ const CATS = [
   { id: "pedidos", nombre: "Pedidos", ico: "bouquet", desc: "Arreglos, solicitudes y entregas", tiles: [["encargos", "bouquet", "Arreglos personalizados", "Pedidos con depósito y saldo"], ["solicitudes", "clip", "Solicitudes", "Arreglos y consultas que te piden"], ["pedidos", "inbox", "Pedidos", "Productos por entregar"]] },
   { id: "ventas", nombre: "Ventas", ico: "bag", desc: "Queen Shop, cupones y suscripciones", tiles: [["tienda", "bag", "Queen Shop", "Tus productos"], ["cupones", "tag", "Cupones", "Descuentos para tus clientas"], ["suscripciones", "cards", "Suscripción de lecturas", "Lectura mensual y suscriptoras"], ["categorias", "tag", "Categorías y envíos", "Tus categorías, envíos y recoger"]] },
   { id: "comunidad-c", nombre: "Comunidad", ico: "users", desc: "Publicaciones, miembros y encuentros", tiles: [["publicaciones", "play", "Publicaciones", "Videos, fotos y enseñanzas"], ["interaccion", "chat", "Comentarios y preguntas", "Lo que te escriben tus miembros"], ["conversaciones", "chat", "Conversaciones", "Lo que comparten tus miembros"], ["encuentros", "video", "Encuentros en vivo", "Cada 15 días, en tu sala o por Zoom"], ["miembros", "users", "Miembros", "Quiénes se registraron"], ["comunidad", "doc", "Página de la comunidad", "Registro, normas y bienvenida"]] },
-  { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
+  { id: "pagina", nombre: "Mi página", ico: "store", desc: "Lo que ven tus clientes en tu página", tiles: [["lecturas", "cards", "Lecturas", "Precio y descripción"], ["consejera", "heart", "Consejera espiritual", "Tu sección de consejería"], ["arreglos", "flower", "Arreglos y mesas", "Fotos, celebraciones y precios"], ["eventos", "star", "Eventos realizados", "Tu portafolio de fotos"], ["flores", "flower", "Flores", "Galería para personalizar arreglos"], ["resenas", "star", "Reseñas", "Lo que dicen tus clientes"], ["negocio", "store", "Negocio y contacto", "Nombre, portada, WhatsApp y redes"], ["politicas", "doc", "Políticas", "Cancelaciones, envíos y privacidad"]] },
   { id: "numeros", nombre: "Números", ico: "chart", desc: "Visitas y ventas", tiles: [["estadisticas", "chart", "Estadísticas", "Visitas, Queen Shop, miembros y ventas"]] },
   { id: "cuenta", nombre: "Cuenta", ico: "key", desc: "Contraseña y correos", tiles: [["clave", "key", "Contraseña", "Cambiar tu contraseña"], ["correos", "inbox", "Correos", "Probar que tu página manda correos"]] },
 ];
@@ -1591,6 +1592,25 @@ async function vistaForm({ n, titulo, lead, secciones, preparar = d => d, armar 
     b.disabled = false; b.textContent = "Guardar cambios";
   };
   marco(...cabeza(titulo, lead), fs.map(({ t, sub, fm }) => h("div", { class: "card" }, h("h2", null, t), sub ? h("p", { class: "sub" }, sub) : null, fm.nodo)), h("div", { class: "save-bar" }, b));
+}
+
+// Consejera espiritual: la sección de tu página de inicio. El botón lleva a reservar el servicio que elijas (lo creas en Lecturas).
+async function consejera() {
+  const L = await leer("lecturas");
+  const nombres = (L.lecturas || []).map(l => l.nombre).filter(Boolean);
+  return vistaForm({
+    n: "lecturas", titulo: "Consejera espiritual", lead: "Una sección en tu página de inicio para quienes necesitan hablar y recibir tu consejo.",
+    secciones: [
+      ["Sección en tu página", null, [
+        { k: "activa", t: "bool", label: "Mostrar la sección en mi página" },
+        { k: "titulo", t: "text", label: "Título", ph: "Un espacio para hablar de lo que llevas dentro" },
+        { k: "texto", t: "area", label: "Texto", rows: 5, ph: "Por años he escuchado a muchas personas…" },
+        { k: "puntos", t: "text", label: "Detalles (separados por ·)", ph: "Por videollamada privada · 45 minutos · Todo queda entre tú y yo" },
+        { k: "servicio", t: "select", label: "¿Qué servicio reservan con el botón?", ops: [["", nombres.length ? "Elige uno" : "Primero crea el servicio en Lecturas"], ...nombres.map(n => [n, n])], hint: "En Agenda → Lecturas agrega uno llamado “Consejería espiritual” con su precio y duración. Sale en el calendario igual que tus lecturas." },
+        { k: "nota", t: "text", label: "Nota pequeña al final (opcional)", ph: "La consejería espiritual no reemplaza la atención médica ni psicológica." },
+      ], "consejera"],
+    ],
+  });
 }
 
 const negocio = () => vistaForm({
@@ -2499,7 +2519,7 @@ const eventos = () => vistaLista({
 });
 
 /* ═════════ Rutas ═════════ */
-const RUTAS = { c: categoria, salas, sala: salaPrivada, fichas, ficha, cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
+const RUTAS = { consejera, c: categoria, salas, sala: salaPrivada, fichas, ficha, cupones, suscripciones, eventos, correos, conversaciones: conversacionesPanel, "": inicio, encargos, flores, politicas, solicitudes, reservas, pedidos, calendario, lecturas, arreglos, tienda, categorias, resenas, negocio, clave, estadisticas, publicaciones, interaccion, encuentros, miembros, comunidad };
 async function ruta() {
   if (dlg.open) dlg.close();
   const r = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];

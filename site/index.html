@@ -136,6 +136,15 @@ section{padding:72px 0;border-top:1px solid var(--line)}
   #tienda .product .cost{font-size:.95rem}
   #tienda .product .row .btn{font-size:.72rem;padding:6px 4px}
 }
+/* Consejera espiritual */
+#consejera{padding-top:64px;padding-bottom:64px}
+.conse{max-width:760px;margin:0 auto;text-align:center;background:var(--surface);border:1.5px solid #D4AE52;border-radius:22px;padding:38px 28px;box-shadow:0 10px 30px rgba(20,27,51,.08)}
+.conse h2{margin:6px 0 12px}
+.conse > p{color:var(--muted);white-space:pre-line;margin:0 auto 18px;max-width:620px;line-height:1.65}
+.conse-pts{list-style:none;padding:0;margin:0 0 22px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.conse-pts li{padding:7px 14px;border-radius:999px;background:var(--blue-soft,#EEF2FB);color:var(--blue,#24407F);font-weight:600;font-size:.9rem}
+.conse-nota{font-size:.8rem;color:var(--muted);margin:16px 0 0}
+@media (max-width:640px){.conse{padding:28px 18px}}
 .shop-cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:-14px 0 30px}
 .shop-cats a{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--blue);font-weight:600;font-size:.92rem;text-decoration:none}
 .shop-cats a:hover{border-color:var(--blue)}
@@ -331,6 +340,7 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
   </div>
     <nav class="cats-bar" aria-label="Secciones"><div class="wrap cats-in">
     <a href="/lecturas.html">Lecturas</a>
+    <a href="#consejera" hidden>Consejería</a>
     <a href="/tienda.html">Queen Shop</a>
     <a href="#arreglos">Arreglos</a>
     <a href="/eventos.html">Eventos</a>
@@ -384,6 +394,18 @@ dialog::backdrop{background:rgba(14,19,38,.6)}
       <p id="lecIntro"></p>
       <a class="sus-home" href="/lecturas.html#suscripcion" id="susHome" hidden><span class="sh-cinta">✨ Nuevo</span><b id="susHomeTit">Suscripción mensual</b><span id="susHomeTx">Tu lectura de cartas cada mes por $35</span><i aria-hidden="true">→</i></a>
       <a class="btn on-night" href="/lecturas.html" id="lecBtn">Ver calendario y reservar</a>
+    </div>
+  </div>
+</section>
+<section id="consejera" hidden>
+  <div class="wrap">
+    <div class="conse">
+      <span class="kicker">Consejera espiritual</span>
+      <h2 id="conTit">Un espacio para hablar de lo que llevas dentro</h2>
+      <p id="conTx"></p>
+      <ul class="conse-pts" id="conPts"></ul>
+      <a class="btn btn-solid" id="conBtn" href="/lecturas.html">Reserva tu consejería</a>
+      <p class="conse-nota" id="conNota" hidden></p>
     </div>
   </div>
 </section>
@@ -585,6 +607,21 @@ function resenasArriba(R, lecPrimero) {
   $("#destacadas").hidden = false;
 }
 // Portada con las lecturas primero (se elige en el panel > Negocio y contacto).
+
+// Consejera espiritual (la llenas en tu panel: Mi página → Consejera espiritual)
+function renderConsejera(L) {
+  const C = (L && L.consejera) || {}, lista = ((L && L.lecturas) || []).filter(l => l && l.visible !== false && s(l.nombre));
+  const serv = lista.find(l => l.nombre === C.servicio) || lista.find(l => /consej/i.test(l.nombre));
+  if (C.activa === false || !serv) return;
+  const sec = $("#consejera"); sec.hidden = false;
+  if (s(C.titulo)) $("#conTit").textContent = C.titulo;
+  $("#conTx").textContent = s(C.texto) || "Por años he escuchado a muchas personas que llegan con el corazón cargado: problemas de pareja, de familia, de trabajo o decisiones difíciles. En una consejería espiritual me cuentas lo que estás viviendo y buscamos claridad, con la guía de tus ancestros y tu fe. Sin juicios, con respeto y en total confianza.";
+  const pts = (s(C.puntos) || `Por videollamada privada · ${serv.duracion || "45 minutos"} · Todo queda entre tú y yo`).split("·").map(x => x.trim()).filter(Boolean);
+  $("#conPts").replaceChildren(...pts.map(t => el("li", null, t)));
+  const b = $("#conBtn"); b.href = "/lecturas.html?l=" + encodeURIComponent(slug(serv.nombre)) + "#reserva"; b.textContent = `Reserva tu consejería · ${dinero(serv.precio)}`;
+  if (s(C.nota)) { const n = $("#conNota"); n.hidden = false; n.textContent = C.nota; }
+  const nav = document.querySelector('.cats-in a[href="#consejera"]'); if (nav) nav.hidden = false;
+}
 function portadaLecturas(N, L) {
   const ls = (L.lecturas || []).filter(l => l && l.visible !== false && Number(l.precio) > 0), pr = ls.length ? Number(ls[0].precio) : 0;
   document.body.classList.add("portada-lec");
@@ -757,11 +794,13 @@ function abrirSolicitud(pre) {
 Promise.all(["negocio", "arreglos", "lecturas", "tienda", "resenas", "solicitudes", "horario", "tienda-ajustes"].map(leer)).then(([N, A, L, P, R, SL, HO, TA]) => {
   if (SL && typeof SL === "object" && "activo" in SL) { SOL = SL; if (s(SL.intro)) $("#solIntro").textContent = SL.intro; if (SL.activo === false) { $("#solCta").hidden = true; } }
   const C = renderNegocio(N); renderArreglos(A); renderLecturas(L); renderTienda(P, TA); renderResenas(R, C);
+  renderConsejera(L);
   if (N.portada !== "flores") portadaLecturas(N, L);
   // Qué se ve primero debajo de la portada (lo eliges en tu panel): Queen Shop o las flores
   { const t = $("#tienda"), a = $("#arreglos"), l = $("#lecturas");
     const cm = $("#comunidad");
     if (N.destacar === "flores") { l.before(a); l.after(t); } else { l.before(t); l.after(a); }
+    l.after($("#consejera"));
     $("#destacadas").after(cm); }
   resenasArriba(R, N.portada !== "flores");
 });
